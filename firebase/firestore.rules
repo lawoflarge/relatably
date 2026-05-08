@@ -33,17 +33,18 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // LEADERBOARD_ENTRIES: signed-in clients may read; the API does shadowban
-    // filtering on the response path (rule-level filtering would require per-doc
-    // user lookups and is impractical).
+    // LEADERBOARD_ENTRIES: server-only. Clients read via GET /api/leaderboard,
+    // which applies shadowban filtering. Direct SDK reads would let a shadowbanned
+    // user confirm their ban — anti-cheat hard requirement.
     match /leaderboard_entries/{entryId} {
-      allow read: if request.auth != null;
+      allow read: if false;
       allow write: if false;
     }
 
-    // USER_AGGREGATES: signed-in clients may read; API filters shadowbanned.
+    // USER_AGGREGATES: server-only. Same anti-cheat reasoning as leaderboard_entries.
+    // Clients read aggregated state via API endpoints that filter shadowbanned users.
     match /user_aggregates/{userId} {
-      allow read: if request.auth != null;
+      allow read: if false;
       allow write: if false;
     }
 

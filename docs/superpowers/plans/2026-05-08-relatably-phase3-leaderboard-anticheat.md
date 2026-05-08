@@ -67,7 +67,7 @@ relatably/
 │               ├── devices/register/route.ts       (modify: import shared hash helper)
 │               └── yesterday/route.ts              (modify: import shared hash helper)
 ├── firebase/
-│   ├── firestore.rules                             (modify: relax /users update, add reads for users, leaderboard_entries, user_aggregates, deny-all for friendships)
+│   ├── firestore.rules                             (modify: relax /users update, add reads for users only; deny-all for leaderboard_entries/user_aggregates/friendships — clients hit the API)
 │   ├── firestore.indexes.json                      (modify: add 4 indexes for leaderboard + friendships)
 │   └── functions/
 │       └── src/
@@ -172,7 +172,7 @@ git checkout -b phase-3-leaderboard-anticheat
 - Modify: `firebase/firestore.rules`
 - Modify: `firebase/firestore.indexes.json`
 
-The rules must (a) allow clients to read `leaderboard_entries` + `user_aggregates` + public `users` for the leaderboard UI, (b) allow a signed-in user to update their own `users` doc (handle, is_public), (c) keep `friendships` server-only (clients call API endpoints, which use Admin SDK to write), (d) keep `submissions` and `device_users` server-only (unchanged).
+The rules must (a) allow clients to read public + non-shadowbanned `users` docs for leaderboard display (the API still drives the leaderboard fetch — `users` reads are only for resolving handles when the API hands back user IDs), (b) allow a signed-in user to update their own `users` doc (handle, is_public), (c) keep `friendships`, `leaderboard_entries`, and `user_aggregates` server-only (clients call API endpoints; direct SDK reads on the leaderboard collections would let shadowbanned users confirm their ban and iterate — anti-cheat hard requirement), (d) keep `submissions` and `device_users` server-only (unchanged).
 
 - [ ] **Step 1: Replace `firebase/firestore.rules` with the Phase 3 ruleset**
 
@@ -212,17 +212,18 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // LEADERBOARD_ENTRIES: signed-in clients may read; the API does shadowban
-    // filtering on the response path (rule-level filtering would require per-doc
-    // user lookups and is impractical).
+    // LEADERBOARD_ENTRIES: server-only. Clients read via GET /api/leaderboard,
+    // which applies shadowban filtering. Direct SDK reads would let a shadowbanned
+    // user confirm their ban — anti-cheat hard requirement.
     match /leaderboard_entries/{entryId} {
-      allow read: if request.auth != null;
+      allow read: if false;
       allow write: if false;
     }
 
-    // USER_AGGREGATES: signed-in clients may read; API filters shadowbanned.
+    // USER_AGGREGATES: server-only. Same anti-cheat reasoning as leaderboard_entries.
+    // Clients read aggregated state via API endpoints that filter shadowbanned users.
     match /user_aggregates/{userId} {
-      allow read: if request.auth != null;
+      allow read: if false;
       allow write: if false;
     }
 
