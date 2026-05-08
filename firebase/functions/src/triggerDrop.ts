@@ -17,18 +17,22 @@ export async function runTriggerDrop(firestore: Firestore, now: Date): Promise<v
   if (dueSnap.empty) return;
 
   for (const dueDoc of dueSnap.docs) {
-    // 1. Transaction A: flip previous live → revealed.
-    let revealedQuestionId: string | null = null;
-    await firestore.runTransaction(async (tx) => {
-      const liveSnap = await tx.get(
-        firestore.collection("questions").where("status", "==", "live").limit(1),
-      );
-      if (!liveSnap.empty) {
+    // 1. Transaction A: flip previous live → revealed. Returns the revealed
+    // question's id (or null if there was no previous live question).
+    const revealedQuestionId: string | null = await firestore.runTransaction(
+      async (tx) => {
+        const liveSnap = await tx.get(
+          firestore
+            .collection("questions")
+            .where("status", "==", "live")
+            .limit(1),
+        );
+        if (liveSnap.empty) return null;
         const live = liveSnap.docs[0];
-        revealedQuestionId = live.id;
         tx.update(live.ref, { status: "revealed" });
-      }
-    });
+        return live.id;
+      },
+    );
 
     // 2. Outside any transaction: rank top-N clusters of the just-revealed question.
     if (revealedQuestionId) {
@@ -56,10 +60,9 @@ export async function runTriggerDrop(firestore: Firestore, now: Date): Promise<v
       await writer.commit();
     }
 
-    // 3. Transaction B: flip this scheduled question → live.
-    await firestore.runTransaction(async (tx) => {
-      tx.update(dueDoc.ref, { status: "live" });
-    });
+    // 3. Flip this scheduled question → live. Single-doc unconditional update;
+    // a transaction would add a round-trip without changing semantics.
+    await dueDoc.ref.update({ status: "live" });
 
     logger.info("triggerDrop: dropped", {
       newLiveQuestionId: dueDoc.id,
