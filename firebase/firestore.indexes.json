@@ -39,6 +39,48 @@
         { "fieldPath": "question_id", "order": "ASCENDING" },
         { "fieldPath": "device_user_id", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "submissions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "question_id", "order": "ASCENDING" },
+        { "fieldPath": "normalized_cluster_id", "order": "ASCENDING" },
+        { "fieldPath": "submitted_at", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "leaderboard_entries",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "question_id", "order": "ASCENDING" },
+        { "fieldPath": "score", "order": "DESCENDING" },
+        { "fieldPath": "submitted_at", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "leaderboard_entries",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "user_id", "order": "ASCENDING" },
+        { "fieldPath": "created_at", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "friendships",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "requester_id", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "friendships",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "accepter_id", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []
