@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { createHash } from "node:crypto";
 import { FieldValue } from "firebase-admin/firestore";
 import { adminFirestore } from "@/lib/firebase";
 import { normalize, clusterId } from "@/lib/normalize";
 import { containsProfanity } from "@/lib/profanity";
+import { hashIp, hashDeviceToken } from "@/lib/hash";
 
 const SubmitSchema = z.object({
   question_id: z.string().min(1),
@@ -14,18 +14,6 @@ const SubmitSchema = z.object({
 });
 
 const MIN_DWELL_MS = 3000;
-
-function hashIp(req: Request): string {
-  const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
-    req.headers.get("x-real-ip") ??
-    "unknown";
-  return createHash("sha256").update(ip).digest("hex");
-}
-
-function hashDeviceToken(token: string): string {
-  return createHash("sha256").update(token).digest("hex");
-}
 
 export async function POST(req: Request) {
   let parsed;

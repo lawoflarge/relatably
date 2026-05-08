@@ -1,12 +1,8 @@
 import { NextResponse } from "next/server";
-import { createHash } from "node:crypto";
 import { adminFirestore } from "@/lib/firebase";
+import { hashDeviceToken } from "@/lib/hash";
 
 const TOP_N = 10;
-
-function hashDeviceToken(token: string): string {
-  return createHash("sha256").update(token).digest("hex");
-}
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
