@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "Relatably",
+    "slug": "relatably",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "relatably",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "co.relatably.app",
+      "googleServicesFile": "./GoogleService-Info.plist"
+    },
+    "plugins": [
+      "@react-native-firebase/app",
+      ["expo-build-properties", { "ios": { "useFrameworks": "static" } }]
+    ]
+  }
+}
