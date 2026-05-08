@@ -5,6 +5,8 @@ import { adminFirestore } from "@/lib/firebase";
 import { normalize, clusterId } from "@/lib/normalize";
 import { containsProfanity } from "@/lib/profanity";
 import { hashIp, hashDeviceToken } from "@/lib/hash";
+import { requireAuth } from "@/lib/auth";
+import { getRateLimiter } from "@/lib/ratelimit";
 
 const SubmitSchema = z.object({
   question_id: z.string().min(1),
@@ -14,6 +16,10 @@ const SubmitSchema = z.object({
 });
 
 const MIN_DWELL_MS = 3000;
+
+function minuteOfDay(d: Date): number {
+  return d.getUTCHours() * 60 + d.getUTCMinutes();
+}
 
 export async function POST(req: Request) {
   let parsed;
@@ -42,30 +48,37 @@ export async function POST(req: Request) {
     );
   }
 
-  const cId = clusterId(parsed.question_id, normalizedText);
   const ipHash = hashIp(req);
+
+  const rl = await getRateLimiter().check(ipHash);
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: "rate limit exceeded" },
+      { status: 429, headers: { "retry-after": String(Math.ceil(rl.retryAfterMs / 1000)) } },
+    );
+  }
+
+  const decoded = await requireAuth(req);
+  const userId = decoded?.uid ?? null;
+
+  const cId = clusterId(parsed.question_id, normalizedText);
   const deviceTokenHash = hashDeviceToken(parsed.device_token);
 
-  // Idempotent device upsert with merge: true preserves any linked_user_id
-  // that may be set by Phase 3's Sign-in-with-Apple flow between the read and
-  // the write. created_at is only stamped on first creation thanks to the
-  // create-vs-merge guard below.
   const deviceRef = adminFirestore
     .collection("device_users")
     .doc(deviceTokenHash);
   const deviceSnap = await deviceRef.get();
-  let linkedUserId: string | null = null;
   if (!deviceSnap.exists) {
     await deviceRef.set(
       {
         device_token: parsed.device_token,
-        linked_user_id: null,
+        linked_user_id: userId,
         created_at: FieldValue.serverTimestamp(),
       },
       { merge: true },
     );
-  } else {
-    linkedUserId = (deviceSnap.data() as { linked_user_id: string | null } | undefined)?.linked_user_id ?? null;
+  } else if (userId) {
+    await deviceRef.set({ linked_user_id: userId }, { merge: true });
   }
 
   const clusterRef = adminFirestore.doc(`answer_clusters/${cId}`);
@@ -75,6 +88,7 @@ export async function POST(req: Request) {
   await adminFirestore.runTransaction(async (tx) => {
     const clusterSnap = await tx.get(clusterRef);
     const now = FieldValue.serverTimestamp();
+    const minuteUtc = minuteOfDay(new Date());
 
     if (!clusterSnap.exists) {
       tx.set(clusterRef, {
@@ -85,7 +99,7 @@ export async function POST(req: Request) {
       });
       newCount = 1;
     } else {
-      const prevCount = (clusterSnap.data() as any)?.submission_count ?? 0;
+      const prevCount = (clusterSnap.data() as { submission_count?: number } | undefined)?.submission_count ?? 0;
       newCount = prevCount + 1;
       tx.update(clusterRef, {
         submission_count: FieldValue.increment(1),
@@ -94,11 +108,12 @@ export async function POST(req: Request) {
 
     tx.set(submissionRef, {
       question_id: parsed.question_id,
-      user_id: null,
+      user_id: userId,
       device_user_id: deviceTokenHash,
       raw_text: parsed.raw_text,
       normalized_cluster_id: cId,
       submitted_at: now,
+      submitted_at_minute_of_day: minuteUtc,
       ip_hash: ipHash,
       dwell_ms: parsed.dwell_ms,
       moderation_status: "passed",
