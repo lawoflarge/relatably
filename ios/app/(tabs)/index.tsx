@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { View, StyleSheet, Text } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { View, StyleSheet, Text, Pressable } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { WordcloudScreen, type Cluster } from "@/src/screens/WordcloudScreen";
 import { SubmitButton } from "@/src/components/SubmitButton";
@@ -22,19 +22,26 @@ export default function HomeScreen() {
   const [selfClusterId, setSelfClusterId] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Load today's question
-  useEffect(() => {
+  const loadQuestion = useCallback(() => {
+    setPhase("loading");
+    setErrorMsg(null);
     fetchTodayQuestion()
       .then((q) => {
         setQuestion(q);
         setRenderedAt(Date.now());
         setPhase("question");
       })
-      .catch((e) => {
-        setErrorMsg(e.message);
+      .catch((e: unknown) => {
+        const msg = e instanceof Error ? e.message : "fetch failed";
+        setErrorMsg(msg);
         setPhase("error");
       });
   }, []);
+
+  // Load today's question on mount
+  useEffect(() => {
+    loadQuestion();
+  }, [loadQuestion]);
 
   // Subscribe to Firestore listener for live cluster updates
   useEffect(() => {
@@ -98,6 +105,13 @@ export default function HomeScreen() {
       {phase === "error" && (
         <View style={styles.center}>
           <Text style={styles.error}>{errorMsg}</Text>
+          <Pressable
+            role="button"
+            onPress={loadQuestion}
+            style={styles.retryBtn}
+          >
+            <Text style={styles.retryLabel}>RETRY</Text>
+          </Pressable>
         </View>
       )}
       {phase === "question" && question && (
@@ -129,4 +143,17 @@ const styles = StyleSheet.create({
   center: { flex: 1, backgroundColor: "#000", alignItems: "center", justifyContent: "center" },
   muted: { color: "#888", fontSize: 16 },
   error: { color: "tomato", fontSize: 14, textAlign: "center", marginTop: 12 },
+  retryBtn: {
+    marginTop: 24,
+    paddingHorizontal: 32,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: "#aaff00",
+  },
+  retryLabel: {
+    color: "#000",
+    fontSize: 16,
+    fontWeight: "800",
+    letterSpacing: 1.5,
+  },
 });
