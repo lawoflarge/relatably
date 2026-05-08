@@ -3,6 +3,7 @@ import { logger } from "firebase-functions/v2";
 import { Timestamp, type Firestore } from "firebase-admin/firestore";
 import { db } from "./lib/admin";
 import { computeFinalRanks } from "./lib/computeFinalRanks";
+import { runScoreReveal } from "./scoreReveal";
 
 const TOP_N_TO_RANK = 100;
 
@@ -58,6 +59,7 @@ export async function runTriggerDrop(firestore: Firestore, now: Date): Promise<v
         });
       }
       await writer.commit();
+      await runScoreReveal(firestore, revealedQuestionId);
     }
 
     // 3. Flip this scheduled question → live. Single-doc unconditional update;
