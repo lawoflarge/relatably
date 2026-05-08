@@ -1,15 +1,15 @@
-# Relatably v1.0 — Phase 1 Implementation Plan (Core Loop)
+# Relatably v1.0 — Phase 1 Implementation Plan (Core Loop, Firebase)
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** A working iOS app where any user can open the app, see today's question, type and submit a free-text answer, and watch their answer appear in a live-updating Mentimeter-style wordcloud alongside everyone else's submissions.
 
-**Architecture:** Expo (React Native) iOS client → Next.js 16 serverless API on Vercel → Supabase Postgres + Realtime. Deterministic answer normalization on submit. Anonymous-by-default; Sign in with Apple is wired but not required. No leaderboard, no friend graph, no share banner, no ads, no scheduler in this phase — those land in Phases 2–4.
+**Architecture:** Expo (React Native) iOS client → Next.js 16 serverless API on Vercel → Firestore (Firebase) + Firebase Auth + Firestore listeners. Deterministic answer normalization on submit. Anonymous-by-default; Sign in with Apple is wired but not required. No leaderboard, no friend graph, no share banner, no ads, no scheduler in this phase — those land in Phases 2–4.
 
-**Tech Stack:** Expo SDK 51+, React Native, TypeScript 5+, Next.js 16 App Router, Supabase (Postgres 15 + Realtime + Auth), Vitest (backend tests), React Native Testing Library + Jest (iOS tests), pnpm.
+**Tech Stack:** Expo SDK 51+, React Native, TypeScript 5+, Next.js 16 App Router, **Firebase (Firestore + Auth)**, Firebase Admin SDK (server), `@react-native-firebase/*` packages (client), Vitest (backend tests), React Native Testing Library + Jest (iOS tests), pnpm.
 
-**Phase 1 acceptance criteria:** A developer running `pnpm dev` in `api/` and `pnpm ios` in `ios/` against a Supabase Cloud project should be able to:
-1. Manually seed a `live` question via SQL
+**Phase 1 acceptance criteria:** A developer running `pnpm dev` in `api/` and `pnpm ios` in `ios/` against a Firebase project (or local Emulator Suite) should be able to:
+1. Manually seed a `live` question via the Firebase console or a setup script
 2. Open the iOS app in simulator
 3. Type a free-text answer and submit
 4. See their answer appear as a bubble in the wordcloud
@@ -24,14 +24,19 @@
 
 ```
 relatably/
-├── README.md                            (already exists)
+├── README.md                            (already exists, updated for Firebase)
 ├── .gitignore                           (already exists)
 ├── docs/
 │   └── superpowers/
 │       ├── specs/
-│       │   └── 2026-05-08-relatably-design.md   (already exists)
+│       │   └── 2026-05-08-relatably-design.md   (already exists, updated for Firebase)
 │       └── plans/
 │           └── 2026-05-08-relatably-phase1-core-loop.md  (this file)
+├── firebase/                            (Firebase project config + rules + indexes)
+│   ├── firebase.json
+│   ├── .firebaserc
+│   ├── firestore.rules
+│   └── firestore.indexes.json
 ├── api/                                 (Next.js 16 backend, deploys to Vercel)
 │   ├── package.json
 │   ├── tsconfig.json
@@ -47,181 +52,216 @@ relatably/
 │   │   │       └── submit/
 │   │   │           └── route.ts            (POST submission)
 │   │   └── lib/
+│   │       ├── firebase.ts                 (Firebase Admin SDK init)
 │   │       ├── normalize.ts                (deterministic normalization)
 │   │       ├── normalize.test.ts
 │   │       ├── profanity.ts                (regex-based blocklist)
-│   │       ├── profanity.test.ts
-│   │       └── supabase.ts                 (server-side Supabase client)
-│   └── .gitignore (delegated to root)
-├── ios/                                 (Expo app)
-│   ├── package.json
-│   ├── tsconfig.json
-│   ├── app.json
-│   ├── babel.config.js
-│   ├── App.tsx
-│   ├── src/
-│   │   ├── lib/
-│   │   │   ├── api.ts                      (typed fetch wrappers for backend)
-│   │   │   ├── supabase.ts                 (Realtime client)
-│   │   │   └── deviceId.ts                 (anonymous device tracking)
-│   │   ├── screens/
-│   │   │   ├── QuestionScreen.tsx          (today's Q + text input + submit)
-│   │   │   └── WordcloudScreen.tsx         (live cluster bubbles)
-│   │   ├── components/
-│   │   │   ├── QuestionText.tsx
-│   │   │   ├── AnswerInput.tsx
-│   │   │   ├── SubmitButton.tsx            (with 3-sec dwell guard)
-│   │   │   ├── ClusterBubble.tsx
-│   │   │   └── LiveCounter.tsx
-│   │   └── types/
-│   │       └── api.ts                      (shared response types)
-│   └── __tests__/
-│       └── components/
-│           └── SubmitButton.test.tsx
-└── supabase/
-    └── migrations/
-        ├── 20260508_001_init_schema.sql
-        ├── 20260508_002_rls_policies.sql
-        └── 20260508_003_realtime_publication.sql
+│   │       └── profanity.test.ts
+└── ios/                                 (Expo app)
+    ├── package.json
+    ├── tsconfig.json
+    ├── app.json
+    ├── babel.config.js
+    ├── App.tsx
+    ├── src/
+    │   ├── lib/
+    │   │   ├── api.ts                      (typed fetch wrappers for backend)
+    │   │   ├── firebase.ts                 (Firebase RN client init)
+    │   │   └── deviceId.ts                 (anonymous device tracking)
+    │   ├── screens/
+    │   │   ├── QuestionScreen.tsx          (today's Q + text input + submit)
+    │   │   └── WordcloudScreen.tsx         (live cluster bubbles)
+    │   ├── components/
+    │   │   ├── QuestionText.tsx
+    │   │   ├── AnswerInput.tsx
+    │   │   ├── SubmitButton.tsx            (with 3-sec dwell guard)
+    │   │   ├── ClusterBubble.tsx
+    │   │   └── LiveCounter.tsx
+    │   └── types/
+    │       └── api.ts                      (shared response types)
+    └── __tests__/
+        └── components/
+            └── SubmitButton.test.tsx
 ```
 
 **Why this layout:**
-- `api/` and `ios/` are independent npm projects (no monorepo workspace tooling) — solo-founder simple, less to debug.
-- Shared types are duplicated by design — there are only ~3 of them and each side is small.
-- All SQL lives under `supabase/migrations/` and runs via `supabase db push`.
-- Plans/specs live under `docs/superpowers/` per the brainstorming workflow.
+- `firebase/` holds Firebase project config (rules, indexes, .firebaserc) — ready to `firebase deploy` when needed
+- `api/` and `ios/` are independent npm projects (no monorepo workspace tooling)
+- Shared types are duplicated — only ~3 of them and each side is small
+- All Firestore Security Rules live under `firebase/firestore.rules` and deploy via `firebase deploy --only firestore:rules`
 
 ---
 
-## Task Map (Phase 1 = 18 tasks across ~4 weeks)
+## Task Map (Phase 1 = 16 tasks across ~4 weeks)
 
 | Task | Subject | Depends on |
 |---|---|---|
-| 1 | Provision Supabase project + local CLI | — |
-| 2 | Initialize `api/` Next.js project | 1 |
-| 3 | Initialize `ios/` Expo project | 1 |
-| 4 | Write schema migration `001_init_schema.sql` | 1 |
-| 5 | Write RLS policies migration `002_rls_policies.sql` | 4 |
-| 6 | Enable Realtime publication migration `003_realtime_publication.sql` | 4 |
-| 7 | TDD: `normalize()` function | 2 |
-| 8 | TDD: profanity filter | 2 |
-| 9 | TDD: `/api/questions/today` endpoint | 2, 4, 7 |
-| 10 | TDD: `/api/submit` endpoint | 2, 4, 7, 8 |
-| 11 | Anonymous device tracking (`deviceId.ts`) | 3 |
-| 12 | iOS API client (`api.ts`) | 3, 9, 10 |
-| 13 | iOS Supabase Realtime client | 3, 6 |
-| 14 | iOS `QuestionScreen` (UI only) | 3 |
-| 15 | iOS `SubmitButton` with 3-sec dwell (TDD) | 3 |
-| 16 | iOS `WordcloudScreen` static rendering | 3 |
-| 17 | iOS Realtime subscription wires bubbles to live updates | 13, 16 |
-| 18 | End-to-end smoke test + Phase 1 acceptance gate | all |
+| 1 | Provision Firebase project + Emulator Suite + service-account key | — |
+| 2 | Initialize `api/` Next.js project + Firebase Admin SDK | 1 |
+| 3 | Initialize `ios/` Expo project + `@react-native-firebase/*` | 1 |
+| 4 | Firestore Security Rules + indexes (deny-by-default) | 1 |
+| 5 | TDD: `normalize()` function | 2 |
+| 6 | TDD: profanity filter | 2 |
+| 7 | TDD: `/api/questions/today` endpoint | 2, 4, 5 |
+| 8 | TDD: `/api/submit` endpoint with Firestore transaction | 2, 4, 5, 6 |
+| 9 | Anonymous device tracking (`deviceId.ts`) | 3 |
+| 10 | iOS API client (`api.ts`) | 3, 7, 8 |
+| 11 | iOS Firebase RN client init | 3 |
+| 12 | iOS `QuestionScreen` (UI only) | 3 |
+| 13 | iOS `SubmitButton` with 3-sec dwell (TDD) | 3 |
+| 14 | iOS `WordcloudScreen` static rendering | 3 |
+| 15 | iOS Firestore listener wires bubbles to live updates | 11, 14 |
+| 16 | End-to-end smoke test + Phase 1 acceptance gate | all |
 
 ---
 
-## Task 1: Provision Supabase project + local CLI
+## Task 1: Provision Firebase project + Emulator Suite + service-account key
 
 **Files:**
-- Create: `supabase/config.toml`
+- Create: `firebase/.firebaserc`
+- Create: `firebase/firebase.json`
 - Create: `api/.env.example`
 - Modify: `README.md` (add setup section)
 
-- [ ] **Step 1: Install Supabase CLI**
+This task has TWO halves: a manual half that the human partner must do (Firebase console UI for project creation and service-account export), and a scriptable half (CLI install, emulator config, env files). The agent should ask the human partner to complete the manual half before proceeding.
+
+- [ ] **Step 1: Install Firebase CLI**
 
 Run:
 ```bash
-# Windows (PowerShell)
-scoop install supabase
-# Or, via npm
-npm i -g supabase
+npm install -g firebase-tools
+firebase --version
 ```
 
-- [ ] **Step 2: Log in to Supabase CLI**
+Expected: prints version (v13+).
+
+- [ ] **Step 2: Log in to Firebase**
 
 Run:
 ```bash
-supabase login
+firebase login
 ```
 
-Expected: opens browser to authorize. After authorizing, CLI prints `You are now logged in.`
+Expected: opens browser to authorize Google account. After auth: `Success! Logged in as <email>`.
 
-- [ ] **Step 3: Create a new Supabase project via CLI**
+- [ ] **Step 3 (HUMAN PARTNER): Create the Firebase project in the console**
+
+Open https://console.firebase.google.com → **Add project** → name `relatably-prod` → disable Google Analytics for v1 (skips the GA setup; can enable later) → Create.
+
+Once provisioned:
+1. **Build → Firestore Database → Create database** → start in **production mode** (we manage Security Rules ourselves) → location `eur3 (europe-west)` (closest match to project's launch market).
+2. **Build → Authentication → Get started** → enable **Apple** provider (configure later in Phase 3 — for now just enable the toggle, leave Service ID blank).
+3. **Project Settings (gear icon) → Service Accounts → Generate new private key** → download JSON. Save it to your password manager AND put a copy at `api/firebase-service-account.json` (this file is gitignored — DO NOT COMMIT).
+
+Capture from **Project Settings → General**:
+- `Project ID` (e.g., `relatably-prod-abc12`)
+- For the iOS app — register an iOS app: bundle id `co.relatably.app` (placeholder, can change later) → download `GoogleService-Info.plist` → save to `ios/GoogleService-Info.plist` (also gitignored).
+
+Confirm to the controller when this human-only step is done.
+
+- [ ] **Step 4: Initialize Firebase locally in the repo**
 
 Run:
 ```bash
 cd /c/Users/levin/relatably
-supabase projects create relatably-prod --org-id <your-org-id> --plan free --region eu-central-1
+mkdir -p firebase
+cd firebase
+firebase use --add
 ```
 
-Expected: prints new project ref, e.g., `abcdefghijklmnopqrst`. Save this for env vars.
+Pick the `relatably-prod` project and assign alias `default`.
 
-(Alternative: create via supabase.com dashboard if CLI region defaults bite you. Note the project ref + URL + anon key + service-role key.)
+Expected: creates `firebase/.firebaserc`.
 
-- [ ] **Step 4: Initialize Supabase locally in repo**
+- [ ] **Step 5: Configure `firebase.json` for emulators + Firestore**
 
-Run:
-```bash
-supabase init
+Create `firebase/firebase.json`:
+
+```json
+{
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "emulators": {
+    "auth": { "port": 9099 },
+    "firestore": { "port": 8080 },
+    "functions": { "port": 5001 },
+    "ui": { "enabled": true, "port": 4000 },
+    "singleProjectMode": true
+  }
+}
 ```
-
-Expected: creates `supabase/` directory with `config.toml`, `seed.sql`, etc. (We already have `supabase/migrations/` from this plan; init won't overwrite it.)
-
-- [ ] **Step 5: Link the local project to the remote**
-
-Run:
-```bash
-supabase link --project-ref <project-ref-from-step-3>
-```
-
-Expected: `Finished supabase link.`
 
 - [ ] **Step 6: Create `api/.env.example`**
 
-Write the file `api/.env.example` with this exact content:
+Create `api/.env.example`:
 
 ```bash
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon-key>
-SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
+# Firebase
+FIREBASE_PROJECT_ID=relatably-prod-abc12
+FIREBASE_SERVICE_ACCOUNT_PATH=./firebase-service-account.json
+
+# When running against the emulator suite (local dev), set:
+# FIRESTORE_EMULATOR_HOST=localhost:8080
+# FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
 
 # Server settings
 NODE_ENV=development
 ```
 
-- [ ] **Step 7: Update README setup section**
+- [ ] **Step 7: Update `.gitignore` for Firebase secrets**
+
+Modify `.gitignore` — append:
+
+```
+# Firebase secrets (never commit)
+firebase-service-account.json
+api/firebase-service-account.json
+ios/GoogleService-Info.plist
+ios/google-services.json
+.firebase/
+```
+
+- [ ] **Step 8: Update README setup section**
 
 Modify `README.md` — append a new section before the "Owner" section:
 
 ```markdown
 ## Local development setup
 
-1. Install Supabase CLI: `npm i -g supabase`
-2. Log in: `supabase login`
-3. Link local repo to your project: `supabase link --project-ref <your-ref>`
-4. Copy `api/.env.example` to `api/.env.local` and fill in values
-5. Run migrations: `supabase db push`
-6. Start API: `cd api && pnpm dev`
-7. Start iOS app: `cd ios && pnpm ios`
+1. Install Firebase CLI: `npm install -g firebase-tools`
+2. Log in: `firebase login`
+3. Initialize: `cd firebase && firebase use --add` (pick relatably-prod, alias `default`)
+4. Place service-account JSON at `api/firebase-service-account.json` (gitignored)
+5. Place `GoogleService-Info.plist` at `ios/GoogleService-Info.plist` (gitignored)
+6. Copy `api/.env.example` to `api/.env.local` and fill in values
+7. Start local emulators (in `firebase/`): `firebase emulators:start`
+8. Start API: `cd api && pnpm dev`
+9. Start iOS app: `cd ios && pnpm ios`
 ```
 
-- [ ] **Step 8: Commit**
+- [ ] **Step 9: Commit (no secrets!)**
 
 ```bash
 cd /c/Users/levin/relatably
-git add supabase/config.toml api/.env.example README.md
-git commit -m "chore: scaffold supabase + env example"
+git add firebase/.firebaserc firebase/firebase.json api/.env.example .gitignore README.md
+# Verify nothing secret is staged:
+git status
+git diff --cached  # eyeball it
+git commit -m "chore(firebase): scaffold project config + emulator suite + env example"
 ```
 
 ---
 
-## Task 2: Initialize `api/` Next.js project
+## Task 2: Initialize `api/` Next.js project + Firebase Admin SDK
 
 **Files:**
 - Create: `api/package.json`
 - Create: `api/tsconfig.json`
 - Create: `api/next.config.ts`
 - Create: `api/vitest.config.ts`
-- Create: `api/src/lib/supabase.ts`
+- Create: `api/src/lib/firebase.ts`
 
 - [ ] **Step 1: Scaffold Next.js with TypeScript and pnpm**
 
@@ -231,16 +271,14 @@ cd /c/Users/levin/relatably
 pnpm create next-app@latest api --typescript --eslint --app --src-dir --import-alias "@/*" --no-tailwind --turbopack
 ```
 
-When prompted: skip Tailwind. Confirm App Router.
-
 Expected: `api/` populated. App Router under `api/src/app/`.
 
-- [ ] **Step 2: Install Supabase + Vitest deps**
+- [ ] **Step 2: Install Firebase + Vitest deps**
 
 Run:
 ```bash
 cd /c/Users/levin/relatably/api
-pnpm add @supabase/supabase-js zod
+pnpm add firebase-admin zod
 pnpm add -D vitest @vitest/coverage-v8 @types/node
 ```
 
@@ -279,25 +317,62 @@ Modify `api/package.json` — under `"scripts"`, add:
 "test:coverage": "vitest run --coverage"
 ```
 
-- [ ] **Step 5: Create `src/lib/supabase.ts`**
+- [ ] **Step 5: Create `src/lib/firebase.ts`**
 
-Create `api/src/lib/supabase.ts`:
+Create `api/src/lib/firebase.ts`:
 
 ```typescript
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import {
+  initializeApp,
+  getApps,
+  cert,
+  type App,
+  applicationDefault,
+} from "firebase-admin/app";
+import { getFirestore, type Firestore } from "firebase-admin/firestore";
+import { getAuth, type Auth } from "firebase-admin/auth";
+import * as path from "node:path";
+import * as fs from "node:fs";
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+let app: App | undefined;
 
-if (!url || !serviceKey) {
-  throw new Error(
-    "Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY env vars",
-  );
+function getApp(): App {
+  if (app) return app;
+  if (getApps().length > 0) {
+    app = getApps()[0];
+    return app;
+  }
+
+  const projectId = process.env.FIREBASE_PROJECT_ID;
+  if (!projectId) {
+    throw new Error("FIREBASE_PROJECT_ID env var is required");
+  }
+
+  // When the FIRESTORE_EMULATOR_HOST env var is set the Admin SDK auto-routes
+  // to the emulator and does not need real credentials.
+  if (process.env.FIRESTORE_EMULATOR_HOST) {
+    app = initializeApp({ projectId });
+    return app;
+  }
+
+  const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
+  if (!serviceAccountPath) {
+    throw new Error(
+      "FIREBASE_SERVICE_ACCOUNT_PATH must be set when not running against the emulator",
+    );
+  }
+
+  const absolute = path.resolve(serviceAccountPath);
+  if (!fs.existsSync(absolute)) {
+    throw new Error(`service-account JSON not found at ${absolute}`);
+  }
+  const credentials = JSON.parse(fs.readFileSync(absolute, "utf-8"));
+  app = initializeApp({ credential: cert(credentials), projectId });
+  return app;
 }
 
-export const supabaseAdmin: SupabaseClient = createClient(url, serviceKey, {
-  auth: { persistSession: false, autoRefreshToken: false },
-});
+export const adminFirestore: Firestore = getFirestore(getApp());
+export const adminAuth: Auth = getAuth(getApp());
 ```
 
 - [ ] **Step 6: Verify build**
@@ -309,7 +384,7 @@ pnpm install
 pnpm build
 ```
 
-Expected: `✓ Compiled successfully`. Build may warn about no pages — that's fine.
+Expected: `✓ Compiled successfully`.
 
 - [ ] **Step 7: Verify Vitest runs (no tests yet)**
 
@@ -318,25 +393,23 @@ Run:
 pnpm test
 ```
 
-Expected: `No test files found, exiting with code 0` or similar — the runner exits cleanly.
+Expected: exits cleanly with no test files.
 
 - [ ] **Step 8: Commit**
 
 ```bash
 cd /c/Users/levin/relatably
 git add api/
-git commit -m "feat(api): scaffold Next.js 16 + Vitest + Supabase admin client"
+git commit -m "feat(api): scaffold Next.js 16 + Vitest + Firebase Admin SDK"
 ```
 
 ---
 
-## Task 3: Initialize `ios/` Expo project
+## Task 3: Initialize `ios/` Expo project + Firebase RN
 
 **Files:**
-- Create: `ios/package.json`
-- Create: `ios/app.json`
-- Create: `ios/App.tsx`
-- Create: `ios/tsconfig.json`
+- Create: `ios/package.json` (and surrounding scaffold)
+- Modify: `ios/babel.config.js`
 - Create: `ios/.env.example`
 
 - [ ] **Step 1: Scaffold Expo TypeScript template**
@@ -347,20 +420,48 @@ cd /c/Users/levin/relatably
 pnpm create expo-app ios --template default
 ```
 
-Choose the default TypeScript template. Expected: `ios/` populated.
+Choose default TypeScript template.
 
-- [ ] **Step 2: Move out the example route file**
+- [ ] **Step 2: Install Firebase RN + auxiliary deps**
 
-The Expo default ships an example tab navigation. Replace `ios/app/index.tsx` and any other `app/` files with a minimal `App.tsx` entry. First, install the additional deps we'll need:
+`@react-native-firebase` requires native modules. For Expo we use the `@react-native-firebase/*` packages (which work with Expo dev builds) plus the Expo config plugins.
 
 Run:
 ```bash
 cd /c/Users/levin/relatably/ios
-pnpm add @supabase/supabase-js react-native-reanimated react-native-gesture-handler expo-secure-store expo-application
+pnpm add @react-native-firebase/app @react-native-firebase/firestore @react-native-firebase/auth
+pnpm add expo-build-properties expo-secure-store expo-application
+pnpm add react-native-reanimated react-native-gesture-handler
 pnpm add -D @testing-library/react-native @testing-library/jest-native jest jest-expo @types/jest
 ```
 
-- [ ] **Step 3: Configure Reanimated babel plugin**
+- [ ] **Step 3: Update `app.json` with Firebase config plugin**
+
+Modify `ios/app.json` — replace the `expo` block with:
+
+```json
+{
+  "expo": {
+    "name": "Relatably",
+    "slug": "relatably",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "relatably",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "co.relatably.app",
+      "googleServicesFile": "./GoogleService-Info.plist"
+    },
+    "plugins": [
+      "@react-native-firebase/app",
+      ["expo-build-properties", { "ios": { "useFrameworks": "static" } }]
+    ]
+  }
+}
+```
+
+- [ ] **Step 4: Configure Reanimated babel plugin**
 
 Modify `ios/babel.config.js` — replace contents with:
 
@@ -374,7 +475,7 @@ module.exports = function (api) {
 };
 ```
 
-- [ ] **Step 4: Add jest config**
+- [ ] **Step 5: Add jest config**
 
 Modify `ios/package.json` — add at top level:
 
@@ -382,7 +483,7 @@ Modify `ios/package.json` — add at top level:
 "jest": {
   "preset": "jest-expo",
   "transformIgnorePatterns": [
-    "node_modules/(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|@supabase/.*))"
+    "node_modules/(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|@react-native-firebase/.*))"
   ]
 },
 "scripts": {
@@ -393,270 +494,159 @@ Modify `ios/package.json` — add at top level:
 
 (Merge with whatever `scripts` block was created — keep `start`, `ios`, `android`, `web`.)
 
-- [ ] **Step 5: Create `ios/.env.example`**
+- [ ] **Step 6: Create `ios/.env.example`**
 
 Create `ios/.env.example`:
 
 ```bash
 EXPO_PUBLIC_API_URL=http://localhost:3000
-EXPO_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
-EXPO_PUBLIC_SUPABASE_ANON_KEY=<anon-key>
+# Firebase config is loaded from GoogleService-Info.plist (placed at ios/ root, gitignored)
 ```
 
-- [ ] **Step 6: Verify Expo runs**
+- [ ] **Step 7: Build a development client**
 
-Run:
+Because `@react-native-firebase/*` requires native modules, the Expo Go app can't host this app. We need an Expo development build. Run:
+
 ```bash
 cd /c/Users/levin/relatably/ios
-cp .env.example .env.local
-# Fill in values manually
-pnpm start
+pnpm add -D expo-dev-client
+npx expo prebuild --platform ios
+npx expo run:ios
 ```
 
-Press `i` to launch iOS simulator. Expected: default Expo app loads with a "Welcome" screen.
+Expected: Xcode builds the app and opens it in the simulator. Default Expo welcome screen loads.
 
-- [ ] **Step 7: Commit**
+(If `expo run:ios` errors with CocoaPods issues, run `cd ios && pod install` then retry.)
+
+- [ ] **Step 8: Commit**
 
 ```bash
 cd /c/Users/levin/relatably
 git add ios/
-git commit -m "feat(ios): scaffold Expo + Supabase client + Jest"
+git commit -m "feat(ios): scaffold Expo + @react-native-firebase + Jest"
 ```
 
 ---
 
-## Task 4: Schema migration `001_init_schema.sql`
+## Task 4: Firestore Security Rules + indexes
 
 **Files:**
-- Create: `supabase/migrations/20260508_001_init_schema.sql`
+- Create: `firebase/firestore.rules`
+- Create: `firebase/firestore.indexes.json`
 
-- [ ] **Step 1: Write the migration**
+- [ ] **Step 1: Write Security Rules**
 
-Create `supabase/migrations/20260508_001_init_schema.sql`:
+Create `firebase/firestore.rules`:
 
-```sql
--- Relatably v1.0 — Phase 1 schema
--- Tables: users, device_users, questions, submissions, answer_clusters
+```
+rules_version = '2';
 
-create extension if not exists "uuid-ossp";
-create extension if not exists "pgcrypto";
+// Deny-by-default: every read/write must match a rule below or it's blocked.
+// All write paths go through the Next.js API using Firebase Admin SDK,
+// which bypasses Security Rules with full credentials. So clients only need
+// READ rules — they cannot write anything directly.
 
--- Users (Supabase auth users gain a row here when they opt-in to public)
-create table public.users (
-  id uuid primary key references auth.users(id) on delete cascade,
-  handle text unique,
-  is_public boolean not null default false,
-  locale text,
-  shadowbanned boolean not null default false,
-  created_at timestamptz not null default now()
-);
+service cloud.firestore {
+  match /databases/{database}/documents {
 
-create index idx_users_handle on public.users(handle) where handle is not null;
+    // QUESTIONS: clients may read live + revealed questions.
+    match /questions/{questionId} {
+      allow read: if resource.data.status in ['live', 'revealed'];
+      allow write: if false;
+    }
 
--- Anonymous device tracking (pre-signup answerers)
-create table public.device_users (
-  id uuid primary key default uuid_generate_v4(),
-  device_token text unique not null,
-  linked_user_id uuid references public.users(id) on delete set null,
-  created_at timestamptz not null default now()
-);
+    // ANSWER_CLUSTERS: clients may read clusters whose question is live or revealed.
+    match /answer_clusters/{clusterId} {
+      allow read: if exists(/databases/$(database)/documents/questions/$(resource.data.question_id))
+        && get(/databases/$(database)/documents/questions/$(resource.data.question_id)).data.status in ['live', 'revealed'];
+      allow write: if false;
+    }
 
-create index idx_device_users_device_token on public.device_users(device_token);
+    // USERS: a user may read+update their own user doc.
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create: if false;        // server-only via Admin SDK
+      allow update: if request.auth != null && request.auth.uid == userId
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['handle', 'is_public', 'locale']);
+      allow delete: if false;
+    }
 
--- Questions
-create type question_status as enum ('scheduled', 'live', 'revealed');
-create type question_source as enum ('curated', 'ai_assisted', 'user_submitted');
-
-create table public.questions (
-  id uuid primary key default uuid_generate_v4(),
-  text text not null,
-  status question_status not null default 'scheduled',
-  source question_source not null default 'curated',
-  scheduled_drop_at timestamptz,
-  author_user_id uuid references public.users(id) on delete set null,
-  created_at timestamptz not null default now()
-);
-
-create index idx_questions_status on public.questions(status);
-create unique index uniq_questions_one_live on public.questions(status) where status = 'live';
-
--- Submissions (partitioned by month from day 1)
-create table public.submissions (
-  id uuid not null default uuid_generate_v4(),
-  question_id uuid not null references public.questions(id) on delete cascade,
-  user_id uuid references public.users(id) on delete set null,
-  device_user_id uuid references public.device_users(id) on delete set null,
-  raw_text text not null,
-  normalized_cluster_id uuid,
-  submitted_at timestamptz not null default now(),
-  ip_hash text not null,
-  dwell_ms integer not null,
-  moderation_status text not null default 'passed' check (moderation_status in ('passed', 'blocked')),
-  primary key (id, submitted_at)
-) partition by range (submitted_at);
-
--- May 2026 partition (manual; v1.1 will add a cron to auto-create future partitions)
-create table public.submissions_2026_05 partition of public.submissions
-  for values from ('2026-05-01') to ('2026-06-01');
-create table public.submissions_2026_06 partition of public.submissions
-  for values from ('2026-06-01') to ('2026-07-01');
-
-create index idx_submissions_question_id on public.submissions(question_id);
-create index idx_submissions_user_id on public.submissions(user_id) where user_id is not null;
-create index idx_submissions_submitted_at on public.submissions(submitted_at);
-
--- Answer clusters (the wordcloud bubbles)
-create table public.answer_clusters (
-  id text primary key,                              -- = sha256(question_id || normalized_text)
-  question_id uuid not null references public.questions(id) on delete cascade,
-  canonical_text text not null,
-  submission_count integer not null default 0,
-  first_submission_at timestamptz,
-  final_rank integer,
-  final_pct_of_total real
-);
-
-create index idx_answer_clusters_question_id on public.answer_clusters(question_id);
-create index idx_answer_clusters_count on public.answer_clusters(question_id, submission_count desc);
+    // SUBMISSIONS, DEVICE_USERS, FRIENDSHIPS, LEADERBOARD_ENTRIES,
+    // USER_AGGREGATES, QUESTION_CANDIDATES: server-only.
+    match /submissions/{id}              { allow read, write: if false; }
+    match /device_users/{id}             { allow read, write: if false; }
+    match /friendships/{id}              { allow read, write: if false; }
+    match /leaderboard_entries/{id}      { allow read, write: if false; }
+    match /user_aggregates/{id}          { allow read, write: if false; }
+    match /question_candidates/{id}      { allow read, write: if false; }
+  }
+}
 ```
 
-- [ ] **Step 2: Apply the migration**
+- [ ] **Step 2: Write composite indexes**
+
+Create `firebase/firestore.indexes.json`:
+
+```json
+{
+  "indexes": [
+    {
+      "collectionGroup": "answer_clusters",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "question_id", "order": "ASCENDING" },
+        { "fieldPath": "submission_count", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "questions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "scheduled_drop_at", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
+```
+
+- [ ] **Step 3: Deploy rules + indexes**
 
 Run:
 ```bash
-cd /c/Users/levin/relatably
-supabase db push
+cd /c/Users/levin/relatably/firebase
+firebase deploy --only firestore:rules,firestore:indexes
 ```
 
-Expected: `Applying migration 20260508_001_init_schema.sql... Finished.`
+Expected: `✔ Deploy complete!` Rules show up in Firebase console under Firestore → Rules.
 
-- [ ] **Step 3: Verify in Supabase Studio**
+(If working entirely in the emulator: skip deploy, the rules apply locally on `firebase emulators:start`.)
 
-Open the Supabase dashboard → Table Editor. Expected: see `users`, `device_users`, `questions`, `submissions` (with two partitions visible), `answer_clusters`.
+- [ ] **Step 4: Smoke-test deny-by-default with the client SDK**
 
-- [ ] **Step 4: Commit**
+Open Firestore in the Firebase console (or emulator UI on http://localhost:4000) → Try to read `/submissions` from the "Rules Playground" simulating an unauthenticated client. Expected: **denied**.
 
-```bash
-git add supabase/migrations/20260508_001_init_schema.sql
-git commit -m "feat(db): initial schema for users, questions, submissions, clusters"
-```
-
----
-
-## Task 5: RLS policies migration `002_rls_policies.sql`
-
-**Files:**
-- Create: `supabase/migrations/20260508_002_rls_policies.sql`
-
-- [ ] **Step 1: Write the policies**
-
-Create `supabase/migrations/20260508_002_rls_policies.sql`:
-
-```sql
--- Deny-by-default RLS on all public tables.
--- All write paths go through service-role-keyed API routes.
--- Read paths for clients: only answer_clusters (post-submit) and live question text.
-
-alter table public.users enable row level security;
-alter table public.device_users enable row level security;
-alter table public.questions enable row level security;
-alter table public.submissions enable row level security;
-alter table public.answer_clusters enable row level security;
-
--- USERS: a user may read+update their own row
-create policy users_self_select on public.users
-  for select using (auth.uid() = id);
-create policy users_self_update on public.users
-  for update using (auth.uid() = id);
-
--- QUESTIONS: anyone (anon + authed) may read live + revealed questions
-create policy questions_public_read on public.questions
-  for select using (status in ('live', 'revealed'));
-
--- ANSWER_CLUSTERS: anyone may read clusters for live or revealed questions
-create policy answer_clusters_public_read on public.answer_clusters
-  for select using (
-    exists (
-      select 1 from public.questions q
-      where q.id = answer_clusters.question_id
-        and q.status in ('live', 'revealed')
-    )
-  );
-
--- SUBMISSIONS: clients may NOT read submissions directly. Service role only.
--- (No policy added → deny-by-default applies for anon/authed.)
-
--- DEVICE_USERS: clients may NOT read directly. Service role only.
--- (No policy added.)
-```
-
-- [ ] **Step 2: Apply migration**
-
-Run:
-```bash
-supabase db push
-```
-
-Expected: `Applying migration 20260508_002_rls_policies.sql... Finished.`
-
-- [ ] **Step 3: Verify policies in Studio**
-
-Supabase dashboard → Authentication → Policies. Expected: see 4 policies listed.
-
-- [ ] **Step 4: Smoke-test deny-by-default with anon key**
-
-Run:
-```bash
-curl -sS "https://<project-ref>.supabase.co/rest/v1/submissions" \
-  -H "apikey: <anon-key>" \
-  -H "Authorization: Bearer <anon-key>"
-```
-
-Expected: empty array `[]` (RLS hides everything from anon). NOT a list of submissions.
+Try to read `/questions` where `status = 'live'`. Expected: **allowed**.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add supabase/migrations/20260508_002_rls_policies.sql
-git commit -m "feat(db): RLS deny-by-default + public-read for live questions/clusters"
+cd /c/Users/levin/relatably
+git add firebase/firestore.rules firebase/firestore.indexes.json
+git commit -m "feat(firebase): Firestore Security Rules deny-by-default + cluster + question indexes"
 ```
 
 ---
 
-## Task 6: Realtime publication migration `003_realtime_publication.sql`
-
-**Files:**
-- Create: `supabase/migrations/20260508_003_realtime_publication.sql`
-
-- [ ] **Step 1: Write migration**
-
-Create `supabase/migrations/20260508_003_realtime_publication.sql`:
-
-```sql
--- Add answer_clusters to the supabase_realtime publication so clients
--- can subscribe to live cluster updates via WebSocket.
-
-alter publication supabase_realtime add table public.answer_clusters;
-```
-
-- [ ] **Step 2: Apply**
-
-Run: `supabase db push`
-
-- [ ] **Step 3: Commit**
-
-```bash
-git add supabase/migrations/20260508_003_realtime_publication.sql
-git commit -m "feat(db): publish answer_clusters to supabase_realtime"
-```
-
----
-
-## Task 7: TDD `normalize()` function
+## Task 5: TDD `normalize()` function
 
 **Files:**
 - Create: `api/src/lib/normalize.ts`
 - Create: `api/src/lib/normalize.test.ts`
+
+(This task is identical to the Supabase version — pure TypeScript, no DB touch.)
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -719,9 +709,7 @@ describe("normalize", () => {
 
 describe("clusterId", () => {
   it("returns deterministic sha256 for question_id + normalized text", () => {
-    const id1 = clusterId("q1", "italy");
-    const id2 = clusterId("q1", "italy");
-    expect(id1).toBe(id2);
+    expect(clusterId("q1", "italy")).toBe(clusterId("q1", "italy"));
   });
 
   it("differs across questions", () => {
@@ -738,7 +726,7 @@ describe("clusterId", () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify failure**
+- [ ] **Step 2: Run the tests, verify fail**
 
 Run:
 ```bash
@@ -779,19 +767,13 @@ export function clusterId(questionId: string, normalizedText: string): string {
 }
 ```
 
-- [ ] **Step 4: Run tests to verify pass**
-
-Run: `pnpm test`
-
-Expected: all 14 tests PASS.
-
-- [ ] **Step 5: Verify 100% coverage**
+- [ ] **Step 4: Run tests, verify pass + 100% coverage**
 
 Run: `pnpm test:coverage`
 
-Expected: `normalize.ts` shows 100% line coverage.
+Expected: 14 tests PASS; `normalize.ts` 100% line coverage.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
 cd /c/Users/levin/relatably
@@ -801,13 +783,13 @@ git commit -m "feat(api): deterministic normalize() + clusterId() with full TDD 
 
 ---
 
-## Task 8: TDD profanity filter
+## Task 6: TDD profanity filter
 
 **Files:**
 - Create: `api/src/lib/profanity.ts`
 - Create: `api/src/lib/profanity.test.ts`
 
-This is a deliberately small, regex-based filter — first line of defense only. Perspective API integration lands in Phase 5 hardening.
+(Identical to original — pure TS, DB-agnostic.)
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -835,8 +817,8 @@ describe("containsProfanity", () => {
   });
 
   it("does NOT block normal text containing substrings", () => {
-    expect(containsProfanity("classics")).toBe(false);   // contains "ass"
-    expect(containsProfanity("scunthorpe")).toBe(false); // famous false-positive case
+    expect(containsProfanity("classics")).toBe(false);
+    expect(containsProfanity("scunthorpe")).toBe(false);
     expect(containsProfanity("pisa tower")).toBe(false);
   });
 
@@ -853,24 +835,15 @@ describe("containsProfanity", () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests, verify fail**
+- [ ] **Step 2: Run tests, verify fail**
 
-Run: `pnpm test`
-
-Expected: FAIL — `Cannot find module './profanity'`.
+Run: `pnpm test` — expect FAIL on missing module.
 
 - [ ] **Step 3: Write minimal implementation**
 
 Create `api/src/lib/profanity.ts`:
 
 ```typescript
-// First-line regex profanity/violence filter.
-// Deliberately conservative for v1 — focuses on universally hateful slurs
-// and explicit self-harm / violence prompts. Perspective API in Phase 5 catches
-// the long tail.
-//
-// Patterns use word boundaries to avoid the Scunthorpe problem.
-
 const HATE_SLUR_PATTERNS: RegExp[] = [
   /\bn[i1]gg[ae]r\b/i,
   /\bf[a4]gg[o0]t\b/i,
@@ -893,9 +866,7 @@ export function containsProfanity(text: string): boolean {
 
 - [ ] **Step 4: Run tests, verify pass**
 
-Run: `pnpm test`
-
-Expected: all 6 tests PASS.
+Run: `pnpm test` — expect 6 tests PASS.
 
 - [ ] **Step 5: Commit**
 
@@ -906,7 +877,7 @@ git commit -m "feat(api): regex profanity filter (slurs + self-harm)"
 
 ---
 
-## Task 9: TDD `/api/questions/today` endpoint
+## Task 7: TDD `/api/questions/today` endpoint
 
 **Files:**
 - Create: `api/src/app/api/questions/today/route.ts`
@@ -919,15 +890,15 @@ Create `api/src/app/api/questions/today/route.test.ts`:
 ```typescript
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// Mock supabaseAdmin BEFORE importing route
-vi.mock("@/lib/supabase", () => ({
-  supabaseAdmin: {
-    from: vi.fn(),
+vi.mock("@/lib/firebase", () => ({
+  adminFirestore: {
+    collection: vi.fn(),
   },
+  adminAuth: {},
 }));
 
 import { GET } from "./route";
-import { supabaseAdmin } from "@/lib/supabase";
+import { adminFirestore } from "@/lib/firebase";
 
 describe("GET /api/questions/today", () => {
   beforeEach(() => {
@@ -935,15 +906,14 @@ describe("GET /api/questions/today", () => {
   });
 
   it("returns the live question with id + text", async () => {
-    const mockQuestion = {
+    const mockDoc = {
       id: "q-uuid-1",
-      text: "what's the most overrated tourist trap?",
-      status: "live",
+      data: () => ({ text: "what's the most overrated tourist trap?", status: "live" }),
     };
-    (supabaseAdmin.from as any).mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({ data: mockQuestion, error: null }),
+    (adminFirestore.collection as any).mockReturnValue({
+      where: vi.fn().mockReturnValue({
+        limit: vi.fn().mockReturnValue({
+          get: vi.fn().mockResolvedValue({ empty: false, docs: [mockDoc] }),
         }),
       }),
     });
@@ -958,13 +928,10 @@ describe("GET /api/questions/today", () => {
   });
 
   it("returns 404 when no live question exists", async () => {
-    (supabaseAdmin.from as any).mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({
-            data: null,
-            error: { code: "PGRST116" },
-          }),
+    (adminFirestore.collection as any).mockReturnValue({
+      where: vi.fn().mockReturnValue({
+        limit: vi.fn().mockReturnValue({
+          get: vi.fn().mockResolvedValue({ empty: true, docs: [] }),
         }),
       }),
     });
@@ -977,75 +944,97 @@ describe("GET /api/questions/today", () => {
 
 - [ ] **Step 2: Run tests, verify fail**
 
-Run: `pnpm test`
+Run: `pnpm test` — expect FAIL.
 
-Expected: FAIL — `Cannot find module './route'`.
-
-- [ ] **Step 3: Write minimal route handler**
+- [ ] **Step 3: Write the route handler**
 
 Create `api/src/app/api/questions/today/route.ts`:
 
 ```typescript
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase";
+import { adminFirestore } from "@/lib/firebase";
 
 export async function GET() {
-  const { data, error } = await supabaseAdmin
-    .from("questions")
-    .select("id, text, status")
-    .eq("status", "live")
-    .single();
+  const snap = await adminFirestore
+    .collection("questions")
+    .where("status", "==", "live")
+    .limit(1)
+    .get();
 
-  if (error || !data) {
+  if (snap.empty) {
     return NextResponse.json({ error: "no live question" }, { status: 404 });
   }
 
-  return NextResponse.json({ id: data.id, text: data.text });
+  const doc = snap.docs[0];
+  const data = doc.data() as { text: string };
+  return NextResponse.json({ id: doc.id, text: data.text });
 }
 ```
 
 - [ ] **Step 4: Run tests, verify pass**
 
-Run: `pnpm test`
+Run: `pnpm test` — expect 2 tests PASS.
 
-Expected: both tests PASS.
+- [ ] **Step 5: Manual smoke test against Firebase emulator**
 
-- [ ] **Step 5: Manual smoke test against real Supabase**
-
-Seed a live question via SQL:
-```sql
-insert into public.questions (text, status) values
-  ('what is the most overrated tourist trap?', 'live');
+Start the emulator:
+```bash
+cd /c/Users/levin/relatably/firebase
+firebase emulators:start
 ```
 
-Run dev server:
+In a second terminal, seed a live question via a one-shot script. Create `api/scripts/seed-question.ts`:
+
+```typescript
+import { adminFirestore } from "../src/lib/firebase";
+
+(async () => {
+  await adminFirestore.collection("questions").add({
+    text: "what is the most overrated tourist trap?",
+    status: "live",
+    source: "curated",
+    created_at: new Date(),
+  });
+  console.log("seeded");
+  process.exit(0);
+})();
+```
+
+Run with emulator env:
 ```bash
 cd /c/Users/levin/relatably/api
-pnpm dev
+FIRESTORE_EMULATOR_HOST=localhost:8080 npx tsx scripts/seed-question.ts
 ```
 
-Curl the endpoint:
+Then run the API dev server pointing at the emulator:
+```bash
+FIRESTORE_EMULATOR_HOST=localhost:8080 pnpm dev
+```
+
+Curl:
 ```bash
 curl -sS http://localhost:3000/api/questions/today
 ```
 
-Expected: `{"id":"<uuid>","text":"what is the most overrated tourist trap?"}`
+Expected: `{"id":"<id>","text":"what is the most overrated tourist trap?"}`
 
 - [ ] **Step 6: Commit**
 
 ```bash
 cd /c/Users/levin/relatably
-git add api/src/app/api/questions/today/
-git commit -m "feat(api): GET /api/questions/today returns live question"
+git add api/src/app/api/questions/today/ api/scripts/seed-question.ts
+git commit -m "feat(api): GET /api/questions/today using Firestore Admin SDK"
 ```
 
 ---
 
-## Task 10: TDD `/api/submit` endpoint
+## Task 8: TDD `/api/submit` endpoint with Firestore transaction
 
 **Files:**
 - Create: `api/src/app/api/submit/route.ts`
 - Create: `api/src/app/api/submit/route.test.ts`
+
+The atomic upsert pattern: a Firestore transaction reads the cluster doc; if it exists, increments `submission_count`; if not, creates it with `submission_count = 1` and `first_submission_at = now`. Then writes the submission doc.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -1054,12 +1043,26 @@ Create `api/src/app/api/submit/route.test.ts`:
 ```typescript
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-vi.mock("@/lib/supabase", () => ({
-  supabaseAdmin: { from: vi.fn(), rpc: vi.fn() },
-}));
+vi.mock("@/lib/firebase", () => {
+  const mockTx = {
+    get: vi.fn(),
+    set: vi.fn(),
+    update: vi.fn(),
+    create: vi.fn(),
+  };
+  return {
+    adminFirestore: {
+      collection: vi.fn(),
+      doc: vi.fn(),
+      runTransaction: vi.fn((fn) => fn(mockTx)),
+      __mockTx: mockTx,
+    },
+    adminAuth: {},
+  };
+});
 
 import { POST } from "./route";
-import { supabaseAdmin } from "@/lib/supabase";
+import { adminFirestore } from "@/lib/firebase";
 
 const buildRequest = (body: unknown) =>
   new Request("http://localhost/api/submit", {
@@ -1106,14 +1109,31 @@ describe("POST /api/submit", () => {
     expect(body.error).toMatch(/that won't fly/i);
   });
 
-  it("upserts cluster and inserts submission for valid input", async () => {
-    const mockRpc = vi
-      .fn()
-      .mockResolvedValueOnce({
-        data: { cluster_id: "cluster-abc", submission_count: 138 },
-        error: null,
-      });
-    (supabaseAdmin.rpc as any) = mockRpc;
+  it("creates a new cluster on first submission", async () => {
+    const mockClusterRef = { id: "cluster-abc" };
+    const mockSubmissionRef = { id: "sub-xyz" };
+    const mockDeviceRef = { id: "dev-1" };
+
+    (adminFirestore.collection as any).mockImplementation((name: string) => {
+      if (name === "device_users") {
+        return {
+          doc: vi.fn(() => ({
+            id: "dev-1",
+            get: vi.fn().mockResolvedValue({ exists: false }),
+            set: vi.fn().mockResolvedValue({}),
+          })),
+        };
+      }
+      if (name === "submissions") {
+        return { doc: vi.fn(() => mockSubmissionRef) };
+      }
+      throw new Error(`unexpected collection ${name}`);
+    });
+
+    (adminFirestore.doc as any).mockReturnValue(mockClusterRef);
+
+    const tx = (adminFirestore as any).__mockTx;
+    tx.get.mockResolvedValueOnce({ exists: false });
 
     const res = await POST(
       buildRequest({
@@ -1126,20 +1146,63 @@ describe("POST /api/submit", () => {
 
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body).toEqual({
-      cluster_id: "cluster-abc",
-      submission_count: 138,
-      normalized_text: "italy",
+    expect(body.normalized_text).toBe("italy");
+    expect(body.submission_count).toBe(1);
+
+    expect(tx.set).toHaveBeenCalledWith(
+      mockClusterRef,
+      expect.objectContaining({
+        canonical_text: "italy",
+        submission_count: 1,
+        question_id: "q-uuid-1",
+      }),
+    );
+  });
+
+  it("increments existing cluster on repeat submission", async () => {
+    const mockClusterRef = { id: "cluster-abc" };
+    const mockSubmissionRef = { id: "sub-xyz" };
+
+    (adminFirestore.collection as any).mockImplementation((name: string) => {
+      if (name === "device_users") {
+        return {
+          doc: vi.fn(() => ({
+            id: "dev-1",
+            get: vi.fn().mockResolvedValue({ exists: true, data: () => ({ linked_user_id: null }) }),
+            set: vi.fn().mockResolvedValue({}),
+          })),
+        };
+      }
+      if (name === "submissions") {
+        return { doc: vi.fn(() => mockSubmissionRef) };
+      }
+      throw new Error(`unexpected collection ${name}`);
     });
 
-    // Should have called RPC with normalized text
-    expect(mockRpc).toHaveBeenCalledWith(
-      "submit_answer",
-      expect.objectContaining({
-        p_question_id: "q-uuid-1",
-        p_normalized_text: "italy",
-        p_raw_text: "  Italy  ",
+    (adminFirestore.doc as any).mockReturnValue(mockClusterRef);
+
+    const tx = (adminFirestore as any).__mockTx;
+    tx.get.mockResolvedValueOnce({
+      exists: true,
+      data: () => ({ submission_count: 137 }),
+    });
+
+    const res = await POST(
+      buildRequest({
+        question_id: "q-uuid-1",
+        device_token: "dev2",
+        raw_text: "italy",
+        dwell_ms: 5000,
       }),
+    );
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.submission_count).toBe(138);
+
+    expect(tx.update).toHaveBeenCalledWith(
+      mockClusterRef,
+      expect.objectContaining({ submission_count: expect.anything() }),
     );
   });
 });
@@ -1147,72 +1210,9 @@ describe("POST /api/submit", () => {
 
 - [ ] **Step 2: Run tests, verify fail**
 
-Run: `pnpm test`
+Run: `pnpm test` — expect FAIL on missing route module.
 
-Expected: FAIL — `Cannot find module './route'`.
-
-- [ ] **Step 3: Write a Postgres function for the atomic upsert**
-
-The submission API does: upsert cluster + insert submission + return new count. To keep it atomic, push it to Postgres as an `RPC`. Add a new migration.
-
-Create `supabase/migrations/20260508_004_submit_rpc.sql`:
-
-```sql
--- Atomic submit_answer RPC.
--- Upserts the cluster, inserts the submission row, returns updated cluster count.
-
-create or replace function public.submit_answer(
-  p_question_id uuid,
-  p_user_id uuid,
-  p_device_user_id uuid,
-  p_raw_text text,
-  p_normalized_text text,
-  p_cluster_id text,
-  p_ip_hash text,
-  p_dwell_ms integer
-)
-returns table(cluster_id text, submission_count integer)
-language plpgsql
-security definer
-as $$
-declare
-  v_now timestamptz := now();
-begin
-  -- Ensure the question exists and is live.
-  perform 1 from public.questions
-    where id = p_question_id and status = 'live';
-  if not found then
-    raise exception 'question_not_live';
-  end if;
-
-  -- Upsert cluster atomically.
-  insert into public.answer_clusters (id, question_id, canonical_text, submission_count, first_submission_at)
-    values (p_cluster_id, p_question_id, p_normalized_text, 1, v_now)
-    on conflict (id) do update
-      set submission_count = public.answer_clusters.submission_count + 1
-    returning public.answer_clusters.id, public.answer_clusters.submission_count
-    into cluster_id, submission_count;
-
-  -- Insert submission row.
-  insert into public.submissions (
-    question_id, user_id, device_user_id,
-    raw_text, normalized_cluster_id, submitted_at, ip_hash, dwell_ms, moderation_status
-  ) values (
-    p_question_id, p_user_id, p_device_user_id,
-    p_raw_text, p_cluster_id, v_now, p_ip_hash, p_dwell_ms, 'passed'
-  );
-
-  return next;
-end;
-$$;
-
-revoke all on function public.submit_answer from public, anon, authenticated;
-grant execute on function public.submit_answer to service_role;
-```
-
-Apply: `supabase db push`
-
-- [ ] **Step 4: Write minimal route handler**
+- [ ] **Step 3: Write the route handler**
 
 Create `api/src/app/api/submit/route.ts`:
 
@@ -1220,12 +1220,13 @@ Create `api/src/app/api/submit/route.ts`:
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createHash } from "node:crypto";
-import { supabaseAdmin } from "@/lib/supabase";
+import { FieldValue } from "firebase-admin/firestore";
+import { adminFirestore } from "@/lib/firebase";
 import { normalize, clusterId } from "@/lib/normalize";
 import { containsProfanity } from "@/lib/profanity";
 
 const SubmitSchema = z.object({
-  question_id: z.string().uuid().or(z.string().min(1)),
+  question_id: z.string().min(1),
   device_token: z.string().min(1),
   raw_text: z.string().min(1).max(280),
   dwell_ms: z.number().int().nonnegative(),
@@ -1241,6 +1242,10 @@ function hashIp(req: Request): string {
   return createHash("sha256").update(ip).digest("hex");
 }
 
+function hashDeviceToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex");
+}
+
 export async function POST(req: Request) {
   let parsed;
   try {
@@ -1250,10 +1255,7 @@ export async function POST(req: Request) {
   }
 
   if (parsed.dwell_ms < MIN_DWELL_MS) {
-    return NextResponse.json(
-      { error: "dwell too short" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "dwell too short" }, { status: 400 });
   }
 
   if (containsProfanity(parsed.raw_text)) {
@@ -1265,143 +1267,121 @@ export async function POST(req: Request) {
 
   const normalizedText = normalize(parsed.raw_text);
   if (!normalizedText) {
-    return NextResponse.json({ error: "empty after normalization" }, { status: 400 });
+    return NextResponse.json(
+      { error: "empty after normalization" },
+      { status: 400 },
+    );
   }
 
   const cId = clusterId(parsed.question_id, normalizedText);
   const ipHash = hashIp(req);
+  const deviceTokenHash = hashDeviceToken(parsed.device_token);
 
-  // Resolve device_user_id (upsert if needed)
-  const { data: deviceRow, error: deviceErr } = await supabaseAdmin
-    .from("device_users")
-    .upsert(
-      { device_token: parsed.device_token },
-      { onConflict: "device_token", ignoreDuplicates: false },
-    )
-    .select("id, linked_user_id")
-    .single();
-
-  if (deviceErr || !deviceRow) {
-    return NextResponse.json({ error: "device registration failed" }, { status: 500 });
+  // Upsert the device_user record (outside the transaction — it's idempotent and
+  // not on the critical write path of cluster atomicity).
+  const deviceRef = adminFirestore
+    .collection("device_users")
+    .doc(deviceTokenHash);
+  const deviceSnap = await deviceRef.get();
+  let linkedUserId: string | null = null;
+  if (!deviceSnap.exists) {
+    await deviceRef.set({
+      device_token: parsed.device_token,
+      linked_user_id: null,
+      created_at: FieldValue.serverTimestamp(),
+    });
+  } else {
+    linkedUserId = (deviceSnap.data() as any)?.linked_user_id ?? null;
   }
 
-  const { data, error } = await supabaseAdmin.rpc("submit_answer", {
-    p_question_id: parsed.question_id,
-    p_user_id: deviceRow.linked_user_id,
-    p_device_user_id: deviceRow.id,
-    p_raw_text: parsed.raw_text,
-    p_normalized_text: normalizedText,
-    p_cluster_id: cId,
-    p_ip_hash: ipHash,
-    p_dwell_ms: parsed.dwell_ms,
+  const clusterRef = adminFirestore.doc(`answer_clusters/${cId}`);
+  const submissionRef = adminFirestore.collection("submissions").doc();
+
+  let newCount = 1;
+  await adminFirestore.runTransaction(async (tx) => {
+    const clusterSnap = await tx.get(clusterRef);
+    const now = FieldValue.serverTimestamp();
+
+    if (!clusterSnap.exists) {
+      tx.set(clusterRef, {
+        question_id: parsed.question_id,
+        canonical_text: normalizedText,
+        submission_count: 1,
+        first_submission_at: now,
+      });
+      newCount = 1;
+    } else {
+      const prevCount = (clusterSnap.data() as any)?.submission_count ?? 0;
+      newCount = prevCount + 1;
+      tx.update(clusterRef, {
+        submission_count: FieldValue.increment(1),
+      });
+    }
+
+    tx.set(submissionRef, {
+      question_id: parsed.question_id,
+      user_id: null,
+      device_user_id: deviceTokenHash,
+      raw_text: parsed.raw_text,
+      normalized_cluster_id: cId,
+      submitted_at: now,
+      ip_hash: ipHash,
+      dwell_ms: parsed.dwell_ms,
+      moderation_status: "passed",
+    });
   });
 
-  if (error || !data) {
-    return NextResponse.json({ error: "submit failed" }, { status: 500 });
-  }
-
-  // RPC returns array-of-rows; take first
-  const row = Array.isArray(data) ? data[0] : data;
   return NextResponse.json({
-    cluster_id: row.cluster_id,
-    submission_count: row.submission_count,
+    cluster_id: cId,
+    submission_count: newCount,
     normalized_text: normalizedText,
   });
 }
 ```
 
-- [ ] **Step 5: Update test to align with implementation**
+- [ ] **Step 4: Run tests, verify pass**
 
-The implementation also calls `supabaseAdmin.from("device_users").upsert(...)`. Update the test mock setup. Modify `api/src/app/api/submit/route.test.ts` — replace the "upserts cluster..." test with this version that mocks both calls:
+Run: `pnpm test` — expect 5 tests PASS.
 
-```typescript
-  it("upserts cluster and inserts submission for valid input", async () => {
-    const mockUpsertResult = {
-      data: { id: "device-uuid-1", linked_user_id: null },
-      error: null,
-    };
-    (supabaseAdmin.from as any).mockReturnValue({
-      upsert: vi.fn().mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue(mockUpsertResult),
-        }),
-      }),
-    });
+- [ ] **Step 5: Manual smoke test against Firebase emulator**
 
-    const mockRpc = vi.fn().mockResolvedValue({
-      data: [{ cluster_id: "cluster-abc", submission_count: 138 }],
-      error: null,
-    });
-    (supabaseAdmin.rpc as any) = mockRpc;
-
-    const res = await POST(
-      buildRequest({
-        question_id: "q-uuid-1",
-        device_token: "dev1",
-        raw_text: "  Italy  ",
-        dwell_ms: 5000,
-      }),
-    );
-
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body).toEqual({
-      cluster_id: "cluster-abc",
-      submission_count: 138,
-      normalized_text: "italy",
-    });
-
-    expect(mockRpc).toHaveBeenCalledWith(
-      "submit_answer",
-      expect.objectContaining({
-        p_question_id: "q-uuid-1",
-        p_normalized_text: "italy",
-        p_raw_text: "  Italy  ",
-      }),
-    );
-  });
-```
-
-- [ ] **Step 6: Run tests, verify pass**
-
-Run: `pnpm test`
-
-Expected: all 4 tests PASS.
-
-- [ ] **Step 7: Manual smoke against real Supabase**
-
-Run dev: `pnpm dev`
+With emulator running and seed-question script having seeded a live question:
 
 ```bash
+# First submit
 curl -sS -X POST http://localhost:3000/api/submit \
   -H "Content-Type: application/json" \
-  -d '{"question_id":"<live-question-uuid>","device_token":"smoke-1","raw_text":"Italy","dwell_ms":5000}'
+  -d '{"question_id":"<live-question-id>","device_token":"smoke-1","raw_text":"Italy","dwell_ms":5000}'
 ```
 
 Expected: `{"cluster_id":"<sha>","submission_count":1,"normalized_text":"italy"}`
 
-Submit again same text:
 ```bash
+# Second submit, same answer, different device
 curl -sS -X POST http://localhost:3000/api/submit \
   -H "Content-Type: application/json" \
-  -d '{"question_id":"<live-question-uuid>","device_token":"smoke-2","raw_text":"italy.","dwell_ms":5000}'
+  -d '{"question_id":"<live-question-id>","device_token":"smoke-2","raw_text":"italy.","dwell_ms":5000}'
 ```
 
 Expected: `{"cluster_id":"<same-sha>","submission_count":2,"normalized_text":"italy"}`
 
-- [ ] **Step 8: Commit**
+In emulator UI (http://localhost:4000) → Firestore → `/answer_clusters` → see the cluster doc with `submission_count: 2`.
+
+- [ ] **Step 6: Commit**
 
 ```bash
-git add api/src/app/api/submit/ supabase/migrations/20260508_004_submit_rpc.sql
-git commit -m "feat(api): POST /api/submit with RPC upsert + dwell + profanity guards"
+git add api/src/app/api/submit/
+git commit -m "feat(api): POST /api/submit with Firestore transaction + dwell + profanity guards"
 ```
 
 ---
 
-## Task 11: Anonymous device tracking
+## Task 9: Anonymous device tracking (iOS)
 
 **Files:**
 - Create: `ios/src/lib/deviceId.ts`
+
+(Identical to original — Firebase-agnostic.)
 
 - [ ] **Step 1: Write the implementation**
 
@@ -1417,8 +1397,6 @@ export async function getDeviceToken(): Promise<string> {
   let token = await SecureStore.getItemAsync(KEY);
   if (token) return token;
 
-  // Use Apple's iOS-stable identifierForVendor as the seed; if unavailable
-  // (sim sometimes returns null), fall back to a random UUID.
   const ifv = await Application.getIosIdForVendorAsync().catch(() => null);
   token = ifv ?? `anon-${cryptoRandom()}`;
   await SecureStore.setItemAsync(KEY, token);
@@ -1441,9 +1419,9 @@ useEffect(() => {
 }, []);
 ```
 
-Run: `pnpm ios` — expected: console logs a token; restarting the app shows the same token.
+Run on dev client. Expected: token logs once, persists across restarts.
 
-Remove the log before committing.
+Remove the temporary log before commit.
 
 - [ ] **Step 3: Commit**
 
@@ -1454,11 +1432,13 @@ git commit -m "feat(ios): persistent anonymous device token via SecureStore"
 
 ---
 
-## Task 12: iOS API client
+## Task 10: iOS API client
 
 **Files:**
 - Create: `ios/src/types/api.ts`
 - Create: `ios/src/lib/api.ts`
+
+(Identical to original — calls `/api/*` endpoints, DB-agnostic.)
 
 - [ ] **Step 1: Write shared types**
 
@@ -1522,49 +1502,70 @@ git commit -m "feat(ios): typed API client for /questions/today and /submit"
 
 ---
 
-## Task 13: iOS Supabase Realtime client
+## Task 11: iOS Firebase RN client init
 
 **Files:**
-- Create: `ios/src/lib/supabase.ts`
+- Create: `ios/src/lib/firebase.ts`
 
-- [ ] **Step 1: Write the client**
+- [ ] **Step 1: Write the client init**
 
-Create `ios/src/lib/supabase.ts`:
+Create `ios/src/lib/firebase.ts`:
 
 ```typescript
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import firestore from "@react-native-firebase/firestore";
+import auth from "@react-native-firebase/auth";
 
-const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
-const anon = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
-
-if (!url || !anon) {
-  throw new Error(
-    "Missing EXPO_PUBLIC_SUPABASE_URL or EXPO_PUBLIC_SUPABASE_ANON_KEY",
-  );
+// In dev with the Firebase Emulator Suite, point the client at the local emulators.
+// EXPO_PUBLIC_USE_FIREBASE_EMULATOR=1 should be set in .env.local during dev.
+if (process.env.EXPO_PUBLIC_USE_FIREBASE_EMULATOR === "1") {
+  // Default emulator host on simulator: 'localhost' for iOS sim works because
+  // sim shares the host network. For physical devices on LAN, replace with the
+  // dev machine's LAN IP (e.g. '192.168.1.42').
+  firestore().useEmulator("localhost", 8080);
+  auth().useEmulator("http://localhost:9099");
 }
 
-export const supabase: SupabaseClient = createClient(url, anon, {
-  auth: { persistSession: false, autoRefreshToken: false },
-  realtime: { params: { eventsPerSecond: 10 } },
-});
+export { firestore, auth };
 ```
 
-- [ ] **Step 2: Commit**
+- [ ] **Step 2: Smoke test**
+
+Add a temporary log in `App.tsx`:
+
+```typescript
+import { firestore } from "./src/lib/firebase";
+useEffect(() => {
+  firestore()
+    .collection("questions")
+    .where("status", "==", "live")
+    .limit(1)
+    .get()
+    .then((snap) => console.log("questions snap:", snap.size));
+}, []);
+```
+
+Run on dev client with emulator running. Expected: console logs `questions snap: 1` (from seeded question).
+
+Remove the temporary log before commit.
+
+- [ ] **Step 3: Commit**
 
 ```bash
-git add ios/src/lib/supabase.ts
-git commit -m "feat(ios): Supabase Realtime client (anon key)"
+git add ios/src/lib/firebase.ts
+git commit -m "feat(ios): @react-native-firebase client init + emulator support"
 ```
 
 ---
 
-## Task 14: iOS QuestionScreen UI
+## Task 12: iOS QuestionScreen UI
 
 **Files:**
 - Create: `ios/src/screens/QuestionScreen.tsx`
 - Create: `ios/src/components/QuestionText.tsx`
 - Create: `ios/src/components/AnswerInput.tsx`
 - Create: `ios/src/components/LiveCounter.tsx`
+
+(Identical to the Supabase plan — pure UI, DB-agnostic. SubmitButton wired in Task 13, Realtime in Task 15.)
 
 - [ ] **Step 1: Write QuestionText component**
 
@@ -1706,8 +1707,8 @@ export function QuestionScreen({
     <View style={styles.container}>
       <QuestionText text={question.text} />
       <AnswerInput value={text} onChangeText={setText} />
-      <LiveCounter count={0 /* wired up in Task 17 */} />
-      {/* SubmitButton wired in Task 15 + 17 */}
+      <LiveCounter count={0 /* wired up in Task 15 */} />
+      {/* SubmitButton wired in Task 13 + 15 */}
     </View>
   );
 }
@@ -1725,7 +1726,7 @@ const styles = StyleSheet.create({
 
 - [ ] **Step 5: Wire QuestionScreen into App.tsx (placeholder)**
 
-Modify `ios/App.tsx` — replace contents:
+Modify `ios/App.tsx`:
 
 ```tsx
 import { StatusBar } from "expo-status-bar";
@@ -1741,11 +1742,9 @@ export default function App() {
 }
 ```
 
-- [ ] **Step 6: Smoke test on simulator**
+- [ ] **Step 6: Smoke test on dev client**
 
-Run: `pnpm ios`
-
-Expected: black screen, big white question text (the live question seeded earlier), accent-color underline input, "0 answers so far" counter.
+Run with emulator + API + dev client. Expected: black screen, white question text from seeded question, accent input underline, "0 answers so far".
 
 - [ ] **Step 7: Commit**
 
@@ -1756,11 +1755,13 @@ git commit -m "feat(ios): QuestionScreen UI (no submit logic yet)"
 
 ---
 
-## Task 15: TDD SubmitButton with 3-second dwell guard
+## Task 13: TDD SubmitButton with 3-second dwell guard
 
 **Files:**
 - Create: `ios/src/components/SubmitButton.tsx`
 - Create: `ios/__tests__/components/SubmitButton.test.tsx`
+
+(Identical to the Supabase plan — pure component logic, DB-agnostic.)
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -1835,9 +1836,7 @@ describe("SubmitButton", () => {
 
 - [ ] **Step 2: Run tests, verify fail**
 
-Run: `cd ios && pnpm test`
-
-Expected: FAIL — `Cannot find module '../../src/components/SubmitButton'`.
+Run: `cd ios && pnpm test` — expect FAIL on missing module.
 
 - [ ] **Step 3: Write minimal implementation**
 
@@ -1903,9 +1902,7 @@ const styles = StyleSheet.create({
 
 - [ ] **Step 4: Run tests, verify pass**
 
-Run: `pnpm test`
-
-Expected: all 4 tests PASS.
+Run: `pnpm test` — expect 4 tests PASS.
 
 - [ ] **Step 5: Commit**
 
@@ -1916,13 +1913,13 @@ git commit -m "feat(ios): SubmitButton with 3-sec dwell guard (TDD)"
 
 ---
 
-## Task 16: iOS WordcloudScreen static rendering
+## Task 14: iOS WordcloudScreen static rendering
 
 **Files:**
 - Create: `ios/src/screens/WordcloudScreen.tsx`
 - Create: `ios/src/components/ClusterBubble.tsx`
 
-This implementation is a "naive flow layout" — bubbles ranked by submission_count, sized proportionally, laid out left-to-right with row wrap. No physics simulation. Good enough for v1 and animated upgrades land in Phase 2 hardening.
+(Identical to the Supabase plan — pure UI, DB-agnostic.)
 
 - [ ] **Step 1: Write ClusterBubble component**
 
@@ -2038,31 +2035,9 @@ const styles = StyleSheet.create({
 });
 ```
 
-- [ ] **Step 3: Smoke render with seeded fake data**
+- [ ] **Step 3: Smoke render with mock data**
 
-Temporarily modify `App.tsx` to render WordcloudScreen with mock data:
-
-```tsx
-import { WordcloudScreen } from "./src/screens/WordcloudScreen";
-
-const MOCK = [
-  { id: "a", canonical_text: "pisa tower", submission_count: 412 },
-  { id: "b", canonical_text: "louvre", submission_count: 138 },
-  { id: "c", canonical_text: "times square", submission_count: 89 },
-  { id: "d", canonical_text: "eiffel tower", submission_count: 47 },
-  { id: "e", canonical_text: "colosseum", submission_count: 18 },
-];
-
-export default function App() {
-  return <WordcloudScreen clusters={MOCK} selfClusterId="b" totalCount={704} />;
-}
-```
-
-Run: `pnpm ios`
-
-Expected: see the bubbles laid out by size, with "louvre" highlighted as self.
-
-Revert `App.tsx` back to the QuestionScreen variant before commit.
+Temporarily set `App.tsx` to render WordcloudScreen with the mock array used in the original plan. Verify visually. Revert before commit.
 
 - [ ] **Step 4: Commit**
 
@@ -2073,22 +2048,21 @@ git commit -m "feat(ios): WordcloudScreen + ClusterBubble static layout"
 
 ---
 
-## Task 17: Wire submit flow + Realtime updates end-to-end
+## Task 15: Wire submit + Firestore listener live updates
 
 **Files:**
 - Modify: `ios/App.tsx`
 
-This is the integration task — connects QuestionScreen → submit → WordcloudScreen → live Supabase updates.
+This is the integration task — connects QuestionScreen → submit (via `/api/submit`) → WordcloudScreen → live Firestore listener.
 
-- [ ] **Step 1: Replace App.tsx with the integrated flow**
+- [ ] **Step 1: Replace App.tsx with integrated flow**
 
 Replace `ios/App.tsx`:
 
 ```tsx
 import { useEffect, useState } from "react";
-import { View, StyleSheet, Pressable, Text } from "react-native";
+import { View, StyleSheet, Text } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { QuestionScreen } from "./src/screens/QuestionScreen";
 import { WordcloudScreen, type Cluster } from "./src/screens/WordcloudScreen";
 import { SubmitButton } from "./src/components/SubmitButton";
 import { QuestionText } from "./src/components/QuestionText";
@@ -2096,7 +2070,7 @@ import { AnswerInput } from "./src/components/AnswerInput";
 import { LiveCounter } from "./src/components/LiveCounter";
 import { fetchTodayQuestion, submitAnswer } from "./src/lib/api";
 import { getDeviceToken } from "./src/lib/deviceId";
-import { supabase } from "./src/lib/supabase";
+import { firestore } from "./src/lib/firebase";
 import type { TodayQuestion } from "./src/types/api";
 
 type Phase = "loading" | "question" | "wordcloud" | "error";
@@ -2110,7 +2084,6 @@ export default function App() {
   const [selfClusterId, setSelfClusterId] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Load today's question
   useEffect(() => {
     fetchTodayQuestion()
       .then((q) => {
@@ -2124,45 +2097,31 @@ export default function App() {
       });
   }, []);
 
-  // Subscribe to Realtime cluster updates once we know the question
+  // Subscribe to Firestore listener for live cluster updates
   useEffect(() => {
     if (!question) return;
-    const channel = supabase
-      .channel(`clusters:${question.id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "answer_clusters",
-          filter: `question_id=eq.${question.id}`,
-        },
-        (payload) => {
-          const row = (payload.new ?? payload.old) as Cluster;
-          if (!row) return;
-          setClusters((prev) => {
-            const idx = prev.findIndex((c) => c.id === row.id);
-            if (idx === -1) return [...prev, row];
-            const copy = [...prev];
-            copy[idx] = row;
-            return copy;
+    const unsub = firestore()
+      .collection("answer_clusters")
+      .where("question_id", "==", question.id)
+      .orderBy("submission_count", "desc")
+      .limit(100)
+      .onSnapshot(
+        (snap) => {
+          const next: Cluster[] = snap.docs.map((d) => {
+            const data = d.data() as any;
+            return {
+              id: d.id,
+              canonical_text: data.canonical_text,
+              submission_count: data.submission_count,
+            };
           });
+          setClusters(next);
         },
-      )
-      .subscribe();
-
-    // Initial snapshot
-    supabase
-      .from("answer_clusters")
-      .select("id, canonical_text, submission_count")
-      .eq("question_id", question.id)
-      .then(({ data }) => {
-        if (data) setClusters(data as Cluster[]);
-      });
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+        (err) => {
+          console.warn("clusters listener error", err);
+        },
+      );
+    return () => unsub();
   }, [question]);
 
   const handleSubmit = async () => {
@@ -2233,36 +2192,24 @@ const styles = StyleSheet.create({
 
 - [ ] **Step 2: Smoke test single device**
 
-Run dev server: `cd api && pnpm dev`
-Run iOS sim: `cd ios && pnpm ios`
-
-Expected:
-1. Question loads.
-2. Type "italy", wait 3+ sec, tap SUBMIT.
-3. Transitions to wordcloud screen with "italy" as the only (highlighted) bubble.
+Start emulator + API (with `FIRESTORE_EMULATOR_HOST=localhost:8080`) + dev client (with `EXPO_PUBLIC_USE_FIREBASE_EMULATOR=1`). Expected: question loads → type "italy" → wait 3+ sec → SUBMIT → wordcloud screen shows "italy" highlighted.
 
 - [ ] **Step 3: Smoke test two devices**
 
-Open a second iOS simulator (or physical device on same network):
-```bash
-cd ios && pnpm ios -- --device "iPhone 15 Pro Max"
-```
-
-Submit a different answer. Expected: both simulators see both bubbles updating in real-time.
+Open a second simulator. Submit a different answer. Expected: both simulators' wordclouds show both bubbles, updating in real-time.
 
 - [ ] **Step 4: Commit**
 
 ```bash
-cd /c/Users/levin/relatably
 git add ios/App.tsx
-git commit -m "feat(ios): integrate question→submit→wordcloud with live Realtime updates"
+git commit -m "feat(ios): integrate question→submit→wordcloud with live Firestore listener"
 ```
 
 ---
 
-## Task 18: Phase 1 acceptance gate
+## Task 16: Phase 1 acceptance gate
 
-This is a gate, not new code. It validates the entire phase against the acceptance criteria.
+This is a gate, not new code. Validates the entire phase against acceptance criteria.
 
 - [ ] **Step 1: Run all backend tests**
 
@@ -2273,10 +2220,9 @@ pnpm test:coverage
 ```
 
 Expected:
-- All Vitest tests PASS
-- `normalize.ts` shows 100% line coverage
-- `profanity.ts` shows ≥ 95% coverage
-- Route tests pass
+- All Vitest tests PASS (≥21 total: 14 normalize + 6 profanity + 2 today + 5 submit)
+- `normalize.ts` 100% coverage
+- `profanity.ts` ≥ 95% coverage
 
 - [ ] **Step 2: Run all iOS tests**
 
@@ -2286,65 +2232,63 @@ cd /c/Users/levin/relatably/ios
 pnpm test
 ```
 
-Expected: all Jest tests PASS.
+Expected: 4 SubmitButton tests PASS.
 
 - [ ] **Step 3: Manual end-to-end smoke**
 
-Run both servers, open two iOS simulators, submit answers from each, verify:
+With emulator + API + 2 simulators running, verify:
 
 - ✅ Question loads
 - ✅ Submit button stays disabled for first 3 seconds
 - ✅ Submit button stays disabled while text is empty
 - ✅ After submit, wordcloud screen shows
-- ✅ Self bubble is highlighted in accent color
+- ✅ Self bubble highlighted in accent color
 - ✅ Live counter updates as second device submits
 - ✅ Bubble sizes update as cluster counts grow
-- ✅ "italy", "Italy", "  italy.  " all collapse into one cluster
-- ✅ "italy" and "italian" stay as separate clusters
-- ✅ Profanity submit returns inline error, not crash
+- ✅ "italy", "Italy", "  italy.  " collapse into one cluster
+- ✅ "italy" and "italian" stay separate
+- ✅ Profanity submit returns inline error, app doesn't crash
 - ✅ Empty text never enables submit
-- ✅ Sub-3-second submit is rejected by backend (would only happen via direct curl since UI blocks)
+- ✅ Sub-3-sec submit rejected by backend (only reachable via direct curl)
 
 - [ ] **Step 4: Manual `curl` regression checks**
-
-Hit edge cases against the live API:
 
 ```bash
 # Empty body
 curl -i -X POST http://localhost:3000/api/submit \
   -H "Content-Type: application/json" -d '{}'
-# Expected: HTTP 400
+# Expected: 400
 
 # Profanity
 curl -i -X POST http://localhost:3000/api/submit \
   -H "Content-Type: application/json" \
   -d '{"question_id":"<id>","device_token":"t","raw_text":"kys","dwell_ms":5000}'
-# Expected: HTTP 400 with "that won't fly"
+# Expected: 400 with "that won't fly"
 
 # Sub-3s dwell
 curl -i -X POST http://localhost:3000/api/submit \
   -H "Content-Type: application/json" \
   -d '{"question_id":"<id>","device_token":"t","raw_text":"italy","dwell_ms":100}'
-# Expected: HTTP 400 with "dwell too short"
+# Expected: 400 with "dwell too short"
 ```
 
 - [ ] **Step 5: Tag the milestone**
 
-Run:
 ```bash
 cd /c/Users/levin/relatably
-git tag -a phase-1-complete -m "Phase 1 (core loop) complete"
-git push origin main --tags
+git tag -a phase-1-complete -m "Phase 1 (core loop, Firebase) complete"
+# Push branch + tag (token URL one-shot)
+git push origin phase-1-core-loop --tags
 ```
 
 - [ ] **Step 6: Phase 1 retrospective**
 
-Write a brief retro at `docs/superpowers/specs/2026-05-08-relatably-design.md` — append a new section near the end:
+Append to `docs/superpowers/specs/2026-05-08-relatably-design.md`:
 
 ```markdown
 ## Implementation log
 
-### Phase 1 — Core loop (completed YYYY-MM-DD)
+### Phase 1 — Core loop (Firebase, completed YYYY-MM-DD)
 
 **What worked:**
 - [fill in]
@@ -2362,22 +2306,22 @@ This becomes input for the Phase 2 plan.
 
 ## Phase 1 self-review
 
-**Spec coverage check (against Section 4 + 6 of design spec):**
+**Spec coverage check (against Sections 4 + 6 of design spec):**
 
 | Spec requirement | Task |
 |---|---|
-| Anonymous answering | Tasks 11, 17 |
-| Free-text submission | Tasks 14, 17 |
-| Deterministic normalization | Task 7 |
-| Profanity filter | Task 8 |
-| Live wordcloud via Supabase Realtime | Tasks 13, 16, 17 |
-| Submit dwell ≥ 3 seconds | Tasks 10, 15 |
-| Sign in with Apple | **NOT in Phase 1** — moved to Phase 3 (where leaderboard requires it) |
+| Anonymous answering | Tasks 9, 15 |
+| Free-text submission | Tasks 12, 15 |
+| Deterministic normalization | Task 5 |
+| Profanity filter | Task 6 |
+| Live wordcloud via Firestore listener | Tasks 11, 14, 15 |
+| Submit dwell ≥ 3 seconds | Tasks 8, 13 |
+| Sign in with Apple | **NOT in Phase 1** — Phase 3 |
 | Random drop scheduler | **NOT in Phase 1** — Phase 2 |
 | Push notifications | **NOT in Phase 1** — Phase 2 |
 | Reveal animation | **NOT in Phase 1** — Phase 2 |
 | Leaderboard | **NOT in Phase 1** — Phase 3 |
-| Anti-cheat (Apple sign-in, IP throttle, DeviceCheck, behavioral) | **NOT in Phase 1** — Phase 3 (the `dwell ≥ 3s` defense IS in Phase 1) |
+| Anti-cheat (Sign in with Apple, IP throttle, App Attest, behavioral) | **NOT in Phase 1** — Phase 3 (the `dwell ≥ 3s` defense IS in Phase 1) |
 | Friend graph | **NOT in Phase 1** — Phase 3 |
 | Share banners | **NOT in Phase 1** — Phase 4 |
 | AdMob ads | **NOT in Phase 1** — Phase 4 |
@@ -2388,7 +2332,7 @@ Coverage of Phase 1 scope: complete. ✅
 
 **Placeholder scan:** no "TBD", "TODO", or hand-wavy steps. Every code block is the actual code. ✅
 
-**Type consistency:** `clusterId()` signature consistent across `normalize.ts` and `route.ts`. `Cluster` type consistent across `WordcloudScreen.tsx` and `App.tsx`. `SubmitRequest` / `SubmitResponse` consistent across `api.ts` (ios) and `route.ts` (api). ✅
+**Type consistency:** `clusterId()` signature consistent. `Cluster` type consistent across screens and App.tsx. `SubmitRequest`/`SubmitResponse` consistent across iOS api.ts and Next.js route.ts. ✅
 
 ---
 
@@ -2396,18 +2340,18 @@ Coverage of Phase 1 scope: complete. ✅
 
 These features are **explicitly NOT** built in Phase 1 — separate plans cover them:
 
-- **Phase 2:** random global drop scheduler, Vercel Cron, Expo Push fanout, push-to-app deep linking, per-user reveal animation, atomic question status transition
-- **Phase 3:** Sign in with Apple wiring, leaderboard scoring formula, three boards, friend graph, group leaderboards, six-layer anti-cheat (App Attest, IP throttle, behavioral classifier, soft shadowban)
+- **Phase 2:** random global drop scheduler (Cloud Functions scheduled trigger), FCM push fanout, push deep linking, per-user reveal animation, atomic question status transition
+- **Phase 3:** Sign in with Apple via Firebase Auth, leaderboard scoring formula, three boards, friend graph, group leaderboards, six-layer anti-cheat (App Attest, IP throttle, behavioral classifier, soft shadowban)
 - **Phase 4:** three banner types, share triggers, AdMob (3 placements), Branch.io install attribution
 - **Phase 5:** archive tab, admin curation console, scheduled question pipeline, Perspective API integration
 - **Phase 6:** Sentry, PostHog, load testing, App Store submission
 
-Each will get its own bite-sized plan written when its phase is about to begin — so the plan reflects current state of the code rather than 12-week-stale assumptions.
+Each phase will get its own bite-sized plan written when its phase begins.
 
 ---
 
-**End of Phase 1 plan.**
+**End of Phase 1 plan (Firebase edition).**
 
-**Total tasks:** 18
-**Estimated calendar time:** 4 weeks at solo-founder pace (working evenings + weekends)
-**Working software at completion:** A standalone iOS app where any user can answer one manually-seeded question and watch a live wordcloud grow. Nothing else.
+**Total tasks:** 16 (down from 18 in the Supabase version — collapsed 3 migration tasks into 1 Security Rules + Indexes task, removed Realtime publication migration since Firestore listeners are auto-enabled)
+**Estimated calendar time:** 4 weeks at solo-founder pace
+**Working software at completion:** Standalone iOS app where any user can answer one manually-seeded question and watch a live wordcloud grow.

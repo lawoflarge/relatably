@@ -15,10 +15,13 @@ That document is the single source of truth for product, UX, technical architect
 ## Stack (planned)
 
 - iOS client: Expo (React Native)
-- Backend: Next.js 16 on Vercel
-- Database: Supabase (Postgres + Realtime + Auth)
-- Cache: Upstash Redis
-- Push: Expo Push Service
+- Backend: Next.js 16 on Vercel (HTTP API write paths via Firebase Admin SDK)
+- Database: Firestore (Firebase) with Security Rules
+- Auth: Firebase Auth + Sign in with Apple
+- Realtime: Firestore listeners
+- Cache: Upstash Redis (post-drop hot reads)
+- Push: Firebase Cloud Messaging (FCM)
+- Scheduler: Cloud Functions for Firebase (scheduled triggers)
 - Ads: Google AdMob
 - Analytics: PostHog
 - Crash: Sentry

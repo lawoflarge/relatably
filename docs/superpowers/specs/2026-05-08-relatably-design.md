@@ -35,7 +35,7 @@ The design occupies a real white space — no shipping app combines daily synchr
 | 12 | Anti-cheat | Six-layer defense (Apple sign-in, 3s dwell, IP throttle, DeviceCheck/App Attest, behavioral classifier post-launch, soft shadowban) |
 | 13 | Visibility | Cannot see others' answers before submitting yourself |
 | 14 | Answer normalization | Deterministic only (no LLM, $0 marginal cost). Acceptable to have similar-but-not-identical bubbles. |
-| 15 | Tech stack | Expo + Next.js + Supabase + Vercel + Upstash Redis + AdMob + Expo Push + Sentry + PostHog |
+| 15 | Tech stack | Expo + Next.js + **Firebase (Firestore + Auth + Cloud Functions + FCM)** + Vercel + AdMob + Sentry + PostHog. (Switched from Supabase 2026-05-08 due to free-tier project cap on Levin's account.) |
 | 16 | Banner generation | Client-side via `react-native-view-shot`, 9:16 vertical, three banner types |
 | 17 | Monetization | Ads from day 1, three placements only — leaderboard banner, archive banner, post-reveal interstitial. **No subscription, no IAP, no cosmetics.** |
 | 18 | Launch geography | English-speaking Western Gen Z primary (US/UK/CA/AU/DE/FR/NL); Asia/Australia accepted as TAM cap |
@@ -95,7 +95,7 @@ Tomorrow at next random drop: cycle repeats
 - Notification title: `🚨 the world is voting NOW`
 - Notification body: today's question text
 - Tap → app opens directly to deep-link flow (yesterday-reveal, then today's question)
-- Push delivery via **Expo Push Service** (APNs proxy), batched in 1k-device chunks for ~100 sec fanout to 1M devices
+- Push delivery via **Firebase Cloud Messaging (FCM)** with APNs cert, batched fanout for ~100 sec to 1M devices
 
 ### Yesterday's verdict reveal animation
 
@@ -123,7 +123,7 @@ If quit mid-reveal: resumes from start next time the user opens the app (one-tim
 
 - Question dominates the screen, ~36pt bold, black background
 - Single text field: `type your take…`
-- Live counter ticking up in real time: `1,247,392 answers so far` (Supabase Realtime WebSocket)
+- Live counter ticking up in real time: `1,247,392 answers so far` (Firestore listener on a question-totals doc)
 - Below: `answering anonymously — sign in to make the leaderboard`
 - Submit button: chunky accent, **disabled until ≥1 char + ≥3-second dwell** (anti-bot)
 - No leaderboard preview, no friends preview, no past archive on this screen
@@ -133,7 +133,7 @@ If quit mid-reveal: resumes from start next time the user opens the app (one-tim
 - User's submitted text flies into the wordcloud as a glowing bubble
 - Status line: `your take: "louvre" — currently bubble #14 (138 others said this)`
 - Cloud is alive: bubbles resize via Reanimated 3 animations (300ms ease)
-- Submission counts streamed via Supabase Realtime, client-throttled to 500ms windows
+- Submission counts streamed via Firestore listeners, client-throttled to 500ms windows
 - Bottom: `the world is voting — next drop is somewhere in the next 24h` (no countdown — preserves the random-drop suspense)
 - 4-tab bottom bar appears: **Today** · **Friends** · **Leaderboard** · **Archive**
 - Top-right: 1-tap **Share** button → "Today's take" banner
@@ -264,76 +264,77 @@ Identical scores → earlier `submitted_at` wins. Identical timestamps → handl
 | Layer | Choice | Rationale |
 |---|---|---|
 | iOS client | **Expo (React Native)** | Matches Noseprint iOS stack. EAS builds, OTA updates, Android-ready in v2. |
-| Backend API | **Next.js 16 on Vercel** | Matches Cleero stack. Serverless functions for submissions, cron for drop scheduler. |
-| Database | **Supabase (Postgres)** | Matches Cleero. RLS enforced, Realtime via logical replication, Auth integrated. |
-| Auth | **Sign in with Apple via Supabase Auth** | Optional for participation, required for leaderboard scoring. |
-| Push | **Expo Push Service** | APNs proxy, native to Expo, batched fanout. |
-| Realtime | **Supabase Realtime** | Postgres logical replication → WebSocket → React Native. Drives live wordcloud. |
-| Edge cache | **Upstash Redis** | Hot cluster state for 1M+ concurrent post-drop watchers. Pay-per-request. |
-| Scheduler | **Vercel Cron** | Triggers daily drop at the random time computed for each day. |
+| Backend API | **Next.js 16 on Vercel** | Matches Cleero stack pattern. Serverless functions for submission write path. |
+| Database | **Firestore (Firebase)** | NoSQL document store with first-class atomic increments (`FieldValue.increment(1)`) — perfect for cluster counts. Doc ID = sha256-clusterId works identically. No project quota issue. |
+| Auth | **Firebase Auth + Sign in with Apple** | Native Apple Sign-in, more mature than Supabase's. Optional for participation, required for leaderboard scoring. |
+| Realtime | **Firestore listeners** | Built-in real-time document/query listeners over Firebase's persistent connection. Drives live wordcloud. |
+| Push | **Firebase Cloud Messaging (FCM)** | Proxies to APNs with cert. Single SDK on iOS via `@react-native-firebase/messaging`. |
+| Scheduler | **Cloud Functions for Firebase** (scheduled triggers) | `onSchedule` triggers compute next random drop, transition statuses, fanout push. Replaces Vercel Cron. |
+| Edge cache | **Upstash Redis** | Hot cluster snapshots for 1M+ concurrent post-drop watchers. Reduces Firestore read fan-out + cost. |
 | Moderation | **Perspective API** + regex blocklist | Two-tier toxicity detection. |
 | Ads | **Google AdMob** via `react-native-google-mobile-ads` | Industry standard for Expo. |
 | Analytics | **PostHog** | Already in toolkit. |
 | Crash reporting | **Sentry** | Standard, Expo-supported. |
 | Install attribution | **Branch.io** | Banner-image referrals → install tracking. |
 
-### Data model (Postgres, simplified)
+### Why Firebase over Supabase (decision recorded 2026-05-08)
+
+Levin's Supabase account is at the per-account free-tier project cap (Cleero + existing project = 2/2). Firebase has no equivalent project quota. Other reasons it suits this app well:
+
+1. **Atomic increments are first-class** — `FieldValue.increment(1)` inside a Firestore transaction is the cleanest possible primitive for the cluster `submission_count` upsert. Cleaner than the Supabase RPC path the original spec needed.
+2. **Sign in with Apple is more mature** in Firebase Auth than in Supabase Auth. Important for the leaderboard gating (Phase 3).
+3. **Cloud Functions scheduled triggers** replace Vercel Cron without an extra vendor.
+4. **FCM** consolidates push into the same vendor as auth/db.
+5. **No Docker requirement** for local dev (Firestore Emulator Suite runs natively).
+
+Cost-at-scale is comparable to Supabase Pro at moderate DAU and slightly higher at very high DAU; not a v1 concern.
+
+### Data model (Firestore collections)
 
 ```
-questions(
-  id, text, status: scheduled|live|revealed,
-  scheduled_drop_at timestamptz,           -- random time computed nightly
-  source: curated | ai_assisted | user_submitted,
-  author_user_id?, moderation_status, approved_by_admin_id?
-)
+/users/{userId}
+    handle?, is_public, locale, shadowbanned, created_at
 
-users(
-  id, handle?, is_public, locale,
-  device_check_token (encrypted), shadowbanned, created_at
-)
+/device_users/{deviceTokenHash}
+    device_token, linked_user_id?, created_at
 
-device_users(
-  id, device_token, linked_user_id?
-)                                          -- anonymous device pre-signup
+/questions/{questionId}
+    text, status: 'scheduled'|'live'|'revealed',
+    source: 'curated'|'ai_assisted'|'user_submitted',
+    scheduled_drop_at?, author_user_id?, created_at
 
-submissions(
-  id, question_id, user_id?, device_user_id?,
-  raw_text, normalized_cluster_id?,
-  submitted_at, ip_hash, dwell_ms,
-  moderation_status: passed | blocked
-)                                          -- monthly partition by submitted_at
+/submissions/{submissionId}
+    question_id, user_id?, device_user_id?,
+    raw_text, normalized_cluster_id?,
+    submitted_at, ip_hash, dwell_ms,
+    moderation_status: 'passed'|'blocked'
 
-answer_clusters(
-  id (= sha256(question_id || normalized_text)),
-  question_id, canonical_text,
-  submission_count, first_submission_at,
-  final_rank?, final_pct_of_total?
-)
+/answer_clusters/{clusterId}                    // clusterId = sha256(question_id||normalized_text)
+    question_id, canonical_text,
+    submission_count,                           // FieldValue.increment(1) per submission
+    first_submission_at,
+    final_rank?, final_pct_of_total?
 
-friendships(
-  requester_id, accepter_id,
-  status: pending | accepted | blocked,
-  created_at, accepted_at
-)
+/friendships/{friendshipId}
+    requester_id, accepter_id,
+    status: 'pending'|'accepted'|'blocked',
+    created_at, accepted_at?
 
-leaderboard_entries(
-  user_id, question_id, score,
-  rank_score_component, early_bird_component, daily_rank
-)
+/leaderboard_entries/{entryId}
+    user_id, question_id, score,
+    rank_score_component, early_bird_component, daily_rank
 
-user_aggregates(
-  user_id, weekly_score, weekly_score_calculated_at,
-  alltime_score, num_called_it_wins, best_daily_rank
-)
+/user_aggregates/{userId}
+    weekly_score, weekly_score_calculated_at,
+    alltime_score, num_called_it_wins, best_daily_rank
 
-question_candidates(                       -- v1.1 only
-  id, user_id, candidate_text, status, votes_count, scheduled_for_date?
-)
+/question_candidates/{candidateId}              // v1.1 only
+    user_id, candidate_text, status, votes_count, scheduled_for_date?
 ```
 
-**Partitioning:** `submissions` is partitioned by month from day 1 (the only table that scales with DAU × days). Other tables are unpartitioned.
+**Sharding & scale:** Firestore auto-shards collections; no manual table partitioning needed (this was a v1 cost in the original Postgres design that goes away with Firestore). At extreme scale, the only document with a write hotspot is the live question's `answer_clusters/{clusterId}` for the global #1 — Firestore's ~1-write/sec sustained per-document limit may be hit by the most-popular bubble during a drop spike. Mitigation: **counter sharding** — split `submission_count` across N=10 shard sub-docs (e.g., `/answer_clusters/{cid}/shards/{0..9}.count`) and sum on read. This is a well-known idiom; we ship it from day 1 to avoid hot-doc contention.
 
-**RLS:** all tables RLS-enabled deny-by-default (matches Cleero pattern). Submission writes via `/api/submit` only (service-role); reads gated by user identity.
+**Security:** Firestore Security Rules deny-by-default. All write paths go through Next.js API routes using the Firebase Admin SDK (which bypasses Security Rules with full credentials). Client SDK reads gated by Security Rules — clients can read live + revealed `questions` and their `answer_clusters`, can read their own `users` doc, **cannot** read `submissions` or `device_users` directly.
 
 ### Answer normalization (deterministic, no LLM, $0 marginal cost)
 
@@ -365,30 +366,33 @@ This produces slightly fragmented wordclouds but eliminates the biggest engineer
 
 ### Real-time wordcloud
 
-- **Supabase Realtime** channel scoped to live `question_id`
-- Client subscribes; receives streamed updates to `answer_clusters.submission_count`
+- **Firestore listener** scoped to a query: `answer_clusters where question_id == liveId order by submission_count desc limit 100`
+- Client receives streamed snapshot updates as cluster docs change
 - Client buffers updates over 500ms windows to avoid visual chaos
 - Bubbles animate via React Native Reanimated 3, 300ms ease curves
-- High-traffic mitigation: post-drop spike served from Upstash Redis cache, refreshed every 1–2 sec via Supabase trigger
+- High-traffic mitigation: post-drop spike served from Upstash Redis cache (top-100 clusters JSON, refreshed every 1–2 sec by a Cloud Function watching Firestore changes). Reduces Firestore listener cost at scale.
 
 ### Global synchronous random drop
 
 ```
-Nightly @ 00:00 UTC: pre-compute tomorrow's random drop_at (uniform 0–24h UTC)
-  → Stored in questions.scheduled_drop_at
+Nightly @ 00:00 UTC: a Cloud Function `prepareNextDrop` pre-computes
+  tomorrow's random drop_at (uniform 0–24h UTC) and stores it on the
+  next /questions/{id} doc.
 
-Vercel Cron @ 1-min granularity: poll for any question with status=scheduled
-                                  AND scheduled_drop_at ≤ NOW()
-  → Atomically:
-      - Mark previous live question status → revealed
-      - Compute final_rank for all answer_clusters of the previous question
-      - Compute leaderboard_entries scores for all submitters
-      - Mark today's question status → live
-      - Trigger Expo Push fanout in 1k-device batches
-      - Broadcast WebSocket event to all open clients
+Cloud Function `triggerDrop` (scheduled, 1-min granularity):
+  poll Firestore for any /questions where status='scheduled'
+                                  and scheduled_drop_at <= now()
+  → In a Firestore transaction:
+      - Mark previous live question status → 'revealed'
+      - Compute final_rank for all /answer_clusters of the previous question
+      - Compute /leaderboard_entries scores for all submitters
+      - Mark today's question status → 'live'
+  → Trigger FCM push fanout in 1k-device batches via Admin SDK
+  → No WebSocket broadcast needed — Firestore listeners pick up the
+    'live' status flip automatically
 ```
 
-Push fanout to 1M devices: ~100 seconds total (Expo Push handles ~10k/sec). Acceptable lag.
+Push fanout to 1M devices: ~100 seconds total (FCM handles 10k+/sec). Acceptable lag.
 
 ### Banner generation (client-side)
 
@@ -405,7 +409,7 @@ Push fanout to 1M devices: ~100 seconds total (Expo Push handles ~10k/sec). Acce
 | 100k | ~$700 | ~$42k |
 | 1M | ~$1k | ~$420k |
 
-Cost is sub-linear because the heavy lifting (Realtime, Postgres, Vercel) has fixed overhead and scales gracefully on tier upgrades. **Profitable from ~5k DAU onward.**
+Cost is roughly linear with Firestore reads/writes at scale (Firestore charges per operation). The biggest scale lever is the **Upstash Redis cache for cluster snapshots** — without it, every concurrent listener after a drop generates Firestore reads, which is the dominant cost. With it, ~95% of post-drop reads come from Redis and Firestore costs stay manageable. **Profitable from ~5k DAU onward.**
 
 ---
 
@@ -540,8 +544,8 @@ This third banner is the rarest, most-braggable artifact in the app — exactly 
 | Phase | Weeks | Scope |
 |---|---|---|
 | **Pre-build** | -2 to 0 | Trademark search "Relatably". Verify relatably.com. Apple Developer enrollment. AdMob account. Hand-curate first 60 questions. Brand visual identity locked. |
-| **Phase 1: Core loop** | 1–4 | Expo client scaffold, Supabase schema, Sign in with Apple, deterministic normalization, submission API, wordcloud rendering. |
-| **Phase 2: Daily ritual** | 5–7 | Vercel Cron random-drop scheduler, Expo Push fanout, per-user reveal animation, push routing. |
+| **Phase 1: Core loop** | 1–4 | Expo client scaffold, Firestore Security Rules, Firebase Admin SDK on Next.js API, deterministic normalization, submission write path, wordcloud rendering with Firestore listener. |
+| **Phase 2: Daily ritual** | 5–7 | Cloud Functions scheduled drop trigger, FCM fanout, per-user reveal animation, push routing. |
 | **Phase 3: Leaderboard + anti-cheat** | 8–9 | Scoring formula, three boards, friend graph, group leaderboards, six anti-cheat layers, profanity filter. |
 | **Phase 4: Share + monetization** | 10–11 | Three banner types, share triggers, AdMob (3 placements), Branch.io install attribution. |
 | **Phase 5: Archive + admin tools** | 12–13 | Archive tab, admin question-curation console, scheduled question pipeline. |
@@ -564,7 +568,7 @@ This third banner is the rarest, most-braggable artifact in the app — exactly 
 | 5 | Multi-account leaderboard cheating goes viral | Reputational | Six layered defenses. Shadowban over hard-ban. Cloudflare Turnstile if needed. |
 | 6 | AdMob fill rate brutal at small scale | Revenue | Expected; supplement with manual brand sponsorship (one branded daily question per week) for first 3–6 months. |
 | 7 | App Store rejects user-generated content app | Launch blocker | Reporting mechanism + 24h moderation SLA + EULA acceptance. v1.0 wordcloud is text-only and moderation-filtered. |
-| 8 | Push delivery to 100k+ devices fails | Engagement | Expo Push batching; pre-warm health-check 1 min before drop. WebSocket fallback for already-open clients. |
+| 8 | Push delivery to 100k+ devices fails | Engagement | FCM batched send via Admin SDK; pre-warm health-check 1 min before drop. Firestore listener fallback for already-open clients (status flip propagates). |
 | 9 | Trademark conflict on "Relatably" | Rebrand cost | Real US/EU TM search before public launch. Backup name candidates ready. |
 | 10 | Optiver compliance friction | Personal/regulatory | Existing Nebengewerbe + Optiver compliance signoff cover side projects. Confirm consumer-app-with-ads is in scope before launch. |
 
@@ -590,7 +594,7 @@ This third banner is the rarest, most-braggable artifact in the app — exactly 
 5. Mentimeter wordclouds visually arresting; nobody's pointed them at consumers.
 6. Free-text answers = infinite content variety + infinite share-banner uniqueness.
 7. Anonymous-by-default + opt-in public = honesty AND viral mechanics.
-8. Existing Expo + Supabase + Vercel stack = fast time to ship.
+8. Existing Expo + Vercel familiarity + Firebase's mature React Native bindings = fast time to ship.
 
 ## 10 — Why it could still fail
 
