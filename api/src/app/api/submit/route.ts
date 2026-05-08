@@ -58,19 +58,26 @@ export async function POST(req: Request) {
   const ipHash = hashIp(req);
   const deviceTokenHash = hashDeviceToken(parsed.device_token);
 
+  // Idempotent device upsert with merge: true preserves any linked_user_id
+  // that may be set by Phase 3's Sign-in-with-Apple flow between the read and
+  // the write. created_at is only stamped on first creation thanks to the
+  // create-vs-merge guard below.
   const deviceRef = adminFirestore
     .collection("device_users")
     .doc(deviceTokenHash);
   const deviceSnap = await deviceRef.get();
   let linkedUserId: string | null = null;
   if (!deviceSnap.exists) {
-    await deviceRef.set({
-      device_token: parsed.device_token,
-      linked_user_id: null,
-      created_at: FieldValue.serverTimestamp(),
-    });
+    await deviceRef.set(
+      {
+        device_token: parsed.device_token,
+        linked_user_id: null,
+        created_at: FieldValue.serverTimestamp(),
+      },
+      { merge: true },
+    );
   } else {
-    linkedUserId = (deviceSnap.data() as any)?.linked_user_id ?? null;
+    linkedUserId = (deviceSnap.data() as { linked_user_id: string | null } | undefined)?.linked_user_id ?? null;
   }
 
   const clusterRef = adminFirestore.doc(`answer_clusters/${cId}`);

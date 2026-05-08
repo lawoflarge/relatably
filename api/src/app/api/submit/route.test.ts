@@ -161,4 +161,52 @@ describe("POST /api/submit", () => {
       expect.objectContaining({ submission_count: expect.anything() }),
     );
   });
+
+  it("persists hashed device_user_id and ip_hash, never raw values", async () => {
+    const mockClusterRef = { id: "cluster-abc" };
+    const mockSubmissionRef = { id: "sub-xyz" };
+
+    (adminFirestore.collection as any).mockImplementation((name: string) => {
+      if (name === "device_users") {
+        return {
+          doc: vi.fn(() => ({
+            id: "dev-1",
+            get: vi.fn().mockResolvedValue({ exists: false }),
+            set: vi.fn().mockResolvedValue({}),
+          })),
+        };
+      }
+      if (name === "submissions") {
+        return { doc: vi.fn(() => mockSubmissionRef) };
+      }
+      throw new Error(`unexpected collection ${name}`);
+    });
+
+    (adminFirestore.doc as any).mockReturnValue(mockClusterRef);
+
+    const tx = (adminFirestore as any).__mockTx;
+    tx.get.mockResolvedValueOnce({ exists: false });
+
+    await POST(
+      buildRequest({
+        question_id: "q-uuid-1",
+        device_token: "raw-token-1",
+        raw_text: "italy",
+        dwell_ms: 5000,
+      }),
+    );
+
+    const submissionWrite = tx.set.mock.calls.find(
+      (call: unknown[]) => call[0] === mockSubmissionRef,
+    );
+    expect(submissionWrite).toBeDefined();
+    const writtenDoc = submissionWrite![1] as Record<string, unknown>;
+
+    // Security invariants: never persist raw IP or raw device token.
+    expect(writtenDoc.device_user_id).not.toBe("raw-token-1");
+    expect(writtenDoc.ip_hash).not.toBe("1.2.3.4");
+    // Both must be 64-char sha256 hex.
+    expect(writtenDoc.device_user_id).toMatch(/^[a-f0-9]{64}$/);
+    expect(writtenDoc.ip_hash).toMatch(/^[a-f0-9]{64}$/);
+  });
 });
