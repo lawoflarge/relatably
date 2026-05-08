@@ -7,7 +7,7 @@
  * Each question is created with no scheduled_drop_at; the nightly
  * prepareNextDrop function picks a random drop time on its turn.
  */
-import { initializeApp, applicationDefault, cert } from "firebase-admin/app";
+import { initializeApp, cert } from "firebase-admin/app";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import * as fs from "node:fs";
 import * as path from "node:path";

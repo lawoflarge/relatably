@@ -5,6 +5,7 @@
     "lib": ["es2022"],
     "moduleResolution": "node",
     "strict": true,
+    "noUnusedLocals": true,
     "esModuleInterop": true,
     "skipLibCheck": true
   },
