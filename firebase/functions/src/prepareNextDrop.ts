@@ -26,7 +26,7 @@ export async function runPrepareNextDrop(
     (d) => (d.data() as { scheduled_drop_at?: unknown }).scheduled_drop_at === undefined,
   );
   if (!eligible) {
-    logger.warn("prepareNextDrop: no scheduled question without drop_at — admin must seed more");
+    logger.error("prepareNextDrop: no scheduled question without drop_at — admin must seed more");
     return;
   }
 

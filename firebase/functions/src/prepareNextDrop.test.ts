@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeAll, beforeEach } from "vitest";
-import { initializeApp, type App } from "firebase-admin/app";
+import { describe, it, expect, beforeAll, beforeEach, afterAll } from "vitest";
+import { initializeApp, deleteApp, type App } from "firebase-admin/app";
 import { getFirestore, type Firestore } from "firebase-admin/firestore";
 import { runPrepareNextDrop } from "./prepareNextDrop";
 
@@ -16,6 +16,10 @@ beforeEach(async () => {
   // Wipe all questions between tests via a per-doc delete loop.
   const snap = await db.collection("questions").get();
   await Promise.all(snap.docs.map((d) => d.ref.delete()));
+});
+
+afterAll(async () => {
+  await deleteApp(app);
 });
 
 describe("prepareNextDrop (emulator-backed)", () => {
