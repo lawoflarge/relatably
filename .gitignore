@@ -55,3 +55,14 @@ logs/
 .supabase/
 *.sqlite
 *.sqlite3
+
+# Firebase secrets (never commit)
+firebase-service-account.json
+api/firebase-service-account.json
+ios/GoogleService-Info.plist
+ios/google-services.json
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+.tmp/

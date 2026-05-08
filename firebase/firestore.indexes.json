@@ -1,0 +1,21 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "answer_clusters",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "question_id", "order": "ASCENDING" },
+        { "fieldPath": "submission_count", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "questions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "scheduled_drop_at", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

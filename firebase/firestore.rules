@@ -1,0 +1,43 @@
+rules_version = '2';
+
+// Deny-by-default. Every read/write must match a rule below.
+// All write paths go through the Next.js API using Firebase Admin SDK,
+// which bypasses Security Rules with full credentials. So clients only need
+// READ rules — they cannot write anything directly.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // QUESTIONS: clients may read live + revealed questions.
+    match /questions/{questionId} {
+      allow read: if resource.data.status in ['live', 'revealed'];
+      allow write: if false;
+    }
+
+    // ANSWER_CLUSTERS: clients may read clusters whose question is live or revealed.
+    match /answer_clusters/{clusterId} {
+      allow read: if exists(/databases/$(database)/documents/questions/$(resource.data.question_id))
+        && get(/databases/$(database)/documents/questions/$(resource.data.question_id)).data.status in ['live', 'revealed'];
+      allow write: if false;
+    }
+
+    // USERS: a user may read+update their own user doc.
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create: if false;
+      allow update: if request.auth != null && request.auth.uid == userId
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['handle', 'is_public', 'locale']);
+      allow delete: if false;
+    }
+
+    // SUBMISSIONS, DEVICE_USERS, FRIENDSHIPS, LEADERBOARD_ENTRIES,
+    // USER_AGGREGATES, QUESTION_CANDIDATES: server-only.
+    match /submissions/{id}              { allow read, write: if false; }
+    match /device_users/{id}             { allow read, write: if false; }
+    match /friendships/{id}              { allow read, write: if false; }
+    match /leaderboard_entries/{id}      { allow read, write: if false; }
+    match /user_aggregates/{id}          { allow read, write: if false; }
+    match /question_candidates/{id}      { allow read, write: if false; }
+  }
+}
