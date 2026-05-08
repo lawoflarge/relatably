@@ -35,3 +35,29 @@ export interface Yesterday {
   top_clusters: YesterdayCluster[];
   self_cluster_id: string | null;
 }
+
+export interface AuthMeResponse {
+  uid: string;
+  handle: string | null;
+  is_public: boolean;
+  locale: string;
+  shadowbanned: boolean;
+}
+
+export interface Friendship {
+  id: string;
+  requester_id: string;
+  accepter_id: string;
+  status: "pending" | "accepted";
+}
+
+export interface LeaderboardEntry {
+  user_id: string;
+  handle: string | null;
+  score: number;
+  daily_rank?: number;
+  locale: string;
+}
+
+export type LeaderboardPeriod = "daily" | "weekly" | "alltime";
+export type LeaderboardScope = "global" | "friends";
