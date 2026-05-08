@@ -6,7 +6,8 @@ import { SubmitButton } from "@/src/components/SubmitButton";
 import { QuestionText } from "@/src/components/QuestionText";
 import { AnswerInput } from "@/src/components/AnswerInput";
 import { LiveCounter } from "@/src/components/LiveCounter";
-import { fetchTodayQuestion, submitAnswer } from "@/src/lib/api";
+import { fetchTodayQuestion, registerDevice, submitAnswer } from "@/src/lib/api";
+import { requestNotificationPermission, getFcmToken } from "@/src/lib/messaging";
 import { getDeviceToken } from "@/src/lib/deviceId";
 import { firestore } from "@/src/lib/firebase";
 import type { TodayQuestion } from "@/src/types/api";
@@ -21,6 +22,21 @@ export default function HomeScreen() {
   const [clusters, setClusters] = useState<Cluster[]>([]);
   const [selfClusterId, setSelfClusterId] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const granted = await requestNotificationPermission();
+        if (!granted) return;
+        const fcmToken = await getFcmToken();
+        if (!fcmToken) return;
+        const deviceToken = await getDeviceToken();
+        await registerDevice({ device_token: deviceToken, fcm_token: fcmToken });
+      } catch (e) {
+        console.warn("messaging registration failed", e);
+      }
+    })();
+  }, []);
 
   const loadQuestion = useCallback(() => {
     setPhase("loading");

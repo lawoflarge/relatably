@@ -15,3 +15,8 @@ export interface SubmitResponse {
   submission_count: number;
   normalized_text: string;
 }
+
+export interface DeviceRegisterPayload {
+  device_token: string;
+  fcm_token: string;
+}
