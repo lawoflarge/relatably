@@ -6,16 +6,24 @@ import { SubmitButton } from "@/src/components/SubmitButton";
 import { QuestionText } from "@/src/components/QuestionText";
 import { AnswerInput } from "@/src/components/AnswerInput";
 import { LiveCounter } from "@/src/components/LiveCounter";
-import { fetchTodayQuestion, registerDevice, submitAnswer } from "@/src/lib/api";
-import { requestNotificationPermission, getFcmToken } from "@/src/lib/messaging";
+import { RevealAnimation } from "@/src/components/RevealAnimation";
+import {
+  fetchTodayQuestion,
+  fetchYesterday,
+  registerDevice,
+  submitAnswer,
+} from "@/src/lib/api";
 import { getDeviceToken } from "@/src/lib/deviceId";
 import { firestore } from "@/src/lib/firebase";
-import type { TodayQuestion } from "@/src/types/api";
+import { hasSeenReveal, markRevealSeen } from "@/src/lib/revealStore";
+import { requestNotificationPermission, getFcmToken } from "@/src/lib/messaging";
+import type { TodayQuestion, Yesterday } from "@/src/types/api";
 
-type Phase = "loading" | "question" | "wordcloud" | "error";
+type Phase = "loading" | "reveal" | "question" | "wordcloud" | "error";
 
 export default function HomeScreen() {
   const [phase, setPhase] = useState<Phase>("loading");
+  const [yesterday, setYesterday] = useState<Yesterday | null>(null);
   const [question, setQuestion] = useState<TodayQuestion | null>(null);
   const [text, setText] = useState("");
   const [renderedAt, setRenderedAt] = useState(Date.now());
@@ -23,6 +31,7 @@ export default function HomeScreen() {
   const [selfClusterId, setSelfClusterId] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // Best-effort messaging registration on first open.
   useEffect(() => {
     (async () => {
       try {
@@ -39,7 +48,6 @@ export default function HomeScreen() {
   }, []);
 
   const loadQuestion = useCallback(() => {
-    setPhase("loading");
     setErrorMsg(null);
     fetchTodayQuestion()
       .then((q) => {
@@ -54,12 +62,26 @@ export default function HomeScreen() {
       });
   }, []);
 
-  // Load today's question on mount
+  // Boot: try yesterday-reveal first, then today's question.
   useEffect(() => {
-    loadQuestion();
+    (async () => {
+      try {
+        const deviceToken = await getDeviceToken();
+        const y = await fetchYesterday(deviceToken);
+        if (y && y.self_cluster_id && !(await hasSeenReveal(y.id))) {
+          setYesterday(y);
+          setPhase("reveal");
+          return;
+        }
+      } catch (e) {
+        // Soft-fail: just proceed to today's question.
+        console.warn("yesterday fetch failed", e);
+      }
+      loadQuestion();
+    })();
   }, [loadQuestion]);
 
-  // Subscribe to Firestore listener for live cluster updates
+  // Subscribe to Firestore listener for live cluster updates (only when we have a question).
   useEffect(() => {
     if (!question) return;
     const unsub = firestore()
@@ -89,6 +111,11 @@ export default function HomeScreen() {
     return () => unsub();
   }, [question]);
 
+  const handleRevealComplete = useCallback(async () => {
+    if (yesterday) await markRevealSeen(yesterday.id);
+    loadQuestion();
+  }, [yesterday, loadQuestion]);
+
   const handleSubmit = async () => {
     if (!question) return;
     try {
@@ -117,6 +144,14 @@ export default function HomeScreen() {
         <View style={styles.center}>
           <Text style={styles.muted}>loading…</Text>
         </View>
+      )}
+      {phase === "reveal" && yesterday && (
+        <RevealAnimation
+          questionText={yesterday.text}
+          clusters={yesterday.top_clusters}
+          selfClusterId={yesterday.self_cluster_id}
+          onComplete={handleRevealComplete}
+        />
       )}
       {phase === "error" && (
         <View style={styles.center}>

@@ -20,3 +20,18 @@ export interface DeviceRegisterPayload {
   device_token: string;
   fcm_token: string;
 }
+
+export interface YesterdayCluster {
+  id: string;
+  canonical_text: string;
+  submission_count: number;
+  final_rank: number;
+  final_pct_of_total: number;
+}
+
+export interface Yesterday {
+  id: string;
+  text: string;
+  top_clusters: YesterdayCluster[];
+  self_cluster_id: string | null;
+}
