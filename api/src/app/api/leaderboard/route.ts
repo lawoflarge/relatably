@@ -18,6 +18,13 @@ interface UserDoc {
 
 const DEFAULT_LIMIT = 100;
 const MAX_LIMIT = 100;
+const FIRESTORE_IN_CAP = 30;
+
+function chunk<T>(arr: T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+}
 
 async function findLatestRevealedId(): Promise<string | null> {
   const snap = await adminFirestore
@@ -94,32 +101,74 @@ export async function GET(req: Request) {
     const qid = await findLatestRevealedId();
     if (!qid) return NextResponse.json({ entries: [] });
 
-    let q: FirebaseFirestore.Query = adminFirestore
-      .collection("leaderboard_entries")
-      .where("question_id", "==", qid);
-    if (friendUids) q = q.where("user_id", "in", friendUids.slice(0, 30));
-    q = q.orderBy("score", "desc").orderBy("submitted_at", "asc").limit(limit);
-
-    const snap = await q.get();
-    rows = snap.docs.map((d: any) => {
-      const data = d.data() as LeaderboardEntryDoc;
-      return { user_id: data.user_id, score: data.score, daily_rank: data.daily_rank };
-    });
+    if (friendUids) {
+      const chunks = chunk(friendUids, FIRESTORE_IN_CAP);
+      const results = await Promise.all(
+        chunks.map(async (c) => {
+          const snap = await adminFirestore
+            .collection("leaderboard_entries")
+            .where("question_id", "==", qid)
+            .where("user_id", "in", c)
+            .orderBy("score", "desc")
+            .orderBy("submitted_at", "asc")
+            .limit(limit)
+            .get();
+          return snap.docs.map((d: any) => {
+            const data = d.data() as LeaderboardEntryDoc;
+            return { user_id: data.user_id, score: data.score, daily_rank: data.daily_rank, submitted_at_ms: data.submitted_at?.toMillis() ?? 0 };
+          });
+        }),
+      );
+      rows = results.flat()
+        .sort((a, b) => b.score - a.score || a.submitted_at_ms - b.submitted_at_ms)
+        .slice(0, limit)
+        .map(({ user_id, score, daily_rank }) => ({ user_id, score, daily_rank }));
+    } else {
+      const snap = await adminFirestore
+        .collection("leaderboard_entries")
+        .where("question_id", "==", qid)
+        .orderBy("score", "desc")
+        .orderBy("submitted_at", "asc")
+        .limit(limit)
+        .get();
+      rows = snap.docs.map((d: any) => {
+        const data = d.data() as LeaderboardEntryDoc;
+        return { user_id: data.user_id, score: data.score, daily_rank: data.daily_rank };
+      });
+    }
   } else {
     const field = period === "weekly" ? "weekly_score" : "alltime_score";
-    let q: FirebaseFirestore.Query = adminFirestore.collection("user_aggregates");
-    if (friendUids) {
-      q = adminFirestore
-        .collection("user_aggregates")
-        .where("__name__", "in", friendUids.slice(0, 30));
-    }
-    q = q.orderBy(field, "desc").limit(limit);
 
-    const snap = await q.get();
-    rows = snap.docs.map((d: any) => {
-      const data = d.data() as Record<string, number>;
-      return { user_id: d.id, score: data[field] ?? 0 };
-    });
+    if (friendUids) {
+      const chunks = chunk(friendUids, FIRESTORE_IN_CAP);
+      const results = await Promise.all(
+        chunks.map(async (c) => {
+          const snap = await adminFirestore
+            .collection("user_aggregates")
+            .where("__name__", "in", c)
+            .orderBy(field, "desc")
+            .limit(limit)
+            .get();
+          return snap.docs.map((d: any) => {
+            const data = d.data() as Record<string, number>;
+            return { user_id: d.id, score: data[field] ?? 0 };
+          });
+        }),
+      );
+      rows = results.flat()
+        .sort((a, b) => b.score - a.score)
+        .slice(0, limit);
+    } else {
+      const snap = await adminFirestore
+        .collection("user_aggregates")
+        .orderBy(field, "desc")
+        .limit(limit)
+        .get();
+      rows = snap.docs.map((d: any) => {
+        const data = d.data() as Record<string, number>;
+        return { user_id: d.id, score: data[field] ?? 0 };
+      });
+    }
   }
 
   const entries = await joinUsersAndFilterShadowbanned(rows);
