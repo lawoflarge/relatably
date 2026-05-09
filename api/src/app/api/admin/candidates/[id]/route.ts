@@ -3,15 +3,11 @@ import { z } from "zod";
 import { FieldValue } from "firebase-admin/firestore";
 import { adminFirestore } from "@/lib/firebase";
 import { requireAdmin } from "@/lib/admin";
+import { gateResponse } from "../../_helpers";
 
 const PatchSchema = z.object({
   action: z.enum(["approve", "reject"]),
 });
-
-function gateResponse(kind: "no_auth" | "not_admin"): NextResponse {
-  if (kind === "no_auth") return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  return NextResponse.json({ error: "forbidden" }, { status: 403 });
-}
 
 export async function PATCH(
   req: Request,

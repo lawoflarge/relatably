@@ -2,11 +2,7 @@ import { NextResponse } from "next/server";
 import type { Timestamp } from "firebase-admin/firestore";
 import { adminFirestore } from "@/lib/firebase";
 import { requireAdmin } from "@/lib/admin";
-
-function gateResponse(kind: "no_auth" | "not_admin"): NextResponse {
-  if (kind === "no_auth") return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  return NextResponse.json({ error: "forbidden" }, { status: 403 });
-}
+import { gateResponse } from "../_helpers";
 
 export async function GET(req: Request) {
   const gate = await requireAdmin(req);

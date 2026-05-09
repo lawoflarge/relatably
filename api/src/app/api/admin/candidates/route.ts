@@ -3,19 +3,13 @@ import { z } from "zod";
 import { FieldValue, type Timestamp } from "firebase-admin/firestore";
 import { adminFirestore } from "@/lib/firebase";
 import { requireAdmin } from "@/lib/admin";
+import { gateResponse } from "../_helpers";
 
 const CreateSchema = z.object({
   candidate_text: z.string().min(1).max(280),
 });
 
 const StatusSchema = z.enum(["pending", "approved", "rejected"]);
-
-function gateResponse(kind: "no_auth" | "not_admin"): NextResponse {
-  if (kind === "no_auth") {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
-  return NextResponse.json({ error: "forbidden" }, { status: 403 });
-}
 
 export async function GET(req: Request) {
   const gate = await requireAdmin(req);
