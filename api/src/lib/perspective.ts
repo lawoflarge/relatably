@@ -16,8 +16,8 @@ export function __resetPerspectiveForTest(): void {
 }
 
 function getKey(): string {
-  if (cachedKey === undefined) cachedKey = process.env.PERSPECTIVE_API_KEY ?? "";
-  return cachedKey;
+  if (!cachedKey) cachedKey = process.env.PERSPECTIVE_API_KEY;
+  return cachedKey ?? "";
 }
 
 export async function evaluateToxicity(text: string): Promise<ToxicityResult> {
