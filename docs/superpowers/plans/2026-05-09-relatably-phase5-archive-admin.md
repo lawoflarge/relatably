@@ -3672,3 +3672,28 @@ Add a Phase 5 section to `~/.claude/projects/C--Users-levin/memory/project_relat
 - **Exact paths.** Every file is named with absolute or repo-relative paths. Dynamic routes use the `[id]` literal which Next.js requires.
 - **Next.js 16 contract.** Dynamic route handlers use `ctx: { params: Promise<{ id: string }> }` per Phase 3+4 confirmation; `await ctx.params` is the access pattern.
 - **Single Vercel project.** Admin UI under `app/admin/*` ships in the same `api/` Vercel deployment. No 2nd project needed.
+
+---
+
+## Phase 5 deviations + Phase 6 follow-ups (filled in at end of execution)
+
+**Deviations / scope decisions actually made during execution:**
+
+1. **Vitest hoisting (Tasks 2, 5–9).** Plan's literal test snippets (`const fakeFirestore = { collection: vi.fn() }` followed by a top-level `vi.mock(...)`) trip Vitest's hoisting and throw "Cannot access before initialization". All backend test files wrap fixture stubs in `vi.hoisted(() => ({ ... }))` so they're available when the hoisted `vi.mock` factory runs. Functionally identical to the plan, just the actual incantation Vitest demands.
+2. **`gateResponse` extracted to `_helpers.ts` (commit 77a630d) — overrides plan's "keep inline" stance.** Plan line 3668 said keep `gateResponse(kind)` inline at every admin endpoint. After Tasks 5–7 had identical 4-line copies, the rule-of-three flagged real drift risk (later edits would inevitably miss one site). Extracted to `api/src/app/api/admin/_helpers.ts` (underscore prefix prevents Next.js from routing it). Did NOT colocate with `lib/admin.ts` to avoid coupling the auth helper to `NextResponse` — this preserves the spirit of the plan's note while addressing the duplication.
+3. **`/api/admin/candidates` returns 400 on invalid `?status` (commit b373697 — was a code-review fix).** Plan implementation silently ignored unknown values and fell back to `'pending'`; reviewer flagged that this hides client bugs. Now Zod-validates and returns `400` with a clear error.
+4. **Archive cursor only when page is full (commit a0091f0 — code-review fix).** Initial implementation set `next_cursor` whenever any tiles were returned, causing a wasted round-trip when the result was the final page. Tightened to `tiles.length === limit ? lastTile.created_at : null`.
+5. **iOS env var name.** Plan referenced `EXPO_PUBLIC_API_BASE_URL`; actual codebase uses `EXPO_PUBLIC_API_URL` (introduced in Phase 3). `lib/api.ts` already exports a `BASE` const that resolves it; the new archive helpers reuse that.
+6. **iOS archive long-press timing.** Plan used `setTimeout(50)` to let the offscreen `ShareCardVerdict` mount before `captureRef`; that 50ms is fragile across slow devices and the rendered offscreen view never got cleared after the share completed. Replaced with `requestAnimationFrame` (deterministic — fires after layout) plus `.finally(() => setLongPressedTile(null))` and a RAF-cancel cleanup useEffect. Now matches Phase 4's profile-share pattern.
+7. **`ShareCardVerdict` ref placement.** Plan's `ArchiveDetailScreen` snippet used `forwardRef` on `ShareCardVerdict`; the Phase 4 component does NOT forward refs. Fixed by attaching the ref to the wrapping `<View>` (Phase 4 precedent in `ProfileScreen`).
+8. **Tier B robustness pass on Task 14.** During code review, the long-press handler was hardened beyond the literal plan (cleared state on `.finally`, added RAF cleanup, used `requestAnimationFrame` instead of timeout) — a deliberate Tier-B improvement, not a deviation from spec.
+
+**Phase 6 follow-ups newly identified by Phase 5:**
+
+1. Real Firebase Auth + Google sign-in validation on the deployed Vercel preview (works in dev; prod just needs Google OAuth client redirect URI added + Firebase Auth → Authorized domains).
+2. Server-rendered archive thumbnails (Cloud Function + Sharp/Skia generates a static PNG per revealed question, stored in Cloud Storage; iOS just renders the URL). Phase 5 ships text-string mini-bubbles — visually meh but $0 and works offline.
+3. Image metadata (PNG iTXt) referral embedding — still deferred from Phase 4 polish.
+4. Admin console: bulk-create candidates from a CSV/Markdown paste. Phase 5 has one-at-a-time only.
+5. Admin console: question-candidate AI-assisted generator (Cloud Function generates ~20 candidate questions per week from prompt templates → admin approves/rejects). v1.0 admin types each one manually.
+6. Admin auth: roles-table Firestore migration when a 2nd admin joins (current `ADMIN_UIDS` env list is fine for v1.0 with 1 admin).
+7. Admin console UI tests (intentionally skipped in Phase 5 per plan scope decision #6 — pages are thin presentational wrappers around already-tested backend APIs).
