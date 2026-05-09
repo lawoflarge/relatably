@@ -22,14 +22,14 @@ describe("requireAdmin", () => {
     delete process.env.ADMIN_UIDS;
   });
 
-  it("returns null when no Authorization header", async () => {
+  it("returns 'no_auth' when no Authorization header", async () => {
     process.env.ADMIN_UIDS = "uid-1,uid-2";
     const req = new Request("http://localhost/x");
     const result = await requireAdmin(req);
     expect(result).toEqual({ kind: "no_auth" });
   });
 
-  it("returns null when token is invalid", async () => {
+  it("returns 'no_auth' when token is invalid", async () => {
     process.env.ADMIN_UIDS = "uid-1,uid-2";
     verifyIdToken.mockRejectedValue(new Error("bad token"));
     const req = new Request("http://localhost/x", {
@@ -59,7 +59,7 @@ describe("requireAdmin", () => {
     expect(result).toEqual({ kind: "ok", decoded: { uid: "uid-2" } });
   });
 
-  it("returns 'no_auth' when ADMIN_UIDS env is unset (defensive — prevents accidental open admin)", async () => {
+  it("returns 'not_admin' when ADMIN_UIDS env is unset (defensive — prevents accidental open admin)", async () => {
     // ADMIN_UIDS deliberately not set
     verifyIdToken.mockResolvedValue({ uid: "uid-1" });
     const req = new Request("http://localhost/x", {
