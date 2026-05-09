@@ -1,45 +1,41 @@
-import { render, fireEvent, waitFor } from "@testing-library/react-native";
+import { render, waitFor, fireEvent } from "@testing-library/react-native";
 import { FriendsScreen } from "./FriendsScreen";
 
 jest.mock("@/src/lib/api", () => ({
   fetchFriends: jest.fn(),
   acceptFriend: jest.fn(),
-  removeFriend: jest.fn(),
-  requestFriend: jest.fn(),
 }));
 
-import * as apiMod from "@/src/lib/api";
+import { fetchFriends, acceptFriend } from "@/src/lib/api";
 
 describe("FriendsScreen", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+  beforeEach(() => jest.clearAllMocks());
 
-  it("when not signed in: prompts to sign in", () => {
-    const { getByText } = render(<FriendsScreen isSignedIn={false} myUid={null} />);
+  it("shows sign-in hint when not signed in", () => {
+    const { getByText } = render(<FriendsScreen isSignedIn={false} />);
     expect(getByText(/sign in/i)).toBeTruthy();
   });
 
-  it("fetches friends on mount", async () => {
-    (apiMod.fetchFriends as jest.Mock).mockResolvedValueOnce({
+  it("renders friendships from API", async () => {
+    (fetchFriends as jest.Mock).mockResolvedValue({
       friendships: [
-        { id: "f1", requester_id: "me", accepter_id: "other-1", status: "accepted" },
+        { id: "f1", friend_user_id: "u-2", handle: "alice", locale: "en", status: "accepted", direction: "outgoing" },
       ],
     });
-    render(<FriendsScreen isSignedIn={true} myUid="me" />);
-    await waitFor(() => expect(apiMod.fetchFriends).toHaveBeenCalled());
+    const { getByText } = render(<FriendsScreen isSignedIn={true} />);
+    await waitFor(() => expect(getByText("alice")).toBeTruthy());
   });
 
-  it("accepting a pending request calls acceptFriend", async () => {
-    (apiMod.fetchFriends as jest.Mock).mockResolvedValue({
+  it("calls acceptFriend on incoming-pending row Accept", async () => {
+    (fetchFriends as jest.Mock).mockResolvedValueOnce({
       friendships: [
-        { id: "f1", requester_id: "other-1", accepter_id: "me", status: "pending" },
+        { id: "f2", friend_user_id: "u-3", handle: "bob", locale: "de", status: "pending", direction: "incoming" },
       ],
     });
-    (apiMod.acceptFriend as jest.Mock).mockResolvedValue({ id: "f1", status: "accepted" });
-    const { findByText } = render(<FriendsScreen isSignedIn={true} myUid="me" />);
-    const btn = await findByText(/accept/i);
-    fireEvent.press(btn);
-    await waitFor(() => expect(apiMod.acceptFriend).toHaveBeenCalledWith("f1"));
+    (fetchFriends as jest.Mock).mockResolvedValueOnce({ friendships: [] });
+    (acceptFriend as jest.Mock).mockResolvedValue({ id: "f2", status: "accepted" });
+    const { getByText, findByText } = render(<FriendsScreen isSignedIn={true} />);
+    fireEvent.press(await findByText("ACCEPT"));
+    await waitFor(() => expect(acceptFriend).toHaveBeenCalledWith("f2"));
   });
 });

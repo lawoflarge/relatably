@@ -1,32 +1,30 @@
 import { View, Text, Pressable, StyleSheet } from "react-native";
-
-type Status = "accepted" | "pending_incoming" | "pending_outgoing";
+import type { Friendship } from "@/src/types/api";
 
 interface Props {
-  id: string;
-  handle: string | null;
-  status: Status;
-  onAccept?: (id: string) => void;
+  friendship: Friendship;
+  onAccept?: () => void;
 }
 
-export function FriendListRow({ id, handle, status, onAccept }: Props) {
+export function FriendListRow({ friendship, onAccept }: Props) {
+  const display = friendship.handle ?? `@${friendship.friend_user_id.slice(0, 6)}`;
   return (
     <View style={styles.row}>
-      <Text style={styles.handle} numberOfLines={1}>{handle ?? "anon"}</Text>
-      {status === "pending_incoming" && onAccept && (
-        <Pressable onPress={() => onAccept(id)} style={styles.acceptBtn}>
+      <Text style={styles.handle}>{display}</Text>
+      <Text style={styles.status}>{friendship.status}</Text>
+      {onAccept && (
+        <Pressable onPress={onAccept} style={styles.acceptBtn} role="button">
           <Text style={styles.acceptLabel}>ACCEPT</Text>
         </Pressable>
       )}
-      {status === "pending_outgoing" && <Text style={styles.muted}>sent</Text>}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: "row", alignItems: "center", paddingVertical: 12, paddingHorizontal: 16, gap: 12 },
+  row: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 12, borderBottomColor: "#222", borderBottomWidth: 1 },
   handle: { color: "#fff", fontSize: 16, flex: 1 },
-  muted: { color: "#888", fontSize: 14 },
-  acceptBtn: { backgroundColor: "#aaff00", paddingHorizontal: 14, paddingVertical: 8, borderRadius: 8 },
-  acceptLabel: { color: "#000", fontSize: 12, fontWeight: "700", letterSpacing: 1 },
+  status: { color: "#888", fontSize: 12, marginRight: 12 },
+  acceptBtn: { backgroundColor: "#aaff00", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
+  acceptLabel: { color: "#000", fontWeight: "800", fontSize: 12, letterSpacing: 1 },
 });

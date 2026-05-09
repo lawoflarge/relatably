@@ -1,28 +1,36 @@
 import { render, fireEvent } from "@testing-library/react-native";
 import { FriendListRow } from "./FriendListRow";
 
+const baseFriendship = {
+  id: "f1",
+  friend_user_id: "u-2",
+  handle: "alice",
+  locale: "en",
+  status: "accepted" as const,
+  direction: "outgoing" as const,
+};
+
 describe("FriendListRow", () => {
-  it("renders accepted friend with handle, no Accept button", () => {
-    const { getByText, queryByText } = render(
-      <FriendListRow id="f1" handle="@friend1" status="accepted" />,
-    );
-    expect(getByText("@friend1")).toBeTruthy();
-    expect(queryByText(/accept/i)).toBeNull();
+  it("renders the handle", () => {
+    const { getByText } = render(<FriendListRow friendship={baseFriendship} />);
+    expect(getByText("alice")).toBeTruthy();
   });
 
-  it("renders pending incoming with Accept button", () => {
+  it("falls back to @<short-uid> when handle is null", () => {
+    const f = { ...baseFriendship, handle: null };
+    const { getByText } = render(<FriendListRow friendship={f} />);
+    expect(getByText(/@u-2/)).toBeTruthy();
+  });
+
+  it("shows ACCEPT button only when onAccept provided", () => {
     const onAccept = jest.fn();
-    const { getByText } = render(
-      <FriendListRow id="f1" handle="@friend1" status="pending_incoming" onAccept={onAccept} />,
+    const { getByText, queryByText, rerender } = render(
+      <FriendListRow friendship={baseFriendship} onAccept={onAccept} />,
     );
-    fireEvent.press(getByText(/accept/i));
-    expect(onAccept).toHaveBeenCalledWith("f1");
-  });
+    fireEvent.press(getByText("ACCEPT"));
+    expect(onAccept).toHaveBeenCalled();
 
-  it("renders pending outgoing as 'Sent'", () => {
-    const { getByText } = render(
-      <FriendListRow id="f1" handle="@friend1" status="pending_outgoing" />,
-    );
-    expect(getByText(/sent/i)).toBeTruthy();
+    rerender(<FriendListRow friendship={baseFriendship} />);
+    expect(queryByText("ACCEPT")).toBeNull();
   });
 });

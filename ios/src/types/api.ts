@@ -46,9 +46,11 @@ export interface AuthMeResponse {
 
 export interface Friendship {
   id: string;
-  requester_id: string;
-  accepter_id: string;
+  friend_user_id: string;
+  handle: string | null;
+  locale: string;
   status: "pending" | "accepted";
+  direction: "incoming" | "outgoing";
 }
 
 export interface LeaderboardEntry {
