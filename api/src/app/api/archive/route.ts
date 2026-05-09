@@ -55,6 +55,6 @@ export async function GET(req: Request) {
     }),
   );
 
-  const next_cursor = tiles.length > 0 ? tiles[tiles.length - 1].created_at : null;
+  const next_cursor = tiles.length === limit ? tiles[tiles.length - 1].created_at : null;
   return NextResponse.json({ tiles, next_cursor });
 }

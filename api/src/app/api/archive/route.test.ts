@@ -63,7 +63,7 @@ describe("GET /api/archive", () => {
       throw new Error("unexpected collection " + name);
     });
 
-    const req = new Request("http://localhost/api/archive");
+    const req = new Request("http://localhost/api/archive?limit=2");
     const res = await GET(req);
     const body = await res.json();
 
@@ -87,7 +87,38 @@ describe("GET /api/archive", () => {
 
     expect(questionsCol.where).toHaveBeenCalledWith("status", "==", "revealed");
     expect(questionsCol.orderBy).toHaveBeenCalledWith("created_at", "desc");
-    expect(questionsCol.limit).toHaveBeenCalledWith(20);
+    expect(questionsCol.limit).toHaveBeenCalledWith(2);
+  });
+
+  it("returns next_cursor=null when result count is less than requested limit (last page)", async () => {
+    const q = makeQuestionDoc("q1", "x?", new Date("2026-05-09T00:00:00Z"));
+    const c = [makeClusterDoc("c1", "yes", 1)];
+    const questionsCol = {
+      where: vi.fn().mockReturnThis(),
+      orderBy: vi.fn().mockReturnThis(),
+      startAfter: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      get: vi.fn().mockResolvedValue({ docs: [q] }),
+    };
+    const clustersCol = {
+      where: vi.fn().mockReturnThis(),
+      orderBy: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      get: vi.fn().mockResolvedValue({ docs: c }),
+    };
+    fakeFirestore.collection.mockImplementation((name: string) => {
+      if (name === "questions") return questionsCol;
+      if (name === "answer_clusters") return clustersCol;
+      throw new Error("unexpected collection " + name);
+    });
+
+    const req = new Request("http://localhost/api/archive");  // default limit 20
+    const res = await GET(req);
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.tiles).toHaveLength(1);
+    expect(body.next_cursor).toBeNull();  // 1 tile < 20 limit → no more pages
   });
 
   it("returns next_cursor=null when fewer tiles than page size returned", async () => {
