@@ -17,6 +17,11 @@ import { getDeviceToken } from "@/src/lib/deviceId";
 import { firestore } from "@/src/lib/firebase";
 import { hasSeenReveal, markRevealSeen } from "@/src/lib/revealStore";
 import { requestNotificationPermission, getFcmToken } from "@/src/lib/messaging";
+import {
+  hasShownInterstitialFor,
+  markInterstitialShownFor,
+} from "@/src/lib/interstitialGate";
+import { loadInterstitialOnce } from "@/src/lib/ads";
 import type { TodayQuestion, Yesterday } from "@/src/types/api";
 
 type Phase = "loading" | "reveal" | "question" | "wordcloud" | "error";
@@ -112,7 +117,21 @@ export default function HomeScreen() {
   }, [question]);
 
   const handleRevealComplete = useCallback(async () => {
-    if (yesterday) await markRevealSeen(yesterday.id);
+    if (yesterday) {
+      await markRevealSeen(yesterday.id);
+      try {
+        const alreadyShown = await hasShownInterstitialFor(yesterday.id);
+        if (!alreadyShown) {
+          const controller = await loadInterstitialOnce();
+          if (controller) {
+            await controller.show();
+            await markInterstitialShownFor(yesterday.id);
+          }
+        }
+      } catch (e) {
+        console.warn("interstitial failed", e);
+      }
+    }
     loadQuestion();
   }, [yesterday, loadQuestion]);
 
@@ -147,6 +166,7 @@ export default function HomeScreen() {
       )}
       {phase === "reveal" && yesterday && (
         <RevealAnimation
+          questionId={yesterday.id}
           questionText={yesterday.text}
           clusters={yesterday.top_clusters}
           selfClusterId={yesterday.self_cluster_id}
@@ -178,11 +198,15 @@ export default function HomeScreen() {
           />
         </View>
       )}
-      {phase === "wordcloud" && (
+      {phase === "wordcloud" && question && (
         <WordcloudScreen
           clusters={clusters}
           selfClusterId={selfClusterId}
           totalCount={totalCount}
+          questionId={question.id}
+          questionText={question.text}
+          userAnswer={text}
+          dateLabel={new Date().toISOString().slice(0, 10)}
         />
       )}
     </>
