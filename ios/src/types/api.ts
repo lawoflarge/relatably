@@ -76,3 +76,31 @@ export interface ShareTrackRequest {
 export interface ShareTrackResponse {
   referral_code: string;
 }
+
+export interface ArchiveTile {
+  question_id: string;
+  question_text: string;
+  verdict_text: string;
+  top_clusters: string[];
+  created_at: string;
+}
+
+export interface ArchivePage {
+  tiles: ArchiveTile[];
+  next_cursor: string | null;
+}
+
+export interface ArchiveDetailCluster {
+  id: string;
+  canonical_text: string;
+  submission_count: number;
+  final_rank: number;
+  final_pct_of_total: number;
+}
+
+export interface ArchiveDetail {
+  id: string;
+  text: string;
+  created_at: string;
+  top_clusters: ArchiveDetailCluster[];
+}

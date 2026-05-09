@@ -3,6 +3,7 @@ import type {
   DeviceRegisterPayload, Yesterday,
   AuthMeResponse, Friendship, LeaderboardEntry, LeaderboardPeriod, LeaderboardScope,
   ShareTrackRequest, ShareTrackResponse,
+  ArchivePage, ArchiveDetail,
 } from "../types/api";
 import { getIdToken } from "@/src/lib/auth";
 
@@ -121,4 +122,19 @@ export async function trackShare(req: ShareTrackRequest): Promise<ShareTrackResp
   });
   if (!res.ok) throw new Error(`trackShare: ${res.status}`);
   return res.json();
+}
+
+export async function fetchArchive(cursor?: string): Promise<ArchivePage> {
+  const url = cursor
+    ? `${BASE}/api/archive?cursor=${encodeURIComponent(cursor)}`
+    : `${BASE}/api/archive`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`fetchArchive failed: ${res.status}`);
+  return (await res.json()) as ArchivePage;
+}
+
+export async function fetchArchiveDetail(questionId: string): Promise<ArchiveDetail> {
+  const res = await fetch(`${BASE}/api/archive/${encodeURIComponent(questionId)}`);
+  if (!res.ok) throw new Error(`fetchArchiveDetail failed: ${res.status}`);
+  return (await res.json()) as ArchiveDetail;
 }

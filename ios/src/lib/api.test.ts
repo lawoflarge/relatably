@@ -5,6 +5,8 @@ import {
   removeFriend,
   fetchFriends,
   fetchLeaderboard,
+  fetchArchive,
+  fetchArchiveDetail,
 } from "./api";
 
 jest.mock("@/src/lib/auth", () => ({
@@ -86,5 +88,52 @@ describe("api clients with Authorization header", () => {
     (authMod.getIdToken as jest.Mock).mockResolvedValueOnce(null);
     fetchMock.mockReturnValueOnce(okJson({ error: "unauthorized" }, 401));
     await expect(fetchAuthMe()).rejects.toThrow();
+  });
+});
+
+describe("fetchArchive", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("calls /api/archive without cursor by default", async () => {
+    fetchMock.mockReturnValueOnce(okJson({ tiles: [], next_cursor: null }));
+    const result = await fetchArchive();
+    expect(result).toEqual({ tiles: [], next_cursor: null });
+    const call = fetchMock.mock.calls[0][0] as string;
+    expect(call).toMatch(/\/api\/archive$/);
+  });
+
+  it("includes cursor query when provided", async () => {
+    fetchMock.mockReturnValueOnce(okJson({ tiles: [], next_cursor: null }));
+    await fetchArchive("2026-05-08T00:00:00.000Z");
+    const call = fetchMock.mock.calls[0][0] as string;
+    expect(call).toContain("cursor=2026-05-08T00%3A00%3A00.000Z");
+  });
+
+  it("throws on non-ok response", async () => {
+    fetchMock.mockReturnValueOnce(okJson({ error: "boom" }, 500));
+    await expect(fetchArchive()).rejects.toThrow();
+  });
+});
+
+describe("fetchArchiveDetail", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("calls /api/archive/<id>", async () => {
+    fetchMock.mockReturnValueOnce(
+      okJson({ id: "q1", text: "?", created_at: "x", top_clusters: [] }),
+    );
+    const result = await fetchArchiveDetail("q1");
+    expect(result.id).toBe("q1");
+    const call = fetchMock.mock.calls[0][0] as string;
+    expect(call).toMatch(/\/api\/archive\/q1$/);
+  });
+
+  it("throws on 404", async () => {
+    fetchMock.mockReturnValueOnce(okJson({ error: "not found" }, 404));
+    await expect(fetchArchiveDetail("missing")).rejects.toThrow();
   });
 });
