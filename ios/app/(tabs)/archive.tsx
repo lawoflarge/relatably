@@ -13,6 +13,7 @@ export default function ArchiveTab() {
   const [loading, setLoading] = useState(false);
   const [longPressedTile, setLongPressedTile] = useState<ArchiveTile | null>(null);
   const shareRef = useRef<View>(null);
+  const rafIdRef = useRef<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -34,6 +35,12 @@ export default function ArchiveTab() {
     };
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (rafIdRef.current !== null) cancelAnimationFrame(rafIdRef.current);
+    };
+  }, []);
+
   const onLoadMore = useCallback(async () => {
     if (!nextCursor || loading) return;
     setLoading(true);
@@ -52,20 +59,27 @@ export default function ArchiveTab() {
     router.push(`/(tabs)/archive/${id}`);
   }, []);
 
-  const onTileLongPress = useCallback(async (tile: ArchiveTile) => {
+  const onTileLongPress = useCallback((tile: ArchiveTile) => {
     setLongPressedTile(tile);
-    // Defer one tick so React renders the offscreen ShareCardVerdict before captureRef.
-    setTimeout(() => {
+    // Defer to next frame so React paints the offscreen ShareCardVerdict
+    // before captureRef runs. RAF is more robust than a magic setTimeout(50).
+    rafIdRef.current = requestAnimationFrame(() => {
+      rafIdRef.current = null;
       if (!shareRef.current) return;
       shareCardImage({
         viewRef: shareRef,
         banner_type: "verdict",
         question_id: tile.question_id,
         share_target: "system",
-      }).catch(() => {
-        // best-effort; user can try again
-      });
-    }, 50);
+      })
+        .catch(() => {
+          // best-effort; user can try again
+        })
+        .finally(() => {
+          // free the offscreen ShareCardVerdict so it doesn't sit mounted forever
+          setLongPressedTile(null);
+        });
+    });
   }, []);
 
   return (
