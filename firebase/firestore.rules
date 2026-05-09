@@ -1,27 +1,19 @@
 rules_version = '2';
 
-// Deny-by-default. Every read/write must match a rule below.
-// All write paths go through the Next.js API using Firebase Admin SDK,
-// which bypasses Security Rules with full credentials.
-
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // QUESTIONS: clients may read live + revealed questions.
     match /questions/{questionId} {
       allow read: if resource.data.status in ['live', 'revealed'];
       allow write: if false;
     }
 
-    // ANSWER_CLUSTERS: clients may read clusters whose question is live or revealed.
     match /answer_clusters/{clusterId} {
       allow read: if exists(/databases/$(database)/documents/questions/$(resource.data.question_id))
         && get(/databases/$(database)/documents/questions/$(resource.data.question_id)).data.status in ['live', 'revealed'];
       allow write: if false;
     }
 
-    // USERS: signed-in users may read+update their own doc; public+non-shadowbanned
-    // users are readable by other signed-in clients (for leaderboard display).
     match /users/{userId} {
       allow read: if request.auth != null
         && (request.auth.uid == userId
@@ -33,25 +25,12 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // LEADERBOARD_ENTRIES: server-only. Clients read via GET /api/leaderboard,
-    // which applies shadowban filtering. Direct SDK reads would let a shadowbanned
-    // user confirm their ban — anti-cheat hard requirement.
-    match /leaderboard_entries/{entryId} {
-      allow read: if false;
-      allow write: if false;
-    }
-
-    // USER_AGGREGATES: server-only. Same anti-cheat reasoning as leaderboard_entries.
-    // Clients read aggregated state via API endpoints that filter shadowbanned users.
-    match /user_aggregates/{userId} {
-      allow read: if false;
-      allow write: if false;
-    }
-
-    // SUBMISSIONS, DEVICE_USERS, FRIENDSHIPS, QUESTION_CANDIDATES: server-only.
+    match /leaderboard_entries/{entryId} { allow read, write: if false; }
+    match /user_aggregates/{userId}      { allow read, write: if false; }
     match /submissions/{id}              { allow read, write: if false; }
     match /device_users/{id}             { allow read, write: if false; }
     match /friendships/{id}              { allow read, write: if false; }
-    match /question_candidates/{id}      { allow read, write: if false; }
+    match /question_candidates/{id}     { allow read, write: if false; }
+    match /share_events/{id}             { allow read, write: if false; }
   }
 }
