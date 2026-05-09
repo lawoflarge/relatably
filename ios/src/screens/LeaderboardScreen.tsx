@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { View, Text, FlatList, Pressable, StyleSheet } from "react-native";
 import { LeaderboardRow } from "@/src/components/LeaderboardRow";
+import { BannerAdSlot } from "@/src/components/BannerAdSlot";
 import { fetchLeaderboard } from "@/src/lib/api";
 import type { LeaderboardEntry, LeaderboardPeriod, LeaderboardScope } from "@/src/types/api";
 
@@ -13,6 +14,20 @@ const PERIODS: { key: LeaderboardPeriod; label: string }[] = [
   { key: "weekly", label: "this week" },
   { key: "alltime", label: "all-time" },
 ];
+
+type ListRow =
+  | { kind: "entry"; entry: LeaderboardEntry; rank: number }
+  | { kind: "ad"; key: "banner-row" };
+
+function interleaveAd(entries: LeaderboardEntry[]): ListRow[] {
+  const rows: ListRow[] = entries.map((entry, i) => ({
+    kind: "entry" as const,
+    entry,
+    rank: entry.daily_rank ?? i + 1,
+  }));
+  if (entries.length >= 11) rows.splice(10, 0, { kind: "ad", key: "banner-row" });
+  return rows;
+}
 
 export function LeaderboardScreen({ isSignedIn }: Props) {
   const [period, setPeriod] = useState<LeaderboardPeriod>("daily");
@@ -37,6 +52,8 @@ export function LeaderboardScreen({ isSignedIn }: Props) {
       cancelled = true;
     };
   }, [period, scope]);
+
+  const rows = interleaveAd(entries);
 
   return (
     <View style={styles.root}>
@@ -68,17 +85,21 @@ export function LeaderboardScreen({ isSignedIn }: Props) {
         <Text style={styles.muted}>loading…</Text>
       ) : (
         <FlatList
-          data={entries}
-          keyExtractor={(e) => e.user_id}
-          renderItem={({ item, index }) => (
-            <LeaderboardRow
-              rank={item.daily_rank ?? index + 1}
-              handle={item.handle}
-              score={item.score}
-              locale={item.locale}
-            />
-          )}
+          data={rows}
+          keyExtractor={(r) => (r.kind === "ad" ? r.key : r.entry.user_id)}
+          renderItem={({ item }) => {
+            if (item.kind === "ad") return <BannerAdSlot slot="leaderboard_banner" />;
+            return (
+              <LeaderboardRow
+                rank={item.rank}
+                handle={item.entry.handle}
+                score={item.entry.score}
+                locale={item.entry.locale}
+              />
+            );
+          }}
           ListEmptyComponent={<Text style={styles.muted}>no entries yet</Text>}
+          initialNumToRender={20}
         />
       )}
     </View>

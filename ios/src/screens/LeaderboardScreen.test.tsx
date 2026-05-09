@@ -42,3 +42,41 @@ describe("LeaderboardScreen", () => {
     expect(queryByText(/sign in to see friend leaderboards/i)).toBeTruthy();
   });
 });
+
+describe("LeaderboardScreen ad row injection", () => {
+  beforeEach(() => {
+    delete process.env.EXPO_PUBLIC_ADMOB_ENABLED;
+    const { __resetAdsForTest } = require("@/src/lib/ads");
+    __resetAdsForTest();
+    jest.clearAllMocks();
+  });
+
+  it("injects banner ad row at index 10 when there are >=11 entries", async () => {
+    const entries = Array.from({ length: 12 }, (_, i) => ({
+      user_id: `u-${i}`,
+      handle: `user${i}`,
+      score: 1000 - i,
+      daily_rank: i + 1,
+      locale: "en",
+    }));
+    (require("@/src/lib/api").fetchLeaderboard as jest.Mock).mockResolvedValue({ entries });
+
+    const { findByTestId } = render(<LeaderboardScreen isSignedIn={false} />);
+    expect(await findByTestId("banner-ad-slot-disabled")).toBeTruthy();
+  });
+
+  it("does NOT inject ad row when fewer than 11 entries", async () => {
+    const entries = Array.from({ length: 5 }, (_, i) => ({
+      user_id: `u-${i}`,
+      handle: `user${i}`,
+      score: 1000 - i,
+      daily_rank: i + 1,
+      locale: "en",
+    }));
+    (require("@/src/lib/api").fetchLeaderboard as jest.Mock).mockResolvedValue({ entries });
+
+    const { queryByTestId, findByText } = render(<LeaderboardScreen isSignedIn={false} />);
+    await findByText("user0");
+    expect(queryByTestId("banner-ad-slot-disabled")).toBeNull();
+  });
+});
