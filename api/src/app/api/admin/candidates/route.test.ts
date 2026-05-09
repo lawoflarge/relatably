@@ -85,6 +85,25 @@ describe("GET /api/admin/candidates", () => {
 
     expect(candidatesCol.where).toHaveBeenCalledWith("status", "==", "pending");
   });
+
+  it("returns 400 when ?status is not one of the enum values", async () => {
+    const candidatesCol = {
+      orderBy: vi.fn().mockReturnThis(),
+      where: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      get: vi.fn().mockResolvedValue({ docs: [] }),
+    };
+    fakeFirestore.collection.mockReturnValue(candidatesCol);
+
+    const req = authedReq("admin-1");
+    const url = new URL(req.url);
+    url.searchParams.set("status", "garbage");
+    const filteredReq = new Request(url, req);
+    const res = await GET(filteredReq);
+
+    expect(res.status).toBe(400);
+    expect(candidatesCol.where).not.toHaveBeenCalled();
+  });
 });
 
 describe("POST /api/admin/candidates", () => {

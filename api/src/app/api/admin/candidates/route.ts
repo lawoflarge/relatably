@@ -27,9 +27,10 @@ export async function GET(req: Request) {
 
   if (statusParam) {
     const parsedStatus = StatusSchema.safeParse(statusParam);
-    if (parsedStatus.success) {
-      query = query.where("status", "==", parsedStatus.data);
+    if (!parsedStatus.success) {
+      return NextResponse.json({ error: "invalid status" }, { status: 400 });
     }
+    query = query.where("status", "==", parsedStatus.data);
   }
   query = query.orderBy("created_at", "desc").limit(200);
 
