@@ -16,7 +16,7 @@ Take the functionally-complete Relatably app (Phases 1–5) and make it producti
 Phase 6 is complete when ALL of these are true:
 
 1. Relatably v1.0 is **submitted to Apple App Review** for worldwide release (175 countries).
-2. Cloud Functions (`prepareNextDrop`, `triggerDrop`, `fanoutPush`, `moderationReview`, `scoreReveal`) are **deployed to the cloud** in `relatably-prod` Firebase project — emulator-only era ends.
+2. Cloud Functions (`prepareNextDrop`, `triggerDrop`, `fanoutPush`, `moderationReview` — 4 exported triggers; `scoreReveal` is called inline from `triggerDrop` and ships with it) are **deployed to the cloud** in `relatably-prod` Firebase project — emulator-only era ends.
 3. Sentry is wired and **receiving real errors** from api/ (Vercel), firebase/functions/ (GCP), and ios/ (TestFlight build).
 4. Three Firebase Remote Config kill-switches are **live and observed by code**: `drop_enabled`, `submit_rate_limit_per_min`, `leaderboard_endpoint_enabled`.
 5. The three retry-vulnerable Cloud Functions (`moderationReview`, `fanoutPush`, `scoreReveal`) are **idempotent** under Cloud-Functions-platform retries.
