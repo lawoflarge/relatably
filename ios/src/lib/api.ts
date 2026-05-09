@@ -2,6 +2,7 @@ import type {
   TodayQuestion, SubmitRequest, SubmitResponse,
   DeviceRegisterPayload, Yesterday,
   AuthMeResponse, Friendship, LeaderboardEntry, LeaderboardPeriod, LeaderboardScope,
+  ShareTrackRequest, ShareTrackResponse,
 } from "../types/api";
 import { getIdToken } from "@/src/lib/auth";
 
@@ -108,5 +109,16 @@ export async function fetchLeaderboard(opts: {
   const headers = opts.scope === "friends" ? await authHeaders() : {};
   const res = await fetch(url.toString(), { headers });
   if (!res.ok) throw new Error(`fetchLeaderboard: ${res.status}`);
+  return res.json();
+}
+
+export async function trackShare(req: ShareTrackRequest): Promise<ShareTrackResponse> {
+  const auth = await authHeaders();
+  const res = await fetch(`${BASE}/api/share/track`, {
+    method: "POST",
+    headers: { "content-type": "application/json", ...auth },
+    body: JSON.stringify(req),
+  });
+  if (!res.ok) throw new Error(`trackShare: ${res.status}`);
   return res.json();
 }

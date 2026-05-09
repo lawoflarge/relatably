@@ -63,3 +63,16 @@ export interface LeaderboardEntry {
 
 export type LeaderboardPeriod = "daily" | "weekly" | "alltime";
 export type LeaderboardScope = "global" | "friends";
+
+export type BannerType = "todays_take" | "verdict" | "called_it";
+export type ShareTarget = "ig_story" | "tiktok" | "snap" | "imessage" | "system";
+
+export interface ShareTrackRequest {
+  banner_type: BannerType;
+  question_id: string;
+  share_target: ShareTarget;
+}
+
+export interface ShareTrackResponse {
+  referral_code: string;
+}
