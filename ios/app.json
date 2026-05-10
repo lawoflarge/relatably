@@ -15,9 +15,13 @@
         "googleMobileAdsAppId": "ca-app-pub-3940256099942544~1458002511"
       },
       "infoPlist": {
-        "UIBackgroundModes": ["remote-notification"],
+        "UIBackgroundModes": [
+          "remote-notification"
+        ],
         "SKAdNetworkItems": [
-          { "SKAdNetworkIdentifier": "cstr6suwn9.skadnetwork" }
+          {
+            "SKAdNetworkIdentifier": "cstr6suwn9.skadnetwork"
+          }
         ]
       }
     },
@@ -31,7 +35,6 @@
           "iosAppId": "ca-app-pub-3940256099942544~1458002511"
         }
       ],
-      "react-native-branch",
       [
         "expo-build-properties",
         {
@@ -41,6 +44,12 @@
         }
       ],
       "expo-secure-store"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "39e5ff5e-9f31-45a0-a7b3-79fccf010e54"
+      }
+    },
+    "owner": "levinschwab"
   }
 }
