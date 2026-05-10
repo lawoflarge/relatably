@@ -17,13 +17,14 @@
           "remote-notification"
         ]
       },
-      "buildNumber": "8"
+      "buildNumber": "11"
     },
     "plugins": [
       "@react-native-firebase/app",
       "@react-native-firebase/messaging",
       "expo-apple-authentication",
-      "expo-secure-store"
+      "expo-secure-store",
+      "./plugins/with-non-modular-includes"
     ],
     "extra": {
       "eas": {
