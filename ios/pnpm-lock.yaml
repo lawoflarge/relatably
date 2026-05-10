@@ -26,9 +26,6 @@ importers:
       '@react-native-firebase/messaging':
         specifier: ^22.4.0
         version: 22.4.0(@react-native-firebase/app@22.4.0(expo@54.0.34)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(expo@54.0.34)
-      '@react-native-firebase/remote-config':
-        specifier: ^22.4.0
-        version: 22.4.0(@react-native-firebase/analytics@22.4.0(@react-native-firebase/app@22.4.0(expo@54.0.34)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)))(@react-native-firebase/app@22.4.0(expo@54.0.34)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))
       '@react-navigation/bottom-tabs':
         specifier: ^7.4.0
         version: 7.15.12(@react-navigation/native@7.2.3(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native-safe-area-context@5.6.2(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native-screens@4.16.0(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
@@ -1503,12 +1500,6 @@ packages:
     peerDependenciesMeta:
       expo:
         optional: true
-
-  '@react-native-firebase/remote-config@22.4.0':
-    resolution: {integrity: sha512-uisPD4ACE1PDGtAzQMmlPLg08jozT7PI2ddVLUJke499Fne9wc9f3edRqi+7afdMfXf7P70IxA3rR0iE9wagsQ==}
-    peerDependencies:
-      '@react-native-firebase/analytics': 22.4.0
-      '@react-native-firebase/app': 22.4.0
 
   '@react-native/assets-registry@0.81.5':
     resolution: {integrity: sha512-705B6x/5Kxm1RKRvSv0ADYWm5JOnoiQ1ufW7h8uu2E6G9Of/eE6hP/Ivw3U5jI16ERqZxiKQwk34VJbB0niX9w==}
@@ -7106,11 +7097,6 @@ snapshots:
       '@react-native-firebase/app': 22.4.0(expo@54.0.34)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
     optionalDependencies:
       expo: 54.0.34(@babel/core@7.29.0)(@expo/metro-runtime@6.1.2)(expo-router@6.0.23)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(typescript@5.9.3)
-
-  '@react-native-firebase/remote-config@22.4.0(@react-native-firebase/analytics@22.4.0(@react-native-firebase/app@22.4.0(expo@54.0.34)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)))(@react-native-firebase/app@22.4.0(expo@54.0.34)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))':
-    dependencies:
-      '@react-native-firebase/analytics': 22.4.0(@react-native-firebase/app@22.4.0(expo@54.0.34)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))
-      '@react-native-firebase/app': 22.4.0(expo@54.0.34)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
 
   '@react-native/assets-registry@0.81.5': {}
 

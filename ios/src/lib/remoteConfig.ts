@@ -1,58 +1,24 @@
-import remoteConfig from "@react-native-firebase/remote-config";
+// v1.0 ships without @react-native-firebase/remote-config because RNFB
+// Remote Config + Messaging Swift modules can't find FirebaseAuth-Swift.h
+// under the current Expo SDK 54 + RNFB v22 + use_modular_headers! combo.
+// All callers fall back to the supplied default, which matches the
+// server-side defaults (drop_enabled=true, fanout_enabled=true,
+// submit_rate_limit_per_min=10). Server side `api/src/lib/remoteConfig.ts`
+// still honors live Remote Config -- the client just trusts defaults.
+//
+// Reintroduce in v1.0.1 alongside the fix for the RNFB iOS build chain.
 
-const MIN_FETCH_INTERVAL_MS = 5 * 60 * 1000;
+let _initialized = false;
 
-let initialized = false;
-
-async function ensureInit(): Promise<void> {
-  if (initialized) return;
-  await remoteConfig().setConfigSettings({
-    minimumFetchIntervalMillis: MIN_FETCH_INTERVAL_MS,
-  });
-  initialized = true;
-}
-
-/** Test-only escape hatch. */
 export function __resetRemoteConfigForTest(): void {
-  initialized = false;
+  _initialized = false;
 }
 
-/**
- * Reads a Firebase Remote Config kill-switch on iOS, mirroring the
- * api/src/lib/remoteConfig.ts contract.
- *
- * - 5-min minimumFetchIntervalMillis (the SDK throttles itself).
- * - On any fetch failure (network, transient API outage), returns the
- *   caller-supplied fallback. Kill-switches must never break the client.
- * - When the key is not set in Remote Config (source=='static'), also
- *   returns fallback so unprovisioned keys behave like local defaults.
- *
- * Used to read drop_enabled, fanout_enabled, submit_rate_limit_per_min
- * (fanout_enabled is server-side; the client doesn't act on it but reading
- * it keeps a single contract).
- */
 export async function getKillSwitch<T extends boolean | number>(
-  key: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _key: string,
   fallback: T,
 ): Promise<T> {
-  try {
-    await ensureInit();
-    await remoteConfig().fetchAndActivate();
-  } catch (err) {
-    console.warn("remoteConfig.getKillSwitch: fetch failed; using fallback", {
-      key,
-      error: (err as Error).message,
-    });
-    return fallback;
-  }
-  const value = remoteConfig().getValue(key);
-  if (value.getSource() === "static") return fallback;
-  const raw = value.asString();
-  if (typeof fallback === "boolean") {
-    return (raw === "true") as T;
-  }
-  // number
-  const n = Number(raw);
-  if (Number.isFinite(n)) return n as T;
+  if (!_initialized) _initialized = true;
   return fallback;
 }
