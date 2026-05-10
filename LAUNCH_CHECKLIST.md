@@ -47,7 +47,12 @@ openssl rand -hex 32
    - <https://console.firebase.google.com/project/relatably-prod/settings/general/>
    - Under "Your apps", confirm a Web app exists. If not, click "Add app" → Web → name "Relatably Admin" → Register.
    - Copy `apiKey`, `authDomain`, `projectId`, `appId` from the snippet.
-4. **Authorized domains** for Google sign-in:
+4. **Enable Google sign-in provider** (one-click; required for /admin):
+   - <https://console.firebase.google.com/project/relatably-prod/authentication/providers>
+   - Click **Google** → toggle **Enable** → set Project support email → **Save**
+   - Without this, /admin sign-in fails with `auth/operation-not-allowed`.
+   - The REST API can't toggle this without an explicit OAuth client; Firebase Console auto-provisions one.
+5. **Authorized domains** for Google sign-in:
    - <https://console.firebase.google.com/project/relatably-prod/authentication/settings>
    - Add the Vercel preview + production domains once you know them. `localhost` is already there.
 5. **Remote Config kill-switches** (run the seed script after step 2 lands the JSON):

@@ -6,7 +6,8 @@
     "seed:questions": "tsx seed-questions.ts",
     "seed:launch-questions": "tsx seed-launch-questions.ts",
     "seed:remote-config": "tsx seed-remote-config.ts",
-    "add:authorized-domain": "tsx add-authorized-domain.ts"
+    "add:authorized-domain": "tsx add-authorized-domain.ts",
+    "enable:google-signin": "tsx enable-google-signin.ts"
   },
   "dependencies": {
     "firebase-admin": "^13.9.0",
