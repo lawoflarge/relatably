@@ -1,0 +1,9 @@
+export { IconHome } from "./IconHome";
+export { IconFriends } from "./IconFriends";
+export { IconBoard } from "./IconBoard";
+export { IconArchive } from "./IconArchive";
+export { IconShare } from "./IconShare";
+export { IconFlame } from "./IconFlame";
+export { IconCrown } from "./IconCrown";
+export { IconSparkle } from "./IconSparkle";
+export { IconPeelCorner } from "./IconPeelCorner";
