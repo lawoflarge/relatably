@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { requireAuth, getOrCreateUserDoc } from "@/lib/auth";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
   const decoded = await requireAuth(req);
   if (!decoded) {

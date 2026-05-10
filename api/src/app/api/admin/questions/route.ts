@@ -4,6 +4,8 @@ import { adminFirestore } from "@/lib/firebase";
 import { requireAdmin } from "@/lib/admin";
 import { gateResponse } from "../_helpers";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: Request) {
   const gate = await requireAdmin(req);
   if (gate.kind !== "ok") return gateResponse(gate.kind);

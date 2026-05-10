@@ -5,6 +5,8 @@ import { adminFirestore } from "@/lib/firebase";
 import { requireAdmin } from "@/lib/admin";
 import { gateResponse } from "../_helpers";
 
+export const dynamic = "force-dynamic";
+
 const CreateSchema = z.object({
   candidate_text: z.string().min(1).max(280),
 });

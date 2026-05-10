@@ -5,10 +5,12 @@
   "scripts": {
     "seed:questions": "tsx seed-questions.ts",
     "seed:launch-questions": "tsx seed-launch-questions.ts",
-    "seed:remote-config": "tsx seed-remote-config.ts"
+    "seed:remote-config": "tsx seed-remote-config.ts",
+    "add:authorized-domain": "tsx add-authorized-domain.ts"
   },
   "dependencies": {
     "firebase-admin": "^13.9.0",
+    "google-auth-library": "^10.0.0",
     "tsx": "^4.19.0"
   },
   "devDependencies": {

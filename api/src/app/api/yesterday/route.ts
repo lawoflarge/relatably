@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { adminFirestore } from "@/lib/firebase";
 import { hashDeviceToken } from "@/lib/hash";
 
+export const dynamic = "force-dynamic";
+
 const TOP_N = 10;
 
 export async function GET(req: Request) {

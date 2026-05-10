@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { adminFirestore } from "@/lib/firebase";
 import { requireAuth } from "@/lib/auth";
 
+export const dynamic = "force-dynamic";
+
 interface LeaderboardEntryDoc {
   user_id: string;
   score: number;

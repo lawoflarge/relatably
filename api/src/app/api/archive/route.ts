@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { Timestamp } from "firebase-admin/firestore";
 import { adminFirestore } from "@/lib/firebase";
 
+export const dynamic = "force-dynamic";
+
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 50;
 const THUMBNAIL_CLUSTERS = 5;

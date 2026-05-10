@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { adminFirestore } from "@/lib/firebase";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const snap = await adminFirestore
     .collection("questions")
