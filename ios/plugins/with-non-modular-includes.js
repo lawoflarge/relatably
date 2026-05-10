@@ -19,7 +19,18 @@ const fs = require("fs");
 const path = require("path");
 
 const TOP_MARKER = "# === relatably: rnfb static framework + modular headers ===";
-const TOP_INJECT = `\n${TOP_MARKER}\n$RNFirebaseAsStaticFramework = true\n$FirebaseFirestoreCocoaPodsBinaryDistribution = true\nuse_modular_headers!\n`;
+const TOP_INJECT = `\n${TOP_MARKER}\n$RNFirebaseAsStaticFramework = true\nuse_modular_headers!\n`;
+
+// Inject before `target 'main' do` block: use invertase's pre-built
+// FirebaseFirestore frameworks. This skips the entire gRPC source compile
+// (which keeps failing with "gRPC-Core.modulemap not found" under
+// use_modular_headers!). The :git+tag must match the firebase-ios-sdk
+// version pinned by RNFB v22.4.0 (11.15.0 -- see node_modules/@react-native-firebase/app/package.json).
+const TARGET_MARKER = "# === relatably: prebuilt firestore ===";
+const TARGET_INJECT = `
+  ${TARGET_MARKER}
+  pod 'FirebaseFirestore', :git => 'https://github.com/invertase/firestore-ios-sdk-frameworks.git', :tag => '11.15.0'
+`;
 
 const POST_MARKER = "# === relatably: clang allow non-modular includes ===";
 const POST_INJECT_LINES = [
@@ -89,6 +100,23 @@ module.exports = function withNonModularIncludes(config) {
           contents = contents.trimEnd() + TOP_INJECT;
         }
         changed = true;
+      }
+
+      // 4: inject prebuilt Firestore pod inside the target 'main' do block.
+      if (!contents.includes(TARGET_MARKER)) {
+        // Find target 'main' do (or whichever target).
+        const targetOpen = contents.match(/^target\s+['"]\w+['"]\s+do\b/m);
+        if (targetOpen && typeof targetOpen.index === "number") {
+          // Insert right after that line.
+          const lineEnd = contents.indexOf("\n", targetOpen.index);
+          if (lineEnd !== -1) {
+            contents =
+              contents.slice(0, lineEnd + 1) +
+              TARGET_INJECT +
+              contents.slice(lineEnd + 1);
+            changed = true;
+          }
+        }
       }
 
       // 3: inject CLANG_ALLOW inside the existing post_install block.
