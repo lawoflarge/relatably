@@ -14,7 +14,7 @@ export const palette = {
   red: "#FF5A4F",
 } as const;
 
-export const type = {
+export const typography = {
   hero:   { size: 52, line: 50, family: "BagelFatOne" },
   h1:     { size: 40, line: 38, family: "BagelFatOne" },
   h2:     { size: 36, line: 34, family: "BagelFatOne" },

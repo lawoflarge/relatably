@@ -1,4 +1,4 @@
-import { palette, type, sp, radii, shadow, motion } from "./tokens";
+import { palette, typography, sp, radii, shadow, motion } from "./tokens";
 
 describe("Sticker Pop tokens", () => {
   it("exposes the 10 palette colors with stable hex values", () => {
@@ -15,12 +15,12 @@ describe("Sticker Pop tokens", () => {
   });
 
   it("exposes the type scale with hero/h1/h2/h3/body/label/micro", () => {
-    expect(type.hero.size).toBe(52);
-    expect(type.hero.line).toBe(50);
-    expect(type.h3.size).toBe(22);
-    expect(type.body.size).toBe(15);
-    expect(type.label.size).toBe(11);
-    expect(type.micro.size).toBe(9);
+    expect(typography.hero.size).toBe(52);
+    expect(typography.hero.line).toBe(50);
+    expect(typography.h3.size).toBe(22);
+    expect(typography.body.size).toBe(15);
+    expect(typography.label.size).toBe(11);
+    expect(typography.micro.size).toBe(9);
   });
 
   it("exposes 8-step spacing scale", () => {
