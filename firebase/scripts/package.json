@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "seed:questions": "tsx seed-questions.ts",
+    "seed:launch-questions": "tsx seed-launch-questions.ts",
     "seed:remote-config": "tsx seed-remote-config.ts"
   },
   "dependencies": {
