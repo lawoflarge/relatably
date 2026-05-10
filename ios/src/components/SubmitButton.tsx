@@ -1,5 +1,8 @@
-import { useEffect, useState } from "react";
-import { Pressable, Text, StyleSheet } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Pressable, Text, View, StyleSheet } from "react-native";
+import Animated, { useSharedValue, withTiming, withSequence, useAnimatedStyle, Easing } from "react-native-reanimated";
+
+import { palette, radii, shadow, sp, typography, motion } from "@/src/theme/tokens";
 
 interface Props {
   hasText: boolean;
@@ -8,48 +11,77 @@ interface Props {
 }
 
 const MIN_DWELL_MS = 3000;
+const APress = Animated.createAnimatedComponent(Pressable);
 
 export function SubmitButton({ hasText, onPress, startedAt }: Props) {
   const [dwellMet, setDwellMet] = useState(false);
+  const angle = useSharedValue(-2);
+  const tx = useSharedValue(0);
+  const ty = useSharedValue(0);
+  const enabled = dwellMet && hasText;
 
   useEffect(() => {
     const elapsed = Date.now() - startedAt;
-    if (elapsed >= MIN_DWELL_MS) {
-      setDwellMet(true);
-      return;
-    }
+    if (elapsed >= MIN_DWELL_MS) { setDwellMet(true); return; }
     const t = setTimeout(() => setDwellMet(true), MIN_DWELL_MS - elapsed);
     return () => clearTimeout(t);
   }, [startedAt]);
 
-  const enabled = dwellMet && hasText;
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${angle.value}deg` }, { translateX: tx.value }, { translateY: ty.value }],
+  }));
+
+  function handlePressIn() {
+    angle.value = withTiming(0, { duration: motion.tap.duration, easing: Easing.out(Easing.ease) });
+    tx.value = withTiming(2, { duration: motion.tap.duration });
+    ty.value = withTiming(2, { duration: motion.tap.duration });
+  }
+  function handlePressOut() {
+    angle.value = withTiming(-2, { duration: motion.spring.duration });
+    tx.value = withSequence(withTiming(0, { duration: motion.spring.duration }));
+    ty.value = withSequence(withTiming(0, { duration: motion.spring.duration }));
+  }
+
+  const shadowSpec = enabled ? shadow.l : shadow.s;
 
   return (
-    <Pressable
-      role="button"
-      accessibilityState={{ disabled: !enabled }}
-      onPress={enabled ? onPress : undefined}
-      style={[styles.btn, enabled ? styles.btnOn : styles.btnOff]}
-    >
-      <Text style={styles.label}>SUBMIT</Text>
-    </Pressable>
+    <View style={styles.wrap}>
+      <APress
+        role="button"
+        accessibilityState={{ disabled: !enabled }}
+        disabled={!enabled}
+        onPressIn={enabled ? handlePressIn : undefined}
+        onPressOut={enabled ? handlePressOut : undefined}
+        onPress={enabled ? onPress : undefined}
+        style={[
+          styles.btn,
+          {
+            backgroundColor: enabled ? palette.pink : palette.cream,
+            opacity: enabled ? 1 : 0.55,
+            shadowColor: shadowSpec.color,
+            shadowOffset: shadowSpec.offset,
+            shadowRadius: shadowSpec.radius,
+            shadowOpacity: shadowSpec.opacity,
+            elevation: shadowSpec.elevation,
+          },
+          animatedStyle,
+        ]}
+      >
+        <Text style={[styles.label, { color: enabled ? palette.cream : palette.inkSoft }]}>DROP IT</Text>
+      </APress>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrap: { alignItems: "center" },
   btn: {
-    marginTop: 32,
-    marginHorizontal: 24,
-    paddingVertical: 18,
-    borderRadius: 12,
-    alignItems: "center",
+    borderColor: palette.ink,
+    borderWidth: 3,
+    borderRadius: radii.l,
+    paddingVertical: sp[4] + 2,
+    paddingHorizontal: sp[5] + sp[1],
+    alignSelf: "center",
   },
-  btnOn: { backgroundColor: "#aaff00" },
-  btnOff: { backgroundColor: "#222" },
-  label: {
-    color: "#000",
-    fontSize: 18,
-    fontWeight: "800",
-    letterSpacing: 1.5,
-  },
+  label: { fontFamily: typography.h3.family, fontSize: 22 },
 });
