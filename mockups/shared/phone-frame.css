@@ -1,0 +1,119 @@
+/* Shared iPhone-15-Pro-ish frame for every mockup.
+   Identical chrome across all 7 directions — only what's INSIDE
+   the frame changes. Keeps the comparison fair.
+
+   Frame is 393×852 (iPhone 15 Pro logical px). Safe-area top 59
+   (dynamic island band), bottom 34 (home indicator), so the
+   inner usable canvas is 393×759.
+
+   Use:
+     <div class="rb-phone">
+       <div class="rb-phone-island"></div>
+       <div class="rb-phone-screen" style="background: ...">
+         <!-- your screen content here -->
+       </div>
+       <div class="rb-phone-bar"></div>
+     </div>
+*/
+
+.rb-phone {
+  position: relative;
+  width: 393px;
+  height: 852px;
+  border-radius: 56px;
+  background: #0a0a0a;
+  padding: 12px;
+  box-shadow:
+    0 1px 0 1px rgba(255,255,255,0.06) inset,
+    0 0 0 1px rgba(0,0,0,0.5),
+    0 30px 60px -20px rgba(0,0,0,0.35),
+    0 60px 120px -40px rgba(0,0,0,0.25);
+  flex-shrink: 0;
+}
+
+.rb-phone-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 44px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.rb-phone-island {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 124px;
+  height: 36px;
+  background: #000;
+  border-radius: 24px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.rb-phone-bar {
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 134px;
+  height: 5px;
+  background: rgba(255,255,255,0.85);
+  border-radius: 3px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* Light-frame variant (for designs that want a pale phone, e.g. editorial paper) */
+.rb-phone--light {
+  background: #e7e3dd;
+  box-shadow:
+    0 1px 0 1px rgba(255,255,255,0.6) inset,
+    0 0 0 1px rgba(0,0,0,0.18),
+    0 30px 60px -20px rgba(0,0,0,0.18),
+    0 60px 120px -40px rgba(0,0,0,0.12);
+}
+.rb-phone--light .rb-phone-island { background: #1a1a1a; }
+.rb-phone--light .rb-phone-bar    { background: rgba(0,0,0,0.55); }
+
+/* Screen label below the phone (for the row layout) */
+.rb-phone-label {
+  margin-top: 16px;
+  text-align: center;
+  font: 500 12px/1 ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+}
+
+/* Status bar (time + signal) — call out if you want, otherwise omit */
+.rb-phone-statusbar {
+  position: absolute;
+  top: 22px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 36px;
+  font: 600 16px/1 -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #fff;
+  z-index: 6;
+  pointer-events: none;
+}
+.rb-phone-statusbar .rb-time {
+  margin-right: 28px;
+}
+.rb-phone-statusbar .rb-icons {
+  margin-left: 28px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.rb-phone-statusbar--dark { color: #111; }
+
+/* Tab bar — every direction renders its own bottom nav, but the
+   safe-area sizing is consistent. Helper to reserve space. */
+.rb-screen-pad-tabbar { padding-bottom: 96px; }

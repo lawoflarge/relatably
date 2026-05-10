@@ -1,0 +1,1572 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Relatably · Bubble Chat</title>
+  <link rel="stylesheet" href="../shared/reset.css">
+  <link rel="stylesheet" href="../shared/phone-frame.css">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@500;600;700;800&family=DM+Serif+Display:ital,wght@0,400;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    /* ================================================================
+       BUBBLE CHAT — Relatably v1.0 direction
+       Soft pastel group-chat warmth. Rounded grotesque. Springy.
+       Hinge × Geneva × Lapse × iMessage.
+       ================================================================ */
+
+    :root {
+      /* palette */
+      --bg:        #FBF8F3;
+      --surface:   #FFFFFF;
+      --ink:       #1F1A24;
+      --ink-soft:  #2E2733;
+      --subtext:   #6B6473;
+      --hairline:  rgba(31, 26, 36, 0.08);
+      --hairline-strong: rgba(31, 26, 36, 0.14);
+
+      --rose:      #F5A3B7;
+      --rose-deep: #E78AA0;
+      --mint:      #A0E3C8;
+      --lavender:  #C8B5FF;
+      --lavender-deep: #B49CFF;
+      --peach:     #FFCBA0;
+      --error:     #F08585;
+
+      /* tints (pastel-on-paper) */
+      --rose-tint:     #FDE7EC;
+      --mint-tint:     #E6F8EF;
+      --lavender-tint: #EDE5FF;
+      --peach-tint:    #FFEBD7;
+
+      /* spacing scale */
+      --sp-1: 4px;
+      --sp-2: 8px;
+      --sp-3: 12px;
+      --sp-4: 16px;
+      --sp-5: 20px;
+      --sp-6: 24px;
+      --sp-7: 32px;
+      --sp-8: 40px;
+
+      /* radii */
+      --r-pill:    999px;
+      --r-tile:    20px;
+      --r-card:    24px;
+      --r-bubble:  22px;
+      --r-input:   28px;
+
+      /* shadow */
+      --shadow-soft: 0 8px 24px rgba(31, 26, 36, 0.06);
+      --shadow-lift: 0 12px 32px rgba(31, 26, 36, 0.10);
+
+      /* type */
+      --ff-display: 'Hanken Grotesk', ui-sans-serif, system-ui, -apple-system, sans-serif;
+      --ff-serif:   'DM Serif Display', Georgia, serif;
+      --ff-mono:    'DM Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    }
+
+    html, body {
+      background: #efe9e0;
+      font-family: var(--ff-display);
+      color: #2a2330;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      min-height: 100vh;
+      padding: 56px 40px 96px;
+      background:
+        radial-gradient(60% 50% at 20% 0%,   #fbe2e9 0%, transparent 60%),
+        radial-gradient(50% 40% at 100% 20%, #e7dcff 0%, transparent 65%),
+        radial-gradient(60% 45% at 50% 100%, #d4f0e2 0%, transparent 60%),
+        linear-gradient(180deg, #f6efe5 0%, #ece2d4 100%);
+    }
+
+    /* ----- page header --------------------------------------------- */
+    .page-header {
+      max-width: 1840px;
+      margin: 0 auto 56px;
+      padding: 0 16px;
+    }
+    .ph-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+    .ph-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .ph-logo {
+      width: 56px;
+      height: 56px;
+      border-radius: 18px;
+      background: var(--ink);
+      display: grid;
+      place-items: center;
+      box-shadow: var(--shadow-soft);
+      position: relative;
+    }
+    .ph-logo svg { width: 32px; height: 32px; }
+    .ph-wordmark {
+      font-family: var(--ff-display);
+      font-weight: 800;
+      font-size: 38px;
+      letter-spacing: -0.025em;
+      color: var(--ink);
+      line-height: 1;
+    }
+    .ph-wordmark .dot { color: var(--rose-deep); }
+    .ph-direction {
+      margin-top: 6px;
+      font-family: var(--ff-mono);
+      font-size: 11px;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: var(--subtext);
+    }
+    .ph-title {
+      font-family: var(--ff-display);
+      font-weight: 800;
+      font-size: 84px;
+      letter-spacing: -0.045em;
+      color: var(--ink);
+      line-height: 0.92;
+      margin: 18px 0 14px;
+    }
+    .ph-title em {
+      font-style: italic;
+      font-family: var(--ff-serif);
+      font-weight: 400;
+      color: var(--rose-deep);
+      letter-spacing: -0.02em;
+    }
+    .ph-sub {
+      font-size: 19px;
+      font-weight: 500;
+      color: var(--subtext);
+      max-width: 640px;
+      line-height: 1.45;
+    }
+    .ph-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: flex-end;
+    }
+    .ph-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background: var(--surface);
+      border-radius: 999px;
+      box-shadow: var(--shadow-soft);
+      font-family: var(--ff-mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+    }
+    .ph-chip .swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+    }
+
+    /* ----- phone row ----------------------------------------------- */
+    .phone-row {
+      display: flex;
+      gap: 36px;
+      justify-content: center;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      max-width: 1840px;
+      margin: 0 auto;
+    }
+    .rb-phone-label {
+      color: rgba(31, 26, 36, 0.55);
+      font-family: var(--ff-mono);
+    }
+
+    /* ================================================================
+       SCREEN BASE
+       ================================================================ */
+    .rb-phone-screen {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--ff-display);
+    }
+    .scr {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      padding: 76px 22px 96px;
+      display: flex;
+      flex-direction: column;
+    }
+    .scr--question { padding-top: 72px; padding-bottom: 0; }
+    .scr--cloud    { padding: 72px 18px 0; }
+    .scr--lb       { padding: 72px 20px 0; }
+    .scr--arch     { padding: 72px 20px 0; }
+
+    /* shared topbar */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .avatar-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: var(--ink);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(31, 26, 36, 0.18);
+    }
+    .avatar-dot svg { width: 16px; height: 16px; }
+    .topbar-handle {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+    .topbar-name {
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+    }
+    .topbar-status {
+      font-family: var(--ff-mono);
+      font-size: 10px;
+      color: var(--subtext);
+      letter-spacing: 0.08em;
+      margin-top: 2px;
+    }
+    .topbar-status .live-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--mint);
+      margin-right: 6px;
+      vertical-align: 1px;
+    }
+    .top-icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      background: var(--surface);
+      display: grid;
+      place-items: center;
+      box-shadow: var(--shadow-soft);
+      color: var(--ink);
+    }
+    .top-icon-btn svg { width: 18px; height: 18px; }
+
+    /* ================================================================
+       SCREEN 1 — QUESTION
+       ================================================================ */
+    .q-meta {
+      margin-top: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--ff-mono);
+      font-size: 11px;
+      color: var(--subtext);
+      letter-spacing: 0.08em;
+    }
+    .q-meta .dot-sep { opacity: 0.35; }
+
+    /* incoming bubble (the question itself) */
+    .q-bubble-wrap {
+      margin-top: 14px;
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+    }
+    .q-bubble-wrap .avatar-dot {
+      width: 26px;
+      height: 26px;
+      margin-bottom: 6px;
+      background: linear-gradient(135deg, var(--rose) 0%, var(--lavender) 100%);
+      color: var(--ink);
+    }
+    .q-bubble {
+      position: relative;
+      background: var(--surface);
+      border-radius: 28px;
+      padding: 22px 22px 24px;
+      box-shadow: var(--shadow-soft);
+      max-width: 308px;
+      border-bottom-left-radius: 8px;
+    }
+    .q-bubble::before {
+      /* tail — a small rounded square that overlaps the bubble corner,
+         giving the iMessage "tail" silhouette without an SVG path. */
+      content: "";
+      position: absolute;
+      left: -5px;
+      bottom: 0;
+      width: 14px;
+      height: 16px;
+      background: var(--surface);
+      border-bottom-right-radius: 14px;
+      box-shadow: var(--shadow-soft);
+      z-index: -1;
+    }
+    .q-bubble::after {
+      /* paper-colored notch that cuts the tail into a curve */
+      content: "";
+      position: absolute;
+      left: -10px;
+      bottom: -1px;
+      width: 12px;
+      height: 14px;
+      background: var(--bg);
+      border-bottom-right-radius: 14px;
+    }
+    .q-just-now {
+      font-family: var(--ff-mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: var(--subtext);
+      text-transform: lowercase;
+      margin-bottom: 6px;
+    }
+    .q-text {
+      font-family: var(--ff-display);
+      font-weight: 700;
+      font-size: 30px;
+      line-height: 1.12;
+      letter-spacing: -0.025em;
+      color: var(--ink);
+    }
+    .q-text em {
+      font-family: var(--ff-serif);
+      font-weight: 400;
+      font-style: italic;
+      color: var(--rose-deep);
+      letter-spacing: -0.01em;
+    }
+
+    /* progress / time-left */
+    .q-time-card {
+      margin-top: 16px;
+      background: var(--surface);
+      border-radius: 18px;
+      padding: 12px 16px;
+      box-shadow: var(--shadow-soft);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .q-time-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: var(--peach-tint);
+      display: grid;
+      place-items: center;
+      color: #B5722A;
+      flex-shrink: 0;
+    }
+    .q-time-icon svg { width: 16px; height: 16px; }
+    .q-time-meta {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 0;
+    }
+    .q-time-label {
+      font-family: var(--ff-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      color: var(--subtext);
+      text-transform: uppercase;
+    }
+    .q-time-value {
+      font-family: var(--ff-display);
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--ink);
+      margin-top: 1px;
+      letter-spacing: -0.01em;
+    }
+    .q-time-bar {
+      height: 6px;
+      width: 96px;
+      background: var(--peach-tint);
+      border-radius: 999px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .q-time-bar-fill {
+      height: 100%;
+      width: 9%;
+      background: linear-gradient(90deg, var(--peach) 0%, var(--rose) 100%);
+      border-radius: 999px;
+    }
+
+    /* count strip */
+    .q-count {
+      align-self: flex-start;
+      margin-top: 22px;
+      margin-bottom: 10px;
+      margin-left: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 13px 7px 8px;
+      background: var(--rose-tint);
+      border-radius: 999px;
+      color: #8C3A4D;
+    }
+    .q-count-faces {
+      display: flex;
+      align-items: center;
+    }
+    .q-count-faces .face {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      border: 2px solid var(--rose-tint);
+      margin-left: -7px;
+    }
+    .q-count-faces .face:first-child { margin-left: 0; }
+    .q-count-text {
+      font-family: var(--ff-display);
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: -0.005em;
+    }
+    .q-count-text .num { font-family: var(--ff-mono); font-weight: 500; }
+
+    /* input bar (iMessage-style) */
+    .q-input-spacer { flex: 1; }
+    .q-input-wrap {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 96px;
+      padding: 12px 18px 14px;
+      background: linear-gradient(180deg, rgba(251, 248, 243, 0) 0%, var(--bg) 35%);
+    }
+    .q-input {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      border-radius: var(--r-input);
+      padding: 6px 6px 6px 18px;
+      box-shadow: var(--shadow-soft), 0 0 0 2px var(--lavender) inset;
+    }
+    .q-input-text {
+      flex: 1;
+      font-family: var(--ff-display);
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .q-input-caret {
+      display: inline-block;
+      width: 2px;
+      height: 18px;
+      background: var(--lavender-deep);
+      border-radius: 1px;
+      margin-left: 1px;
+      animation: blink 1s steps(1) infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+    .q-send {
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--rose) 0%, var(--rose-deep) 100%);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      flex-shrink: 0;
+      box-shadow: 0 6px 14px rgba(231, 138, 160, 0.45);
+    }
+    .q-send svg { width: 18px; height: 18px; }
+
+    .q-helper {
+      margin-top: 8px;
+      text-align: center;
+      font-family: var(--ff-mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      color: var(--subtext);
+    }
+    .q-helper kbd {
+      font-family: var(--ff-mono);
+      font-size: 10px;
+      background: rgba(31, 26, 36, 0.08);
+      padding: 1px 6px;
+      border-radius: 6px;
+      color: var(--ink);
+    }
+
+    /* ================================================================
+       SCREEN 2 — WORDCLOUD
+       ================================================================ */
+    .wc-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4px;
+    }
+    .wc-title-block { display: flex; flex-direction: column; }
+    .wc-title {
+      font-family: var(--ff-display);
+      font-weight: 800;
+      font-size: 22px;
+      letter-spacing: -0.025em;
+      color: var(--ink);
+      line-height: 1;
+    }
+    .wc-sub {
+      margin-top: 5px;
+      font-family: var(--ff-mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: var(--subtext);
+    }
+    .wc-sub .live-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--mint);
+      margin-right: 6px;
+      vertical-align: 1px;
+      box-shadow: 0 0 0 4px rgba(160, 227, 200, 0.35);
+      animation: pulse 1.8s ease-out infinite;
+    }
+    @keyframes pulse {
+      0%   { box-shadow: 0 0 0 0px rgba(160, 227, 200, 0.55); }
+      70%  { box-shadow: 0 0 0 8px rgba(160, 227, 200, 0); }
+      100% { box-shadow: 0 0 0 0px rgba(160, 227, 200, 0); }
+    }
+
+    /* you-called-it bar */
+    .wc-status {
+      margin: 14px 4px 8px;
+      background: var(--lavender-tint);
+      border-radius: 18px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--ink);
+    }
+    .wc-status-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      background: var(--lavender);
+      display: grid;
+      place-items: center;
+      color: var(--ink);
+      flex-shrink: 0;
+    }
+    .wc-status-icon svg { width: 14px; height: 14px; }
+    .wc-status-text {
+      flex: 1;
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: -0.005em;
+    }
+    .wc-status-text .em {
+      font-family: var(--ff-serif);
+      font-style: italic;
+      font-weight: 400;
+      color: var(--lavender-deep);
+      font-size: 14px;
+    }
+    .wc-status-pct {
+      font-family: var(--ff-mono);
+      font-weight: 500;
+      font-size: 12px;
+      color: var(--ink);
+    }
+
+    /* the chat room layout */
+    .wc-room {
+      position: relative;
+      flex: 1;
+      margin-top: 6px;
+      padding: 6px 2px 10px;
+      overflow: hidden;
+    }
+    .wc-bubble {
+      position: absolute;
+      border-radius: var(--r-bubble);
+      padding: 8px 14px;
+      font-family: var(--ff-display);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      line-height: 1.05;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      box-shadow: var(--shadow-soft);
+    }
+    .wc-bubble .ct {
+      font-family: var(--ff-mono);
+      font-weight: 500;
+      font-size: 10px;
+      color: rgba(31, 26, 36, 0.55);
+      letter-spacing: 0.05em;
+      margin-left: 2px;
+    }
+    .wc-bubble--in  { /* incoming */
+      background: var(--surface);
+      border-bottom-left-radius: 8px;
+    }
+    .wc-bubble--out { /* outgoing */
+      background: var(--surface);
+      border-bottom-right-radius: 8px;
+    }
+
+    /* color variants — every bubble has a pastel left-edge tint */
+    .v-rose     { background: var(--rose-tint);     }
+    .v-mint     { background: var(--mint-tint);     }
+    .v-lavender { background: var(--lavender-tint); }
+    .v-peach    { background: var(--peach-tint);    }
+    .v-white    { background: var(--surface);       }
+    .v-rose-d   { background: var(--rose);          color: var(--ink); }
+
+    /* top cluster — the giant rose incoming bubble */
+    .wc-top-cluster {
+      background: linear-gradient(180deg, var(--rose) 0%, var(--rose-deep) 100%);
+      color: var(--ink);
+      border-radius: 32px;
+      border-bottom-left-radius: 10px;
+      padding: 14px 22px 16px;
+      box-shadow: 0 12px 24px rgba(231, 138, 160, 0.30);
+    }
+    .wc-top-cluster .top-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .wc-crown {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.55);
+      display: grid;
+      place-items: center;
+      color: var(--ink);
+    }
+    .wc-crown svg { width: 12px; height: 12px; }
+    .wc-top-cluster .label {
+      font-family: var(--ff-mono);
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(31, 26, 36, 0.7);
+    }
+    .wc-top-cluster .word {
+      font-family: var(--ff-display);
+      font-weight: 800;
+      font-size: 56px;
+      letter-spacing: -0.04em;
+      line-height: 0.92;
+      color: var(--ink);
+    }
+    .wc-top-cluster .meta {
+      margin-top: 6px;
+      font-family: var(--ff-mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      color: rgba(31, 26, 36, 0.66);
+    }
+
+    /* self bubble (lavender outgoing) */
+    .wc-self {
+      background: linear-gradient(180deg, var(--lavender) 0%, var(--lavender-deep) 100%);
+      color: var(--ink);
+      border-radius: 22px;
+      border-bottom-right-radius: 8px;
+      padding: 8px 14px;
+      box-shadow: 0 10px 18px rgba(180, 156, 255, 0.40);
+    }
+    .wc-self .heart {
+      display: inline-grid;
+      place-items: center;
+      width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.6);
+      color: var(--ink);
+      margin-right: 4px;
+    }
+    .wc-self .heart svg { width: 9px; height: 9px; }
+
+    /* legend strip */
+    .wc-legend {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 8px 6px 0;
+      font-family: var(--ff-mono);
+      font-size: 10px;
+      color: var(--subtext);
+      letter-spacing: 0.08em;
+    }
+    .wc-legend .item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .wc-legend .swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+    }
+
+    /* ================================================================
+       SCREEN 3 — LEADERBOARD
+       ================================================================ */
+    .lb-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .lb-title {
+      font-family: var(--ff-display);
+      font-weight: 800;
+      font-size: 26px;
+      letter-spacing: -0.03em;
+      color: var(--ink);
+    }
+    .lb-period {
+      margin-top: 14px;
+      display: flex;
+      gap: 4px;
+      padding: 4px;
+      background: rgba(31, 26, 36, 0.06);
+      border-radius: 999px;
+      align-self: flex-start;
+    }
+    .lb-period .seg {
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-family: var(--ff-display);
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: -0.005em;
+      color: var(--subtext);
+    }
+    .lb-period .seg.on {
+      background: var(--ink);
+      color: var(--bg);
+      box-shadow: 0 4px 10px rgba(31, 26, 36, 0.20);
+    }
+    .lb-scope {
+      margin-top: 10px;
+      display: flex;
+      gap: 6px;
+    }
+    .lb-scope .seg {
+      padding: 5px 11px;
+      border-radius: 999px;
+      font-family: var(--ff-mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--subtext);
+      background: var(--surface);
+      box-shadow: var(--shadow-soft);
+    }
+    .lb-scope .seg.on {
+      color: var(--ink);
+      background: var(--mint-tint);
+    }
+
+    .lb-list {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-bottom: 6px;
+    }
+    .lb-row {
+      display: grid;
+      grid-template-columns: 34px 1fr auto;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      background: var(--surface);
+      border-radius: 18px;
+      box-shadow: var(--shadow-soft);
+    }
+    .lb-rank {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      font-family: var(--ff-display);
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+    }
+    .lb-rank--1 { background: var(--rose);     }
+    .lb-rank--2 { background: var(--mint);     }
+    .lb-rank--3 { background: var(--peach);    }
+    .lb-rank--n { background: rgba(31, 26, 36, 0.08); color: var(--subtext); }
+
+    .lb-rank--1 { position: relative; }
+    .lb-crown {
+      position: absolute;
+      top: -8px;
+      right: -6px;
+      width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      background: var(--ink);
+      display: grid;
+      place-items: center;
+      color: var(--rose);
+    }
+    .lb-crown svg { width: 10px; height: 10px; }
+
+    .lb-handle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+    }
+    .lb-avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      flex-shrink: 0;
+    }
+    .lb-handle {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .lb-name {
+      font-family: var(--ff-display);
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--ink);
+      letter-spacing: -0.015em;
+      line-height: 1.05;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .lb-streak {
+      margin-top: 2px;
+      font-family: var(--ff-mono);
+      font-size: 9px;
+      letter-spacing: 0.06em;
+      color: var(--subtext);
+    }
+    .lb-streak .flame { color: var(--peach); font-family: var(--ff-display); }
+
+    .lb-score {
+      font-family: var(--ff-mono);
+      font-weight: 500;
+      font-size: 14px;
+      color: var(--ink);
+      letter-spacing: -0.005em;
+    }
+
+    .lb-row--self {
+      background: linear-gradient(180deg, var(--lavender-tint) 0%, #E4D8FF 100%);
+      box-shadow: var(--shadow-lift);
+      border: 1px solid rgba(180, 156, 255, 0.45);
+    }
+    .lb-row--self .lb-name { color: var(--ink); }
+    .lb-row--self .lb-score { color: var(--lavender-deep); }
+    .lb-row--self .you-tag {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: var(--lavender-deep);
+      color: #fff;
+      font-family: var(--ff-mono);
+      font-size: 8px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      vertical-align: 2px;
+    }
+
+    /* ================================================================
+       SCREEN 4 — ARCHIVE
+       ================================================================ */
+    .ar-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .ar-title {
+      font-family: var(--ff-display);
+      font-weight: 800;
+      font-size: 26px;
+      letter-spacing: -0.03em;
+      color: var(--ink);
+      line-height: 0.95;
+    }
+    .ar-title em {
+      font-family: var(--ff-serif);
+      font-weight: 400;
+      font-style: italic;
+      color: var(--rose-deep);
+      letter-spacing: -0.015em;
+    }
+    .ar-count {
+      font-family: var(--ff-mono);
+      font-size: 10px;
+      color: var(--subtext);
+      letter-spacing: 0.1em;
+    }
+
+    .ar-list {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      padding-bottom: 6px;
+    }
+    .ar-tile {
+      background: var(--surface);
+      border-radius: 18px;
+      padding: 12px 14px 12px 18px;
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      overflow: hidden;
+    }
+    .ar-tile::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 5px;
+      background: var(--accent, var(--rose));
+    }
+    .ar-tile .ar-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--ff-mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: var(--subtext);
+      text-transform: uppercase;
+    }
+    .ar-tile .ar-q {
+      margin-top: 6px;
+      font-family: var(--ff-display);
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: -0.015em;
+      color: var(--ink);
+      line-height: 1.25;
+    }
+    .ar-tile .ar-verdict {
+      margin-top: 4px;
+      font-family: var(--ff-serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: 16px;
+      letter-spacing: -0.01em;
+      color: var(--accent-text, #B5475D);
+      line-height: 1.05;
+    }
+    .ar-tile .ar-count-pill {
+      font-family: var(--ff-mono);
+      font-size: 9px;
+      color: var(--subtext);
+      letter-spacing: 0.08em;
+    }
+    .ar-tile.t-rose     { --accent: var(--rose);     --accent-text: #B5475D; }
+    .ar-tile.t-mint     { --accent: var(--mint);     --accent-text: #2F8A6A; }
+    .ar-tile.t-lavender { --accent: var(--lavender); --accent-text: #6849C7; }
+    .ar-tile.t-peach    { --accent: var(--peach);    --accent-text: #B16A28; }
+
+    /* banner ad stub */
+    .ar-ad {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: rgba(31, 26, 36, 0.04);
+      border: 1px dashed rgba(31, 26, 36, 0.18);
+      border-radius: 18px;
+    }
+    .ar-ad .ad-bug {
+      font-family: var(--ff-mono);
+      font-size: 8px;
+      letter-spacing: 0.18em;
+      color: var(--subtext);
+      text-transform: uppercase;
+      background: rgba(31, 26, 36, 0.08);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .ar-ad .ad-title {
+      font-family: var(--ff-display);
+      font-weight: 600;
+      font-size: 12px;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+    .ar-ad .ad-sub {
+      font-family: var(--ff-mono);
+      font-size: 9px;
+      color: var(--subtext);
+      letter-spacing: 0.06em;
+      margin-top: 1px;
+    }
+
+    /* ================================================================
+       TAB BAR (shared)
+       ================================================================ */
+    .tabbar {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 22px;
+      background: var(--surface);
+      border-radius: 999px;
+      box-shadow: var(--shadow-lift);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 8px 10px;
+      z-index: 4;
+    }
+    .tabbar-item {
+      width: 60px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      color: var(--subtext);
+      position: relative;
+    }
+    .tabbar-item svg { width: 22px; height: 22px; }
+    .tabbar-item.on {
+      background: var(--ink);
+      color: var(--bg);
+      box-shadow: 0 6px 14px rgba(31, 26, 36, 0.22);
+    }
+    .tabbar-item.on::after {
+      content: "";
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 4px;
+      border-radius: 999px;
+      background: var(--ink);
+    }
+    .tab-label {
+      position: absolute;
+      bottom: -16px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--ff-mono);
+      font-size: 8px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--subtext);
+      white-space: nowrap;
+    }
+    .tabbar-item.on .tab-label { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+
+  <header class="page-header">
+    <div class="ph-row">
+      <div>
+        <div class="ph-brand">
+          <div class="ph-logo" aria-hidden="true">
+            <svg viewBox="0 0 32 32" fill="none">
+              <!-- chat bubble with a dot -->
+              <path d="M5 14C5 9.582 8.582 6 13 6h6c4.418 0 8 3.582 8 8s-3.582 8-8 8h-3.5l-3.8 3.5a.6.6 0 0 1-1-.45V21.6C7.3 20.1 5 17.3 5 14Z" fill="#FBF8F3"/>
+              <circle cx="13" cy="14" r="1.5" fill="#F5A3B7"/>
+              <circle cx="17" cy="14" r="1.5" fill="#C8B5FF"/>
+              <circle cx="21" cy="14" r="1.5" fill="#A0E3C8"/>
+            </svg>
+          </div>
+          <div>
+            <div class="ph-wordmark">relatably<span class="dot">.</span></div>
+            <div class="ph-direction">04 · BUBBLE CHAT</div>
+          </div>
+        </div>
+        <h1 class="ph-title">soft, warm, <em>group-chat</em> warmth.</h1>
+        <p class="ph-sub">Hinge meets Geneva meets Lapse. Rounded Hanken Grotesk, pastel cluster bubbles, a friendly send button. Of all seven directions, this fits the brand name "Relatably" most literally.</p>
+      </div>
+      <div class="ph-meta">
+        <span class="ph-chip"><span class="swatch" style="background:#F5A3B7"></span> dusty rose · main</span>
+        <span class="ph-chip"><span class="swatch" style="background:#C8B5FF"></span> lavender · you</span>
+        <span class="ph-chip"><span class="swatch" style="background:#A0E3C8"></span> mint · live</span>
+        <span class="ph-chip"><span class="swatch" style="background:#FFCBA0"></span> peach · time</span>
+        <span class="ph-chip"><span class="swatch" style="background:#FBF8F3; box-shadow:inset 0 0 0 1px rgba(0,0,0,0.15)"></span> paper · #FBF8F3</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="phone-row">
+
+    <!-- ============================================================
+         PHONE 1 — QUESTION
+         ============================================================ -->
+    <div>
+      <div class="rb-phone rb-phone--light">
+        <div class="rb-phone-island"></div>
+        <div class="rb-phone-screen" id="screen-1">
+          <div class="scr scr--question">
+
+            <div class="topbar">
+              <div class="topbar-left">
+                <div class="avatar-dot" style="background:linear-gradient(135deg,#F5A3B7 0%,#C8B5FF 100%);">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#1F1A24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                </div>
+                <div class="topbar-handle">
+                  <div class="topbar-name">relatably</div>
+                  <div class="topbar-status"><span class="live-dot"></span>MON · MAY 11 · 6:34 PM UTC</div>
+                </div>
+              </div>
+              <div class="top-icon-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+              </div>
+            </div>
+
+            <div class="q-bubble-wrap">
+              <div class="avatar-dot">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#1F1A24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L9 9l-7 1 5 5-1 7 6-3 6 3-1-7 5-5-7-1-3-7z"/></svg>
+              </div>
+              <div class="q-bubble">
+                <div class="q-just-now">just now · daily drop</div>
+                <div class="q-text">what's the most <em>overrated</em> thing on the internet right now?</div>
+              </div>
+            </div>
+
+            <div class="q-time-card">
+              <div class="q-time-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+              </div>
+              <div class="q-time-meta">
+                <div class="q-time-label">time left</div>
+                <div class="q-time-value">21h 42m</div>
+              </div>
+              <div class="q-time-bar"><div class="q-time-bar-fill"></div></div>
+            </div>
+
+            <div class="q-count">
+              <div class="q-count-faces">
+                <div class="face" style="background:#F5A3B7"></div>
+                <div class="face" style="background:#A0E3C8"></div>
+                <div class="face" style="background:#FFCBA0"></div>
+              </div>
+              <div class="q-count-text"><span class="num">12,847</span> takes in</div>
+            </div>
+
+            <div class="q-input-spacer"></div>
+
+            <div class="q-input-wrap">
+              <div class="q-input">
+                <div class="q-input-text">type a take<span class="q-input-caret"></span></div>
+                <div class="q-send" aria-label="send">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+                </div>
+              </div>
+              <div class="q-helper">hit <kbd>send</kbd> · then see what the world thinks</div>
+            </div>
+
+            <div class="tabbar">
+              <div class="tabbar-item on">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a4 4 0 0 1-4 4H8l-5 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg>
+                <span class="tab-label">today</span>
+              </div>
+              <div class="tabbar-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <div class="tabbar-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7 7 .8-5.3 4.8 1.6 7L12 18.3 5.7 21.6l1.6-7L2 9.8 9 9z"/></svg>
+              </div>
+              <div class="tabbar-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8"/><path d="M10 12h4"/></svg>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <div class="rb-phone-bar"></div>
+      </div>
+      <div class="rb-phone-label">01 · QUESTION</div>
+    </div>
+
+    <!-- ============================================================
+         PHONE 2 — WORDCLOUD
+         ============================================================ -->
+    <div>
+      <div class="rb-phone rb-phone--light">
+        <div class="rb-phone-island"></div>
+        <div class="rb-phone-screen" id="screen-2">
+          <div class="scr scr--cloud">
+
+            <div class="wc-top">
+              <div class="wc-title-block">
+                <div class="wc-title">everyone's in</div>
+                <div class="wc-sub"><span class="live-dot"></span><span id="wc-total">12,847</span> takes · <span id="wc-countries">87</span> countries</div>
+              </div>
+              <div class="top-icon-btn" aria-label="share">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+              </div>
+            </div>
+
+            <div class="wc-status">
+              <div class="wc-status-icon">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.35-7-10a4.5 4.5 0 0 1 8-2.83A4.5 4.5 0 0 1 19 11c0 5.65-7 10-7 10z"/></svg>
+              </div>
+              <div class="wc-status-text">your take is in <span class="em">— AI</span></div>
+              <div class="wc-status-pct">#1 · 24.9%</div>
+            </div>
+
+            <div class="wc-room" id="wc-room"></div>
+
+            <div class="wc-legend">
+              <span class="item"><span class="swatch" style="background:#F5A3B7"></span>top cluster</span>
+              <span class="item"><span class="swatch" style="background:#C8B5FF"></span>your take</span>
+              <span class="item">sized by votes</span>
+            </div>
+
+            <div class="tabbar">
+              <div class="tabbar-item on">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a4 4 0 0 1-4 4H8l-5 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg>
+                <span class="tab-label">today</span>
+              </div>
+              <div class="tabbar-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <div class="tabbar-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7 7 .8-5.3 4.8 1.6 7L12 18.3 5.7 21.6l1.6-7L2 9.8 9 9z"/></svg>
+              </div>
+              <div class="tabbar-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8"/><path d="M10 12h4"/></svg>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <div class="rb-phone-bar"></div>
+      </div>
+      <div class="rb-phone-label">02 · WORDCLOUD</div>
+    </div>
+
+    <!-- ============================================================
+         PHONE 3 — LEADERBOARD
+         ============================================================ -->
+    <div>
+      <div class="rb-phone rb-phone--light">
+        <div class="rb-phone-island"></div>
+        <div class="rb-phone-screen" id="screen-3">
+          <div class="scr scr--lb">
+
+            <div class="lb-head">
+              <div class="lb-title">first calls</div>
+              <div class="top-icon-btn" aria-label="settings">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              </div>
+            </div>
+
+            <div class="lb-period">
+              <div class="seg on">daily</div>
+              <div class="seg">weekly</div>
+              <div class="seg">all-time</div>
+            </div>
+            <div class="lb-scope">
+              <div class="seg on">global</div>
+              <div class="seg">friends</div>
+            </div>
+
+            <div class="lb-list" id="lb-list"></div>
+
+            <div class="tabbar">
+              <div class="tabbar-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a4 4 0 0 1-4 4H8l-5 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg>
+              </div>
+              <div class="tabbar-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <div class="tabbar-item on">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7 7 .8-5.3 4.8 1.6 7L12 18.3 5.7 21.6l1.6-7L2 9.8 9 9z"/></svg>
+                <span class="tab-label">ranks</span>
+              </div>
+              <div class="tabbar-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8"/><path d="M10 12h4"/></svg>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <div class="rb-phone-bar"></div>
+      </div>
+      <div class="rb-phone-label">03 · LEADERBOARD</div>
+    </div>
+
+    <!-- ============================================================
+         PHONE 4 — ARCHIVE
+         ============================================================ -->
+    <div>
+      <div class="rb-phone rb-phone--light">
+        <div class="rb-phone-island"></div>
+        <div class="rb-phone-screen" id="screen-4">
+          <div class="scr scr--arch">
+
+            <div class="ar-head">
+              <div>
+                <div class="ar-title">past <em>takes</em></div>
+                <div class="wc-sub" style="margin-top:6px;">every drop, every winner</div>
+              </div>
+              <div class="ar-count" id="ar-count">8 days</div>
+            </div>
+
+            <div class="ar-list" id="ar-list"></div>
+
+            <div class="tabbar">
+              <div class="tabbar-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a4 4 0 0 1-4 4H8l-5 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg>
+              </div>
+              <div class="tabbar-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <div class="tabbar-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7 7 .8-5.3 4.8 1.6 7L12 18.3 5.7 21.6l1.6-7L2 9.8 9 9z"/></svg>
+              </div>
+              <div class="tabbar-item on">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8"/><path d="M10 12h4"/></svg>
+                <span class="tab-label">archive</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <div class="rb-phone-bar"></div>
+      </div>
+      <div class="rb-phone-label">04 · ARCHIVE</div>
+    </div>
+
+  </main>
+
+  <script src="../shared/content.js"></script>
+  <script>
+    const R = window.RELATABLY;
+
+    /* -------------- WORDCLOUD (chat room layout) ----------------- */
+    /* Hand-tuned positions for a chat-app feel — incoming on left,
+       outgoing on right, top cluster centered & dominant, self
+       bubble unmistakably lavender. */
+    (function renderCloud() {
+      const room = document.getElementById('wc-room');
+      if (!room) return;
+
+      // Map cluster id -> bubble style + position. 20 bubbles total.
+      // Position uses percentage so it scales inside the room area.
+      const layout = [
+        // top cluster (rose, incoming, dominant)
+        { id: 'c_ai', kind: 'top', x: 8,  y: 0,  w: 235, label: 'AI', count: 3204, note: '3,204 takes · #1 globally' },
+        // self bubble (lavender, outgoing) — but c_ai IS the self cluster!
+        // since AI is both #1 and self, the top cluster doubles as self-win.
+        // We add a small lavender "you" tag below to make it unmistakable.
+
+        // big incoming cluster
+        { id: 'c_tiktok',     pos: { left: '6%',  top: '128px' }, size: 32, color: 'v-rose-d',   kind: 'in', count: '1,892' },
+        // right side outgoing pastel
+        { id: 'c_twitter',    pos: { right: '6%', top: '136px' }, size: 28, color: 'v-mint',     kind: 'out', count: '1,421' },
+        { id: 'c_podcasts',   pos: { left: '10%', top: '188px' }, size: 22, color: 'v-peach',    kind: 'in', count: '987' },
+        { id: 'c_nfts',       pos: { right: '8%', top: '196px' }, size: 20, color: 'v-lavender', kind: 'out', count: '743' },
+        { id: 'c_influencers',pos: { left: '6%',  top: '236px' }, size: 18, color: 'v-white',    kind: 'in', count: '612' },
+        { id: 'c_linkedin',   pos: { right: '6%', top: '244px' }, size: 18, color: 'v-rose',     kind: 'out', count: '543' },
+        { id: 'c_crypto',     pos: { left: '14%', top: '280px' }, size: 17, color: 'v-mint',     kind: 'in', count: '487' },
+        { id: 'c_dating_apps',pos: { right: '4%', top: '286px' }, size: 16, color: 'v-peach',    kind: 'out', count: '432' },
+        { id: 'c_reddit',     pos: { left: '6%',  top: '320px' }, size: 16, color: 'v-lavender', kind: 'in', count: '389' },
+        { id: 'c_threads',    pos: { right: '14%',top: '324px' }, size: 15, color: 'v-white',    kind: 'out', count: '312' },
+        { id: 'c_instagram',  pos: { left: '18%', top: '356px' }, size: 14, color: 'v-rose',     kind: 'in', count: '287' },
+        { id: 'c_substack',   pos: { right: '8%', top: '358px' }, size: 13, color: 'v-mint',     kind: 'out', count: '198' },
+        { id: 'c_chatgpt',    pos: { left: '6%',  top: '388px' }, size: 13, color: 'v-peach',    kind: 'in', count: '167' },
+        { id: 'c_discord',    pos: { right: '20%',top: '388px' }, size: 12, color: 'v-lavender', kind: 'out', count: '134' },
+        { id: 'c_yt_shorts',  pos: { left: '22%', top: '416px' }, size: 12, color: 'v-white',    kind: 'in', count: '121' },
+        { id: 'c_snapchat',   pos: { right: '6%', top: '418px' }, size: 11, color: 'v-rose',     kind: 'out', count: '87' },
+        { id: 'c_bereal',     pos: { left: '8%',  top: '444px' }, size: 11, color: 'v-mint',     kind: 'in', count: '54' },
+        { id: 'c_clubhouse',  pos: { right: '24%',top: '446px' }, size: 10, color: 'v-peach',    kind: 'out', count: '23' },
+        { id: 'c_bluesky',    pos: { left: '34%', top: '470px' }, size: 10, color: 'v-lavender', kind: 'in', count: '18' },
+      ];
+
+      // 1) top cluster (rose, dominant)
+      const top = document.createElement('div');
+      top.className = 'wc-top-cluster';
+      top.style.position = 'absolute';
+      top.style.left = '6%';
+      top.style.right = '12%';
+      top.style.top = '4px';
+      top.innerHTML = `
+        <div class="top-row">
+          <div class="wc-crown">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 7l4 6 6-9 6 9 4-6v12H2z"/></svg>
+          </div>
+          <span class="label">#1 · 24.9% · top cluster</span>
+        </div>
+        <div class="word">AI</div>
+        <div class="meta">3,204 takes · matches your call</div>
+      `;
+      room.appendChild(top);
+
+      // 2) Self-bubble badge floating under the top (since AI === self cluster)
+      const selfBadge = document.createElement('div');
+      selfBadge.className = 'wc-self';
+      selfBadge.style.position = 'absolute';
+      selfBadge.style.right = '6%';
+      selfBadge.style.top = '94px';
+      selfBadge.style.fontSize = '13px';
+      selfBadge.innerHTML = `
+        <span class="heart">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.35-7-10a4.5 4.5 0 0 1 8-2.83A4.5 4.5 0 0 1 19 11c0 5.65-7 10-7 10z"/></svg>
+        </span>
+        you called it
+      `;
+      room.appendChild(selfBadge);
+
+      // 3) Remaining bubbles
+      const byId = id => R.clusters.find(c => c.id === id);
+      layout.forEach(b => {
+        if (b.kind === 'top') return;
+        const c = byId(b.id);
+        if (!c) return;
+        const el = document.createElement('div');
+        el.className = `wc-bubble wc-bubble--${b.kind} ${b.color}`;
+        el.style.fontSize = `${b.size}px`;
+        if (b.pos.left)  el.style.left  = b.pos.left;
+        if (b.pos.right) el.style.right = b.pos.right;
+        el.style.top   = b.pos.top;
+        el.innerHTML = `${c.text}<span class="ct">${b.count}</span>`;
+        room.appendChild(el);
+      });
+    })();
+
+    /* -------------- LEADERBOARD ---------------------------------- */
+    (function renderLeaderboard() {
+      const list = document.getElementById('lb-list');
+      if (!list) return;
+
+      const avatars = ['#F5A3B7','#A0E3C8','#FFCBA0','#C8B5FF','#FBD0DC','#B7E8FF','#F4D9A8','#D7E5C5','#E8BFE3','#F0A294'];
+
+      R.leaderboard.entries.forEach((e, i) => {
+        const row = document.createElement('div');
+        row.className = 'lb-row' + (e.isSelf ? ' lb-row--self' : '');
+        let rankClass = 'lb-rank--n';
+        if (e.rank === 1) rankClass = 'lb-rank--1';
+        else if (e.rank === 2) rankClass = 'lb-rank--2';
+        else if (e.rank === 3) rankClass = 'lb-rank--3';
+
+        const crown = e.crown ? `<div class="lb-crown"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 7l4 6 6-9 6 9 4-6v12H2z"/></svg></div>` : '';
+        const youTag = e.isSelf ? '<span class="you-tag">you</span>' : '';
+
+        row.innerHTML = `
+          <div class="lb-rank ${rankClass}">
+            ${e.rank}
+            ${crown}
+          </div>
+          <div class="lb-handle-wrap">
+            <div class="lb-avatar" style="background:${avatars[i]}"></div>
+            <div class="lb-handle">
+              <div class="lb-name">${e.handle}${youTag}</div>
+              <div class="lb-streak"><span class="flame">●</span> ${e.streak}-day streak</div>
+            </div>
+          </div>
+          <div class="lb-score">${e.score.toLocaleString()}</div>
+        `;
+        list.appendChild(row);
+      });
+    })();
+
+    /* -------------- ARCHIVE -------------------------------------- */
+    (function renderArchive() {
+      const list = document.getElementById('ar-list');
+      if (!list) return;
+      const count = document.getElementById('ar-count');
+      if (count) count.textContent = `${R.archive.length} days`;
+
+      const tones = ['t-rose', 't-mint', 't-lavender', 't-peach'];
+
+      R.archive.forEach((a, i) => {
+        const tone = tones[i % tones.length];
+        const tile = document.createElement('div');
+        tile.className = `ar-tile ${tone}`;
+        tile.innerHTML = `
+          <div class="ar-meta">
+            <span>${a.date}</span>
+            <span class="ar-count-pill">${a.count.toLocaleString()} in</span>
+          </div>
+          <div class="ar-q">${a.text}</div>
+          <div class="ar-verdict">"${a.verdict}"</div>
+        `;
+        list.appendChild(tile);
+
+        // insert ad stub after the 4th tile
+        if (i === 3) {
+          const ad = document.createElement('div');
+          ad.className = 'ar-ad';
+          ad.innerHTML = `
+            <span class="ad-bug">ad</span>
+            <div>
+              <div class="ad-title">your daily Spotify wrapped, but weekly</div>
+              <div class="ad-sub">sponsored · tap to listen</div>
+            </div>
+          `;
+          list.appendChild(ad);
+        }
+      });
+    })();
+
+    /* -------------- top counters --------------------------------- */
+    const wcTotal = document.getElementById('wc-total');
+    if (wcTotal) wcTotal.textContent = R.meta.totalAnswers.toLocaleString();
+    const wcCountries = document.getElementById('wc-countries');
+    if (wcCountries) wcCountries.textContent = R.meta.countriesAnswered;
+  </script>
+</body>
+</html>
