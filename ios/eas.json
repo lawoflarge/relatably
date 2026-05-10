@@ -1,0 +1,51 @@
+{
+  "cli": {
+    "version": ">= 12.0.0",
+    "appVersionSource": "local"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "ios": {
+        "bundleIdentifier": "co.relatably.app"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://relatably.vercel.app"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "ios": {
+        "bundleIdentifier": "co.relatably.app"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://relatably.vercel.app",
+        "EXPO_PUBLIC_FIREBASE_API_KEY": "",
+        "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "relatably-prod.firebaseapp.com",
+        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "relatably-prod",
+        "EXPO_PUBLIC_FIREBASE_APP_ID": "",
+        "EXPO_PUBLIC_ADMOB_ENABLED": "false",
+        "EXPO_PUBLIC_ADMOB_LEADERBOARD_BANNER_ID": "",
+        "EXPO_PUBLIC_ADMOB_ARCHIVE_BANNER_ID": "",
+        "EXPO_PUBLIC_ADMOB_INTERSTITIAL_ID": "",
+        "EXPO_PUBLIC_BRANCH_KEY": ""
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "appleId": "",
+        "ascAppId": "",
+        "appleTeamId": ""
+      }
+    }
+  }
+}
