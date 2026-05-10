@@ -59,8 +59,12 @@ logs/
 # Firebase secrets (never commit)
 firebase-service-account.json
 api/firebase-service-account.json
-ios/GoogleService-Info.plist
 ios/google-services.json
+# Note: ios/GoogleService-Info.plist is intentionally NOT gitignored.
+# EAS Build needs it to bundle into the .ipa; Apple ships it inside every
+# Apple app bundle so the iOS Firebase API key inside is public-by-design.
+# Security comes from Firestore Security Rules (deny-by-default), not key
+# obscurity.
 .firebase/
 firebase-debug.log
 firestore-debug.log
