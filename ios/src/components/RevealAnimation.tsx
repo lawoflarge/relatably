@@ -4,6 +4,7 @@ import type { YesterdayCluster } from "../types/api";
 import { ShareCardVerdict } from "./ShareCardVerdict";
 import { ShareCardCalledIt } from "./ShareCardCalledIt";
 import { shareCardImage } from "../lib/shareCard";
+import { palette, typography, sp, radii, shadow } from "../theme/tokens";
 
 interface Props {
   questionId?: string;
@@ -124,7 +125,7 @@ export function RevealAnimation({
         ))}
       </View>
       {done && verdict && (
-        <Text style={styles.verdict}>🌍 the world said: {verdict.canonical_text}</Text>
+        <Text style={styles.verdict}>the world said — {verdict.canonical_text}</Text>
       )}
 
       {done && questionId && (
@@ -183,17 +184,17 @@ export function RevealAnimation({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: palette.cream,
     paddingTop: 60,
-    paddingHorizontal: 16,
+    paddingHorizontal: sp.gutter,
     alignItems: "center",
   },
   question: {
-    color: "#aaff00",
-    fontSize: 20,
-    fontWeight: "700",
+    color: palette.ink,
+    fontSize: typography.h2.size,
+    fontFamily: typography.h2.family,
     textAlign: "center",
-    marginBottom: 24,
+    marginBottom: sp[5],
   },
   cloud: {
     flex: 1,
@@ -203,48 +204,60 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   bubble: {
-    color: "#fff",
+    color: palette.inkSoft,
+    fontFamily: typography.body.family,
     margin: 6,
   },
   selfBubble: {
-    color: "#aaff00",
-    textShadowColor: "#aaff00",
-    textShadowRadius: 8,
+    color: palette.pink,
+    // hot-pink ring shadow instead of neon glow
+    textShadowColor: palette.pink,
+    textShadowRadius: 6,
   },
   verdict: {
-    color: "#aaff00",
-    fontSize: 24,
-    fontWeight: "800",
-    marginVertical: 24,
+    color: palette.pink,
+    fontSize: typography.h1.size,
+    fontFamily: typography.h1.family,
+    marginVertical: sp[5],
     textAlign: "center",
   },
   cta: {
-    gap: 12,
-    paddingVertical: 16,
+    gap: sp[3],
+    paddingVertical: sp[4],
     width: "100%",
   },
   shareBtn: {
-    backgroundColor: "#aaff00",
-    paddingHorizontal: 24,
+    backgroundColor: palette.pink,
+    paddingHorizontal: sp[5],
     paddingVertical: 14,
-    borderRadius: 999,
+    borderRadius: radii.pill,
     alignItems: "center",
+    borderWidth: 2,
+    borderColor: palette.ink,
+    // sticker shadow
+    shadowColor: palette.ink,
+    shadowOffset: shadow.s.offset,
+    shadowRadius: shadow.s.radius,
+    shadowOpacity: shadow.s.opacity,
+    elevation: shadow.s.elevation,
   },
   crownBtn: {
-    backgroundColor: "#fff",
+    backgroundColor: palette.lemon2,
   },
   shareLabel: {
-    color: "#000",
+    color: palette.ink,
+    fontFamily: typography.label.family,
+    letterSpacing: typography.label.letterSpacing,
     fontWeight: "900",
-    letterSpacing: 1,
   },
   continueBtn: {
-    paddingVertical: 12,
+    paddingVertical: sp[3],
     alignItems: "center",
   },
   continueLabel: {
-    color: "#888",
-    fontSize: 14,
+    color: palette.inkSoft,
+    fontFamily: typography.bodyS.family,
+    fontSize: typography.bodyS.size,
   },
   offscreen: {
     position: "absolute",
