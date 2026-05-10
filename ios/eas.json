@@ -42,9 +42,9 @@
   "submit": {
     "production": {
       "ios": {
-        "appleId": "",
+        "appleId": "levin.schwab@gmx.de",
         "ascAppId": "",
-        "appleTeamId": ""
+        "appleTeamId": "R95M36AU2X"
       }
     }
   }
