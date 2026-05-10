@@ -12,16 +12,12 @@
       "googleServicesFile": "./GoogleService-Info.plist",
       "usesAppleSignIn": true,
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false,
-        "UIBackgroundModes": [
-          "remote-notification"
-        ]
+        "ITSAppUsesNonExemptEncryption": false
       },
-      "buildNumber": "11"
+      "buildNumber": "17"
     },
     "plugins": [
       "@react-native-firebase/app",
-      "@react-native-firebase/messaging",
       "expo-apple-authentication",
       "expo-secure-store",
       "./plugins/with-non-modular-includes"
