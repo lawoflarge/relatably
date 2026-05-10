@@ -6,6 +6,7 @@ import {
 } from "firebase-admin/app";
 import { getFirestore, type Firestore } from "firebase-admin/firestore";
 import { getAuth, type Auth } from "firebase-admin/auth";
+import { getMessaging, type Messaging } from "firebase-admin/messaging";
 import * as path from "node:path";
 import * as fs from "node:fs";
 
@@ -48,3 +49,4 @@ function getApp(): App {
 
 export const adminFirestore: Firestore = getFirestore(getApp());
 export const adminAuth: Auth = getAuth(getApp());
+export const adminMessaging: Messaging = getMessaging(getApp());
