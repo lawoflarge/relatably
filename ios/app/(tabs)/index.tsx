@@ -15,6 +15,14 @@ import {
 } from "@/src/lib/api";
 import { getDeviceToken } from "@/src/lib/deviceId";
 import { firestore } from "@/src/lib/firebase";
+import {
+  collection,
+  query,
+  where,
+  orderBy,
+  limit,
+  onSnapshot,
+} from "firebase/firestore";
 import { hasSeenReveal, markRevealSeen } from "@/src/lib/revealStore";
 import { requestNotificationPermission, getFcmToken } from "@/src/lib/messaging";
 import {
@@ -89,30 +97,32 @@ export default function HomeScreen() {
   // Subscribe to Firestore listener for live cluster updates (only when we have a question).
   useEffect(() => {
     if (!question) return;
-    const unsub = firestore()
-      .collection("answer_clusters")
-      .where("question_id", "==", question.id)
-      .orderBy("submission_count", "desc")
-      .limit(100)
-      .onSnapshot(
-        (snap) => {
-          const next: Cluster[] = snap.docs.map((d) => {
-            const data = d.data() as {
-              canonical_text: string;
-              submission_count: number;
-            };
-            return {
-              id: d.id,
-              canonical_text: data.canonical_text,
-              submission_count: data.submission_count,
-            };
-          });
-          setClusters(next);
-        },
-        (err) => {
-          console.warn("clusters listener error", err);
-        },
-      );
+    const q = query(
+      collection(firestore(), "answer_clusters"),
+      where("question_id", "==", question.id),
+      orderBy("submission_count", "desc"),
+      limit(100),
+    );
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        const next: Cluster[] = snap.docs.map((d) => {
+          const data = d.data() as {
+            canonical_text: string;
+            submission_count: number;
+          };
+          return {
+            id: d.id,
+            canonical_text: data.canonical_text,
+            submission_count: data.submission_count,
+          };
+        });
+        setClusters(next);
+      },
+      (err) => {
+        console.warn("clusters listener error", err);
+      },
+    );
     return () => unsub();
   }, [question]);
 

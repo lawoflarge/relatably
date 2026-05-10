@@ -1,5 +1,5 @@
 import { LeaderboardScreen } from "@/src/screens/LeaderboardScreen";
-import auth from "@react-native-firebase/auth";
+import { auth } from "@/src/lib/firebase";
 
 export default function LeaderboardTab() {
   const isSignedIn = auth().currentUser !== null;

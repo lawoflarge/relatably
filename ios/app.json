@@ -9,18 +9,15 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "co.relatably.app",
-      "googleServicesFile": "./GoogleService-Info.plist",
       "usesAppleSignIn": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       },
-      "buildNumber": "17"
+      "buildNumber": "19"
     },
     "plugins": [
-      "@react-native-firebase/app",
       "expo-apple-authentication",
-      "expo-secure-store",
-      "./plugins/with-non-modular-includes"
+      "expo-secure-store"
     ],
     "extra": {
       "eas": {

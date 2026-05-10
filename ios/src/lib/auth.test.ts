@@ -1,4 +1,6 @@
 import { signInWithApple, signOut, getIdToken } from "./auth";
+import * as fbAuth from "firebase/auth";
+import { auth } from "./firebase";
 
 jest.mock("expo-apple-authentication", () => ({
   AppleAuthenticationScope: { FULL_NAME: "name", EMAIL: "email" },
@@ -6,23 +8,28 @@ jest.mock("expo-apple-authentication", () => ({
   isAvailableAsync: jest.fn(),
 }));
 
-jest.mock("@react-native-firebase/auth", () => {
-  const signInWithCredential = jest.fn();
-  const signOutFn = jest.fn();
-  const getIdTokenFn = jest.fn();
-  const auth: any = jest.fn(() => ({
-    signInWithCredential,
-    signOut: signOutFn,
-    currentUser: { getIdToken: getIdTokenFn },
+jest.mock("./firebase", () => ({
+  auth: jest.fn(() => ({ currentUser: { getIdToken: jest.fn() } })),
+  firestore: jest.fn(),
+}));
+
+jest.mock("firebase/auth", () => {
+  const credential = jest.fn((opts: { idToken: string; rawNonce: string }) => ({
+    ...opts,
+    providerId: "apple.com",
   }));
-  auth.AppleAuthProvider = {
-    credential: jest.fn((idToken: string, nonce: string) => ({ idToken, nonce, providerId: "apple.com" })),
+  return {
+    OAuthProvider: jest.fn().mockImplementation((id: string) => ({
+      providerId: id,
+      credential,
+    })),
+    signInWithCredential: jest.fn(),
+    signOut: jest.fn(),
+    __credentialFn: credential,
   };
-  return { __esModule: true, default: auth };
 });
 
 import * as AppleAuthentication from "expo-apple-authentication";
-import auth from "@react-native-firebase/auth";
 
 describe("ios auth helper", () => {
   beforeEach(() => {
@@ -35,11 +42,17 @@ describe("ios auth helper", () => {
       nonce: "the-nonce",
       user: "apple-user-id",
     });
-    (auth() as any).signInWithCredential.mockResolvedValueOnce({ user: { uid: "firebase-uid-1" } });
+    (fbAuth.signInWithCredential as jest.Mock).mockResolvedValueOnce({
+      user: { uid: "firebase-uid-1" },
+    });
 
     const out = await signInWithApple();
     expect(AppleAuthentication.signInAsync).toHaveBeenCalled();
-    expect((auth as any).AppleAuthProvider.credential).toHaveBeenCalledWith("apple-id-token-xyz", "the-nonce");
+    const credentialFn = (fbAuth as unknown as { __credentialFn: jest.Mock }).__credentialFn;
+    expect(credentialFn).toHaveBeenCalledWith({
+      idToken: "apple-id-token-xyz",
+      rawNonce: "the-nonce",
+    });
     expect(out).toMatchObject({ uid: "firebase-uid-1" });
   });
 
@@ -52,13 +65,14 @@ describe("ios auth helper", () => {
   });
 
   it("getIdToken returns the current Firebase ID token", async () => {
-    (auth() as any).currentUser.getIdToken.mockResolvedValueOnce("firebase-id-token-abc");
+    const mockGetIdToken = jest.fn().mockResolvedValueOnce("firebase-id-token-abc");
+    (auth as jest.Mock).mockReturnValueOnce({ currentUser: { getIdToken: mockGetIdToken } });
     await expect(getIdToken()).resolves.toBe("firebase-id-token-abc");
   });
 
   it("signOut calls Firebase auth signOut", async () => {
-    (auth() as any).signOut.mockResolvedValueOnce(undefined);
+    (fbAuth.signOut as jest.Mock).mockResolvedValueOnce(undefined);
     await signOut();
-    expect((auth() as any).signOut).toHaveBeenCalled();
+    expect(fbAuth.signOut).toHaveBeenCalled();
   });
 });
