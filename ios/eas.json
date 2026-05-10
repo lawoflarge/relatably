@@ -30,7 +30,11 @@
     "production": {
       "ios": {
         "appleId": "levin.schwab@gmx.de",
-        "appleTeamId": "R95M36AU2X"
+        "appleTeamId": "R95M36AU2X",
+        "ascAppId": "6768082631",
+        "ascApiKeyPath": "../.secrets/AuthKey_8XWLD2B2RQ.p8",
+        "ascApiKeyId": "8XWLD2B2RQ",
+        "ascApiKeyIssuerId": "538cb0d4-b8c6-4bc7-8b59-75da5d2b9411"
       }
     }
   }
