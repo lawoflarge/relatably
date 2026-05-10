@@ -13,6 +13,9 @@ export function isBranchEnabled(): boolean {
 
 export async function initBranch(): Promise<void> {
   if (!isBranchEnabled()) return;
+  // Dep removed in v1.0 (App Store ship). isBranchEnabled() is false
+  // in v1.0 so this never runs.
+  // @ts-expect-error -- module not in v1.0 deps
   const branch = (await import("react-native-branch")).default;
   await branch.subscribe(() => {
     // Phase 4 leaves install-attribution params unhandled — Phase 6 will
@@ -31,6 +34,9 @@ export async function createBranchUniversalLink(
 ): Promise<string | null> {
   if (!isBranchEnabled()) return null;
 
+  // Dep removed in v1.0 (App Store ship). isBranchEnabled() is false
+  // in v1.0 so this never runs.
+  // @ts-expect-error -- module not in v1.0 deps
   const branch = (await import("react-native-branch")).default;
   const branchUniversalObject = await branch.createBranchUniversalObject(
     `relatably/share/${opts.banner_type}/${opts.question_id}`,
