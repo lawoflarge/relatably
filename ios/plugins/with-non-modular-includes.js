@@ -19,7 +19,7 @@ const fs = require("fs");
 const path = require("path");
 
 const TOP_MARKER = "# === relatably: rnfb static framework + modular headers ===";
-const TOP_INJECT = `\n${TOP_MARKER}\n$RNFirebaseAsStaticFramework = true\nuse_modular_headers!\n`;
+const TOP_INJECT = `\n${TOP_MARKER}\n$RNFirebaseAsStaticFramework = true\n$FirebaseFirestoreCocoaPodsBinaryDistribution = true\nuse_modular_headers!\n`;
 
 const POST_MARKER = "# === relatably: clang allow non-modular includes ===";
 const POST_INJECT_LINES = [
