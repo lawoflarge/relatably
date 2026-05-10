@@ -11,42 +11,19 @@
       "bundleIdentifier": "co.relatably.app",
       "googleServicesFile": "./GoogleService-Info.plist",
       "usesAppleSignIn": true,
-      "config": {
-        "googleMobileAdsAppId": "ca-app-pub-3940256099942544~1458002511"
-      },
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "UIBackgroundModes": [
           "remote-notification"
-        ],
-        "SKAdNetworkItems": [
-          {
-            "SKAdNetworkIdentifier": "cstr6suwn9.skadnetwork"
-          }
         ]
       },
-      "buildNumber": "2"
+      "buildNumber": "8"
     },
     "plugins": [
       "@react-native-firebase/app",
       "@react-native-firebase/messaging",
       "expo-apple-authentication",
-      [
-        "react-native-google-mobile-ads",
-        {
-          "iosAppId": "ca-app-pub-3940256099942544~1458002511"
-        }
-      ],
-      [
-        "expo-build-properties",
-        {
-          "ios": {
-            "useFrameworks": "static"
-          }
-        }
-      ],
-      "expo-secure-store",
-      "./plugins/with-non-modular-includes"
+      "expo-secure-store"
     ],
     "extra": {
       "eas": {
