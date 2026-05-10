@@ -27,7 +27,7 @@ describe("LeaderboardScreen", () => {
   it("re-fetches on period change", async () => {
     (apiMod.fetchLeaderboard as jest.Mock).mockResolvedValue({ entries: [] });
     const { findByText } = render(<LeaderboardScreen isSignedIn={true} />);
-    await findByText(/today/i);
+    await findByText(/daily/i);
     fireEvent.press(await findByText(/all-time/i));
     await waitFor(() =>
       expect(apiMod.fetchLeaderboard).toHaveBeenLastCalledWith(
