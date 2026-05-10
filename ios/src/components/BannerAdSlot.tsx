@@ -5,21 +5,15 @@ interface Props {
   slot: "leaderboard_banner" | "archive_banner";
 }
 
-export function BannerAdSlot({ slot }: Props) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function BannerAdSlot({ slot: _slot }: Props) {
+  // v1.0 ships without AdMob; isAdsEnabled() is hard-gated to false.
+  // Reintroduce real banner in v1.0.1.
+  void getAdUnitId; // keep ads.ts API in scope for v1.0.1
   if (!isAdsEnabled()) {
     return <View testID="banner-ad-slot-disabled" style={styles.placeholder} />;
   }
-  // Lazy-loaded only when ads enabled — keeps test env clean.
-  const { BannerAd, BannerAdSize } = require("react-native-google-mobile-ads");
-  return (
-    <View style={styles.container}>
-      <BannerAd
-        unitId={getAdUnitId(slot)}
-        size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-        requestOptions={{ requestNonPersonalizedAdsOnly: true }}
-      />
-    </View>
-  );
+  return <View testID="banner-ad-slot-disabled" style={styles.placeholder} />;
 }
 
 const styles = StyleSheet.create({
