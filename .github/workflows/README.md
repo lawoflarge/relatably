@@ -13,7 +13,7 @@ auth.
 | `cron-prepare-next-drop.yml` | `0 0 * * *` (daily 00:00) | `POST /api/cron/prepare-next-drop` |
 | `cron-trigger-drop.yml` | `*/5 * * * *` (every 5 min) | `POST /api/cron/trigger-drop` |
 
-Score reveal is **not** a separate cron — it runs inline inside
+Score reveal is **not** a separate cron. It runs inline inside
 `trigger-drop` per the Phase 6 pivot doc.
 
 > GitHub Actions enforces a 5-minute minimum cron granularity, and
@@ -46,7 +46,7 @@ Each workflow is also `workflow_dispatch`-enabled so you can run it on
 demand:
 
 1. Open the **Actions** tab in the GitHub repo.
-2. Pick the workflow in the left sidebar (e.g. `Cron — Trigger Drop`).
+2. Pick the workflow in the left sidebar (e.g. `Cron - Trigger Drop`).
 3. Click **Run workflow** → choose `phase-6-launch-hardening` (or `main`
    once merged) → **Run workflow**.
 
@@ -57,5 +57,5 @@ This is the fastest way to smoke-test the wiring after rotating
 
 `curl -fSs` causes the step (and the run) to fail loudly on any non-2xx
 HTTP response, so failures show up red in the Actions UI and via
-GitHub's default failure notifications. There is no retry — the next
+GitHub's default failure notifications. There is no retry. The next
 scheduled tick is the retry.
