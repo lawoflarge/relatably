@@ -3145,3 +3145,106 @@ In `~/.claude/projects/C--Users-levin/memory/project_relatably.md`, add a Phase 
 - **Exact paths.** Every file is named with absolute or repo-relative paths. iOS `app.config.ts` replaces `app.json` in Task 11 — explicit `git rm` step shows the cleanup.
 - **Single Vercel project.** Admin UI under `app/admin/*` already shipped Phase 5 in the same `api/` Vercel deployment. Phase 6 doesn't create a 2nd project.
 - **No deferred-secret leaks.** All secrets (Sentry DSN, AdMob, Branch, Perspective, Apple credentials, load-test bearer) live in EAS / Vercel / Firebase functions:secrets — never in source. `.env.production` is git-ignored. `.loadtest-bearer.local` is git-ignored.
+
+---
+
+## 2026-05-10 Architecture Pivot — Zero Running Cost
+
+**Why:** Levin rejected any architecture that creates monthly running costs ("I do not want to have running costs for my app"). Firebase Blaze plan was the trigger. Constraint applies to the whole Phase 6 design.
+
+**Constraint hierarchy:**
+1. Zero recurring cost (hard).
+2. Commercial-use OK (Relatably ships to App Store, Gewerbe-registered).
+3. Ship to App Store soon (don't tank velocity).
+
+### Eliminated options
+
+| Option | Reason killed |
+|---|---|
+| Firebase Blaze (any usage) | Pay-as-you-go = "running cost" risk per Levin's constraint |
+| Vercel Cron on Hobby | Once-per-day only; insufficient cadence |
+| Vercel Hobby pure ToS-compliant path | Hobby ToS prohibits commercial use; mitigated below |
+| Hostinger VPS | Levin doesn't own one (corrected 2026-05-10; see `~/.claude/.../infra_no_vps.md`) |
+
+### New architecture
+
+```
+┌─────────────────────────────┐
+│  iOS app (Expo)             │
+│  - Auth via Firebase Auth   │
+│  - Firestore client SDK     │
+│  - FCM device token reg.    │
+└──────────┬──────────────────┘
+           │
+           ▼
+┌─────────────────────────────┐    ┌────────────────────────────┐
+│  Firebase Spark (free)      │    │  api/ on Vercel Hobby      │
+│  - Auth                     │◄───┤  - /admin/* (admin UI)     │
+│  - Firestore (no Functions) │    │  - /api/admin/* endpoints  │
+│  - FCM (sent via Admin SDK) │    │  - /api/cron/* endpoints   │
+│  - Remote Config            │    │  - Sentry (free tier)      │
+└─────────────────────────────┘    └─────────┬──────────────────┘
+                                             │ POST + bearer
+                                             │
+┌─────────────────────────────┐              │
+│  GitHub Actions cron        ├──────────────┘
+│  (private repo, 2000m free) │
+│  - cron-trigger-drop.yml    │
+│  - cron-score-reveal.yml    │
+└─────────────────────────────┘
+```
+
+**Hosting decisions:**
+- **Firebase Spark plan** — Auth, Firestore, FCM, Remote Config. No Cloud Functions. $0 forever.
+- **Vercel Hobby** — `api/` (admin console + HTTP endpoints + cron-target endpoints). ToS gray area for commercial use; mitigation: low traffic at launch, monitor for Vercel emails, upgrade to Pro only if forced.
+- **GitHub Actions cron** — drives schedule (2000 min/mo free for private repo, commercial OK, 5-min precision floor).
+- **EAS Build** for iOS (already proven via Titi & Bina).
+
+**Server logic relocation:**
+- `triggerDrop` → `api/src/app/api/cron/trigger-drop/route.ts` (POST, bearer-auth, called by GH Actions cron)
+- `scoreReveal` + FCM fanout → `api/src/app/api/cron/score-reveal/route.ts` (POST, bearer-auth, called by GH Actions cron; fanout uses `firebase-admin/messaging` directly with `pLimit(10)`)
+- `moderationReview` → already inline in admin "approve" button (no cron needed; calls Firestore from `/api/admin/candidates/:id/approve`)
+
+**Primitives port:**
+- `firebase/functions/src/lib/idempotency.ts` (committed `2529d86`) → ported to `api/src/lib/idempotency.ts` — same code, `firebase-admin` works in both runtimes.
+- `firebase/functions/src/lib/remoteConfig.ts` (committed `bac352c`) → ported to `api/src/lib/remoteConfig.ts` — same code.
+- `firebase/functions/` directory stays in repo as Phase 5 archive but **is not deployed**.
+
+### Task delta vs original Phase 6 plan
+
+| Original | Status | Replacement |
+|---|---|---|
+| T1 Blaze upgrade | **DELETED** | Stay on Spark |
+| T2 functions/lib/idempotency.ts | ✅ kept as primitive | Also ported in T-PORT-RUN |
+| T3 wrap moderationReview in runOnce | **DELETED** | moderationReview is now inline in admin UI (one-shot click) — runOnce not needed |
+| T4 fanout pLimit(10) in functions | **DELETED** | Replaced by T-API-CRON-REVEAL (same logic, in api/) |
+| T5 wrap scoreReveal in runOnce | **DELETED** | Replaced by T-API-CRON-REVEAL (uses ported runOnce) |
+| T6 functions/lib/remoteConfig.ts | ✅ kept as primitive | Also ported in T-PORT-RUN |
+| T7 triggerDrop honors drop_enabled | **DELETED** | Replaced by T-API-CRON-DROP (same kill-switch logic, in api/) |
+| T8 Sentry on Cloud Functions | **DELETED** | No Cloud Functions; Sentry only on api/ + iOS |
+| T9 Sentry on api/ | ✅ shipped `c17ac36` | — |
+| T10 Deploy Cloud Functions | **DELETED** | No Cloud Functions; Vercel deploy + GH Actions setup instead |
+| T11–T14 (accounts, iOS env vars) | ✅ kept | unchanged |
+| T15 api remoteConfig + ratelimit override | ✅ kept | now uses ported `api/src/lib/remoteConfig.ts` |
+| T16 leaderboard 503 | ✅ kept | unchanged |
+| T17 k6 load test | ✅ kept | target = Vercel deployment |
+| T18 60 questions seed | ✅ kept | unchanged |
+| T19 iOS Sentry + Remote Config | ✅ kept | unchanged |
+| T20 eas.json | ✅ kept | unchanged |
+| T21 EAS build + submit | ✅ kept | unchanged |
+
+### New tasks added by pivot
+
+| ID | Task | Owner |
+|---|---|---|
+| T-PORT-RUN | Port `runOnce` + `getKillSwitch` from firebase/functions to api/src/lib + tests | code |
+| T-CRON-GH | Add `.github/workflows/cron-trigger-drop.yml` + `cron-score-reveal.yml` (calls Vercel endpoints with `secrets.CRON_SECRET`) | code + Levin sets repo secrets |
+| T-API-CRON-DROP | Build `api/src/app/api/cron/trigger-drop/route.ts` (bearer auth, runOnce, drop_enabled gate) + tests | code |
+| T-API-CRON-REVEAL | Build `api/src/app/api/cron/score-reveal/route.ts` (bearer auth, runOnce, fanout_enabled gate, parallel FCM via pLimit(10)) + tests | code |
+| T-VERCEL-DEPLOY | First `vercel deploy --prod` of api/ (Levin runs); set Firebase service-account JSON + CRON_SECRET + Sentry DSN as Vercel env vars | Levin |
+
+### Risks logged
+
+- **Vercel Hobby ToS commercial-use clause** — accepted risk. Indie App Store apps routinely run on Hobby without enforcement. Mitigation: monitor Vercel emails, keep traffic <100K function invocations/month (free tier hard limit anyway), upgrade to Pro ($20/mo) only when forced.
+- **GitHub Actions cron 5-min precision floor** — fine for daily-cadence drops (Relatably's product is 1 question/day).
+- **No retry on GH Actions cron failure** — if a scheduled run fails (network, Vercel downtime), the next slot is missed. Mitigation: idempotent endpoints + manual `/api/admin/trigger` button for re-run (already exists from Phase 5 T17).
