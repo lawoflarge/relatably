@@ -31,10 +31,20 @@ function getApp(): App {
     return app;
   }
 
+  // Vercel serverless has no persistent filesystem, so production reads the
+  // service account from FIREBASE_SERVICE_ACCOUNT_JSON (env-var with the
+  // entire JSON string). Local dev still supports FIREBASE_SERVICE_ACCOUNT_PATH.
+  const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+  if (serviceAccountJson) {
+    const credentials = JSON.parse(serviceAccountJson);
+    app = initializeApp({ credential: cert(credentials), projectId });
+    return app;
+  }
+
   const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
   if (!serviceAccountPath) {
     throw new Error(
-      "FIREBASE_SERVICE_ACCOUNT_PATH must be set when not running against the emulator",
+      "FIREBASE_SERVICE_ACCOUNT_JSON or FIREBASE_SERVICE_ACCOUNT_PATH must be set when not running against the emulator",
     );
   }
 

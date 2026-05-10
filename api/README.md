@@ -69,3 +69,59 @@ Set the same five env vars in the Vercel project (`relatably-api` or whatever th
 | GET    | `/api/admin/questions`                          | Admin — list scheduled + live questions |
 | POST   | `/api/admin/questions/[id]/schedule`            | Admin — set scheduled_drop_at |
 | POST   | `/api/admin/trigger-drop`                       | Admin — soft-trigger next drop (≤60s) |
+
+## Phase 6 - Cron + observability + kill-switches
+
+The Cloud Functions architecture (`firebase/functions/`) was abandoned in
+the 2026-05-10 architecture pivot to keep monthly cost at €0 (Firebase
+Spark plan, no Blaze upgrade). All server-side scheduled work now lives
+in Vercel api/ routes called by GitHub Actions cron. See
+`docs/superpowers/plans/2026-05-09-relatably-phase6-launch-hardening.md`
+under "2026-05-10 Architecture Pivot" for full context.
+
+### Cron endpoints (require `Authorization: Bearer $CRON_SECRET`)
+
+| Method | Path | Schedule | Purpose |
+|---|---|---|---|
+| POST | `/api/cron/prepare-next-drop` | daily 00:00 UTC | Assigns `scheduled_drop_at` to oldest unscheduled question |
+| POST | `/api/cron/trigger-drop`      | every 5 min     | Flips due questions live + reveals previous + inline FCM fanout |
+
+Both endpoints are idempotent via `runOnce` (Firestore `function_runs`
+guard doc) and gated by Firebase Remote Config kill-switches.
+
+### Remote Config kill-switches (read by api/ at runtime)
+
+| Key | Type | Default | Effect when set |
+|---|---|---|---|
+| `drop_enabled` | boolean | `true` | When `false`, `/api/cron/trigger-drop` returns immediately |
+| `fanout_enabled` | boolean | `true` | When `false`, FCM push fanout is skipped during drops |
+| `submit_rate_limit_per_min` | number | `10` | Per-IP submit limit; set to `0` for full halt |
+
+5-min in-memory cache with graceful fallback. The api/ never goes down
+because Remote Config is unreachable.
+
+### Sentry
+
+`api/instrumentation.ts` initialises `@sentry/node` on the Node runtime
+when `SENTRY_DSN` is set. `tracesSampleRate=0.1` keeps the free-tier
+quota safe (5K errors / 10K traces per month).
+
+### Production env vars (Vercel)
+
+Add these on top of the Phase 5 admin-console set:
+
+```
+CRON_SECRET=...                 # openssl rand -hex 32; must match GH Actions secret
+SENTRY_DSN=https://...@sentry.io/...
+SENTRY_ENVIRONMENT=production
+PERSPECTIVE_API_KEY=...         # Phase 4; required for inline tier-2 moderation
+```
+
+### GitHub Actions repo secrets
+
+| Secret | Value |
+|---|---|
+| `CRON_SECRET` | same value as Vercel |
+| `API_BASE_URL` | `https://<your-vercel-deployment>` (no trailing slash) |
+
+Cron workflows live in `.github/workflows/cron-*.yml`.

@@ -51,7 +51,7 @@ describe("POST /api/devices/register", () => {
     expect(res.status).toBe(200);
 
     // device_token must be hashed (64 hex chars), never raw.
-    const docCallArg = docMock.mock.calls[0][0] as string;
+    const docCallArg = (docMock.mock.calls[0] as unknown as [string])[0];
     expect(docCallArg).toMatch(/^[a-f0-9]{64}$/);
     expect(docCallArg).not.toBe("raw-dev-1");
 

@@ -42,7 +42,7 @@ describe("POST /api/friends/request", () => {
 
     const res = await POST(buildReq({ target_user_id: "u2" }, "tok"));
     expect(res.status).toBe(200);
-    const idArg = docMock.mock.calls[0][0] as string;
+    const idArg = (docMock.mock.calls[0] as unknown as [string])[0];
     expect(idArg).toMatch(/^[a-f0-9]{40}$/);
     expect(setMock).toHaveBeenCalledWith(
       expect.objectContaining({
