@@ -34,29 +34,9 @@ export interface InterstitialController {
 
 export async function loadInterstitialOnce(): Promise<InterstitialController | null> {
   if (!isAdsEnabled()) return null;
-  // Lazy-load native module so test environments don't load it.
-  // Dep removed in v1.0 (App Store ship). Reintroduce in v1.0.1 once
-  // the @react-native-firebase + AdMob useFrameworks=static clash
-  // is resolved. isAdsEnabled() returns false in v1.0 so this never runs.
-  // @ts-expect-error -- module not in v1.0 deps
-  const mod = await import("react-native-google-mobile-ads");
-  const InterstitialAd = mod.InterstitialAd;
-  const AdEventType = mod.AdEventType;
-  const interstitial = InterstitialAd.createForAdRequest(getAdUnitId("post_reveal_interstitial"), {
-    requestNonPersonalizedAdsOnly: true,
-  });
-  const loaded = new Promise<void>((resolve) => {
-    const unsub = interstitial.addAdEventListener(AdEventType.LOADED, () => {
-      unsub();
-      resolve();
-    });
-  });
-  interstitial.load();
-  await loaded;
-  return {
-    show: () => interstitial.show(),
-    dispose: () => {
-      // SDK manages its own teardown; no explicit dispose needed.
-    },
-  };
+  // v1.0 ships without the AdMob native module; isAdsEnabled() is hard-
+  // gated to false via env, so this code path is unreachable at runtime.
+  // Reintroduce in v1.0.1 once the RNFB + useFrameworks=static clash is
+  // resolved -- at which point swap this stub back to a dynamic import.
+  return null;
 }
