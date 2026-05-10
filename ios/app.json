@@ -24,7 +24,8 @@
             "SKAdNetworkIdentifier": "cstr6suwn9.skadnetwork"
           }
         ]
-      }
+      },
+      "buildNumber": "2"
     },
     "plugins": [
       "@react-native-firebase/app",
@@ -44,7 +45,8 @@
           }
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "./plugins/with-non-modular-includes"
     ],
     "extra": {
       "eas": {
