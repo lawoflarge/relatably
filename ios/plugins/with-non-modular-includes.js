@@ -29,6 +29,12 @@ const TOP_INJECT = `\n${TOP_MARKER}\n$RNFirebaseAsStaticFramework = true\nuse_mo
 const TARGET_MARKER = "# === relatably: prebuilt firestore ===";
 const TARGET_INJECT = `
   ${TARGET_MARKER}
+  pod 'FirebaseAuth', :modular_headers => true
+  pod 'FirebaseAuthInterop', :modular_headers => true
+  pod 'FirebaseCore', :modular_headers => true
+  pod 'FirebaseCoreExtension', :modular_headers => true
+  pod 'FirebaseCoreInternal', :modular_headers => true
+  pod 'GoogleUtilities', :modular_headers => true
   pod 'FirebaseFirestore', :git => 'https://github.com/invertase/firestore-ios-sdk-frameworks.git', :tag => '11.15.0'
 `;
 
