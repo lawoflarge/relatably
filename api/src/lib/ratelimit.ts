@@ -1,3 +1,5 @@
+import { getKillSwitch } from "./remoteConfig";
+
 export interface RateLimitResult {
   ok: boolean;
   retryAfterMs: number;
@@ -20,11 +22,12 @@ export class MemoryRateLimiter implements RateLimiter {
   constructor(private cfg: RateLimitConfig) {}
 
   async check(key: string): Promise<RateLimitResult> {
+    const effectiveLimit = await getKillSwitch("submit_rate_limit_per_min", this.cfg.limit);
     const now = Date.now();
     const cutoff = now - this.cfg.windowMs;
     const arr = (this.hits.get(key) ?? []).filter((ts) => ts > cutoff);
-    if (arr.length >= this.cfg.limit) {
-      const retryAfterMs = arr[0] + this.cfg.windowMs - now;
+    if (arr.length >= effectiveLimit) {
+      const retryAfterMs = (arr[0] ?? now) + this.cfg.windowMs - now;
       this.hits.set(key, arr);
       return { ok: false, retryAfterMs: Math.max(retryAfterMs, 0) };
     }
@@ -46,6 +49,7 @@ class UpstashRateLimiter implements RateLimiter {
   }
 
   async check(key: string): Promise<RateLimitResult> {
+    const effectiveLimit = await getKillSwitch("submit_rate_limit_per_min", this.cfg.limit);
     const now = Date.now();
     const cutoff = now - this.cfg.windowMs;
     const script = `
@@ -59,7 +63,7 @@ class UpstashRateLimiter implements RateLimiter {
       [`rl:${key}`],
       [String(now), String(cutoff), String(Math.ceil(this.cfg.windowMs / 1000))],
     );
-    if (count > this.cfg.limit) {
+    if (count > effectiveLimit) {
       return { ok: false, retryAfterMs: this.cfg.windowMs };
     }
     return { ok: true, retryAfterMs: 0 };
