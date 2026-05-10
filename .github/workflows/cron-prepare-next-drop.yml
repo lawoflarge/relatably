@@ -1,0 +1,31 @@
+name: Cron — Prepare Next Drop
+
+on:
+  schedule:
+    # Daily at 00:00 UTC
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+jobs:
+  prepare-next-drop:
+    name: POST /api/cron/prepare-next-drop
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Vercel endpoint
+        env:
+          API_BASE_URL: ${{ secrets.API_BASE_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$API_BASE_URL" ]; then
+            echo "::error::API_BASE_URL secret is not set"
+            exit 1
+          fi
+          if [ -z "$CRON_SECRET" ]; then
+            echo "::error::CRON_SECRET secret is not set"
+            exit 1
+          fi
+          curl -fSs \
+            -X POST \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            -H "Content-Type: application/json" \
+            "$API_BASE_URL/api/cron/prepare-next-drop"
