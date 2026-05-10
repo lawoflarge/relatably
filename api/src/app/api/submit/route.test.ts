@@ -26,6 +26,14 @@ vi.mock("@/lib/ratelimit", () => {
   };
 });
 
+const { evaluateToxicityMock } = vi.hoisted(() => ({
+  evaluateToxicityMock: vi.fn(),
+}));
+
+vi.mock("@/lib/perspective", () => ({
+  evaluateToxicity: evaluateToxicityMock,
+}));
+
 import { POST } from "./route";
 import { adminFirestore, adminAuth } from "@/lib/firebase";
 import * as ratelimitMod from "@/lib/ratelimit";
@@ -41,6 +49,8 @@ describe("POST /api/submit", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (ratelimitMod as any).__getCheckMock().mockResolvedValue({ ok: true, retryAfterMs: 0 });
+    // Default: Perspective skipped (no API key) — existing tests are unaffected.
+    evaluateToxicityMock.mockResolvedValue({ verdict: "pass", score: 0, skipped: true });
   });
 
   it("rejects missing fields", async () => {
@@ -351,5 +361,156 @@ describe("POST /api/submit", () => {
     expect(typeof submissionWrite![1].submitted_at_minute_of_day).toBe("number");
     expect(submissionWrite![1].submitted_at_minute_of_day).toBeGreaterThanOrEqual(0);
     expect(submissionWrite![1].submitted_at_minute_of_day).toBeLessThanOrEqual(1439);
+  });
+
+  describe("tier-2 Perspective moderation (inline)", () => {
+    // Helper: build refs whose .update() is observable. The route calls
+    // submissionRef.update() (pass) or runs a second runTransaction (block)
+    // after the cheap-pass commit.
+    function setupRefs() {
+      const submissionUpdate = vi.fn().mockResolvedValue({});
+      const clusterUpdate = vi.fn().mockResolvedValue({});
+      const mockClusterRef = { id: "cluster-abc", update: clusterUpdate };
+      const mockSubmissionRef = { id: "sub-xyz", update: submissionUpdate };
+
+      (adminFirestore.collection as any).mockImplementation((name: string) => {
+        if (name === "device_users") {
+          return {
+            doc: vi.fn(() => ({
+              id: "dev-1",
+              get: vi.fn().mockResolvedValue({ exists: false }),
+              set: vi.fn().mockResolvedValue({}),
+            })),
+          };
+        }
+        if (name === "submissions") {
+          return { doc: vi.fn(() => mockSubmissionRef) };
+        }
+        throw new Error(`unexpected collection ${name}`);
+      });
+      (adminFirestore.doc as any).mockReturnValue(mockClusterRef);
+      return { mockClusterRef, mockSubmissionRef, submissionUpdate, clusterUpdate };
+    }
+
+    const validBody = {
+      question_id: "q1",
+      device_token: "dev1",
+      raw_text: "italy",
+      dwell_ms: 5000,
+    };
+
+    it("stamps tier2_reviewed_at + tier2_score when Perspective verdict is pass", async () => {
+      evaluateToxicityMock.mockResolvedValueOnce({
+        verdict: "pass",
+        score: 0.12,
+        skipped: false,
+      });
+      const { mockSubmissionRef, submissionUpdate } = setupRefs();
+      const tx = (adminFirestore as any).__mockTx;
+      // First runTransaction (cheap-pass commit): cluster does not exist yet.
+      tx.get.mockResolvedValueOnce({ exists: false });
+
+      const res = await POST(buildRequest(validBody));
+      expect(res.status).toBe(200);
+
+      // moderation_status stays "passed" (cheap-pass write).
+      const submissionWrite = tx.set.mock.calls.find((c: unknown[]) => c[0] === mockSubmissionRef);
+      expect(submissionWrite![1].moderation_status).toBe("passed");
+
+      // tier2 fields stamped via direct submissionRef.update().
+      expect(submissionUpdate).toHaveBeenCalledTimes(1);
+      const tier2Patch = submissionUpdate.mock.calls[0][0];
+      expect(tier2Patch.tier2_score).toBeCloseTo(0.12, 2);
+      expect(tier2Patch.tier2_reviewed_at).toBeDefined();
+    });
+
+    it("flips moderation_status to blocked AND decrements cluster when Perspective verdict is block", async () => {
+      evaluateToxicityMock.mockResolvedValueOnce({
+        verdict: "block",
+        score: 0.93,
+        skipped: false,
+      });
+      const { mockSubmissionRef, mockClusterRef, submissionUpdate } = setupRefs();
+      const tx = (adminFirestore as any).__mockTx;
+      // 1st runTransaction (cheap-pass commit): cluster exists with 5 prior submissions.
+      tx.get.mockResolvedValueOnce({
+        exists: true,
+        data: () => ({ submission_count: 5 }),
+      });
+      // 2nd runTransaction (tier-2 block): submission has no tier2_reviewed_at yet,
+      // cluster currently has 6 submissions (after the cheap-pass increment).
+      tx.get.mockResolvedValueOnce({
+        exists: true,
+        data: () => ({ moderation_status: "passed" }),
+      });
+      tx.get.mockResolvedValueOnce({
+        exists: true,
+        data: () => ({ submission_count: 6 }),
+      });
+
+      const res = await POST(buildRequest(validBody));
+      // Same UX as today: HTTP 200 with cluster_id payload.
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.submission_count).toBe(6);
+
+      // submissionRef.update() inside the tier-2 transaction flips status + stamps tier2.
+      expect(submissionUpdate).not.toHaveBeenCalled();
+      const submissionUpdateInTx = tx.update.mock.calls.find(
+        (c: unknown[]) => c[0] === mockSubmissionRef,
+      );
+      expect(submissionUpdateInTx).toBeDefined();
+      expect(submissionUpdateInTx![1]).toMatchObject({
+        moderation_status: "blocked",
+        tier2_score: 0.93,
+      });
+      expect(submissionUpdateInTx![1].tier2_reviewed_at).toBeDefined();
+
+      // Cluster decrement.
+      const clusterUpdateInTx = tx.update.mock.calls.find(
+        (c: unknown[]) => c[0] === mockClusterRef,
+      );
+      expect(clusterUpdateInTx).toBeDefined();
+      expect(clusterUpdateInTx![1].submission_count).toBeDefined();
+    });
+
+    it("does NOT block submission when Perspective API throws (graceful degradation)", async () => {
+      // evaluateToxicity catches network errors internally and returns skipped:true,
+      // so simulate that here.
+      evaluateToxicityMock.mockResolvedValueOnce({
+        verdict: "pass",
+        score: 0,
+        skipped: true,
+      });
+      const { mockSubmissionRef, submissionUpdate } = setupRefs();
+      const tx = (adminFirestore as any).__mockTx;
+      tx.get.mockResolvedValueOnce({ exists: false });
+
+      const res = await POST(buildRequest(validBody));
+      expect(res.status).toBe(200);
+
+      // moderation_status stays "passed".
+      const submissionWrite = tx.set.mock.calls.find((c: unknown[]) => c[0] === mockSubmissionRef);
+      expect(submissionWrite![1].moderation_status).toBe("passed");
+
+      // No tier2 stamp on skip — tier2_reviewed_at stays unset.
+      expect(submissionUpdate).not.toHaveBeenCalled();
+      // No second transaction (no block path).
+      expect(adminFirestore.runTransaction).toHaveBeenCalledTimes(1);
+    });
+
+    it("does NOT call Perspective API when cheap moderation already blocked the submission", async () => {
+      // "kys" is in the cheap profanity word-list; route returns 400 before tier-2.
+      const res = await POST(
+        buildRequest({
+          question_id: "q1",
+          device_token: "dev1",
+          raw_text: "kys",
+          dwell_ms: 5000,
+        }),
+      );
+      expect(res.status).toBe(400);
+      expect(evaluateToxicityMock).not.toHaveBeenCalled();
+    });
   });
 });

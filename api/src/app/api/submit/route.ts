@@ -7,6 +7,7 @@ import { containsProfanity } from "@/lib/profanity";
 import { hashIp, hashDeviceToken } from "@/lib/hash";
 import { requireAuth } from "@/lib/auth";
 import { getRateLimiter } from "@/lib/ratelimit";
+import { reviewSubmission } from "@/lib/moderationReview";
 
 const SubmitSchema = z.object({
   question_id: z.string().min(1),
@@ -119,6 +120,43 @@ export async function POST(req: Request) {
       moderation_status: "passed",
     });
   });
+
+  // Tier-2 toxicity check (Perspective API). Runs synchronously after the
+  // cheap-pass commit so we can either stamp tier2 fields (pass) or flip
+  // moderation_status + decrement the cluster (block). Mirrors the original
+  // onDocumentCreated(submissions/{id}) algorithm. Fails open: if Perspective
+  // throws or is skipped, the cheap verdict stands.
+  const verdict = await reviewSubmission({ raw_text: parsed.raw_text });
+
+  if (verdict.skipped) {
+    // Network error or no API key — keep cheap-pass verdict, do not stamp tier2.
+  } else if (verdict.verdict === "pass") {
+    await submissionRef.update({
+      tier2_reviewed_at: FieldValue.serverTimestamp(),
+      tier2_score: verdict.score,
+    });
+  } else {
+    await adminFirestore.runTransaction(async (tx) => {
+      const subRecheck = await tx.get(submissionRef);
+      if ((subRecheck.data() as { tier2_reviewed_at?: unknown } | undefined)?.tier2_reviewed_at) {
+        return;
+      }
+      const clusterSnap = await tx.get(clusterRef);
+      tx.update(submissionRef, {
+        moderation_status: "blocked",
+        tier2_reviewed_at: FieldValue.serverTimestamp(),
+        tier2_score: verdict.score,
+      });
+      const prevCount =
+        (clusterSnap.data() as { submission_count?: number } | undefined)
+          ?.submission_count ?? 0;
+      if (prevCount > 0) {
+        tx.update(clusterRef, {
+          submission_count: FieldValue.increment(-1),
+        });
+      }
+    });
+  }
 
   return NextResponse.json({
     cluster_id: cId,
