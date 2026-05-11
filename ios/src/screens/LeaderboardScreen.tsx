@@ -57,7 +57,7 @@ export function LeaderboardScreen({ isSignedIn, currentUserId }: Props) {
   const rows = interleaveAd(entries);
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top + sp[4] }]}>
+    <View style={[styles.root, { paddingTop: insets.top + sp[6] }]}>
       <PaperTexture />
       <Text style={styles.title}>the board ★</Text>
       <View style={styles.periodRow}>

@@ -11,6 +11,14 @@ workflows:
         XCODE_SCHEME: "Relatably"
         BUNDLE_ID: "co.relatably.app"
         APP_STORE_APPLE_ID: 6768082631
+        # Mirrored from ios/eas.json -> build.production.env. EAS read these
+        # automatically; Codemagic doesn't know about eas.json, so without
+        # this block EXPO_PUBLIC_API_URL is undefined at JS bundle time and
+        # ios/src/lib/api.ts falls back to http://localhost:3000 -> every
+        # request fails on the iPhone with "Network request failed".
+        # Build 25 shipped without these and the Today tab was unusable.
+        EXPO_PUBLIC_API_URL: "https://relatably.vercel.app"
+        EXPO_PUBLIC_ADMOB_ENABLED: "false"
       node: 20.18.0
       xcode: latest
       cocoapods: default

@@ -6,6 +6,19 @@ import { palette, radii, shadow, sp, typography } from "@/src/theme/tokens";
 
 type RouteName = "index" | "friends" | "leaderboard" | "archive";
 
+// Whitelist of routes that get a tab pill. Expo-router auto-discovers
+// every file in (tabs)/ including the nested archive/[id] dynamic route,
+// and `<Tabs.Screen options={{ href: null }} />` only suppresses items
+// from the DEFAULT React Navigation tab bar — custom tab bars (this
+// component) get every route in state.routes regardless. Build 25
+// shipped with archive/[id] visible as a phantom "ARCHIVE/[ID]" tab.
+const VISIBLE: ReadonlySet<RouteName> = new Set([
+  "index",
+  "friends",
+  "leaderboard",
+  "archive",
+]);
+
 // Unicode glyphs instead of react-native-svg icons. The svg package
 // downgrade (15.15 -> 15.12 to match Expo SDK 54) was leaving one of
 // the IconHome/Friends/Board/Archive imports as undefined at runtime,
@@ -33,15 +46,24 @@ interface Props {
 }
 
 export function StickerTabBar({ state, navigation, insets }: Props) {
+  // Tighter bottom padding so the pill hugs the home indicator instead of
+  // floating with a goofy 30-40pt cream gap below it (build 25 issue).
+  // Home indicator is ~34pt; keep ~8pt clearance so the gesture handle
+  // doesn't visually overlap the pill border.
+  const bottomPad = insets.bottom > 0 ? 8 : 12;
   return (
-    <View style={[styles.outer, { paddingBottom: Math.max(insets.bottom, 8) }]} pointerEvents="box-none">
+    <View style={[styles.outer, { paddingBottom: bottomPad }]} pointerEvents="box-none">
       <View style={styles.bar}>
-        {state.routes.map((route, i) => {
-          const name = route.name as RouteName;
-          const isActive = state.index === i;
-          const glyph = GLYPHS[name] ?? "•";
-          const label = LABELS[name] ?? route.name.toUpperCase();
-          return (
+        {state.routes
+          .map((route, i) => ({ route, originalIndex: i }))
+          .filter(({ route }) => VISIBLE.has(route.name as RouteName))
+          .map(({ route, originalIndex }) => {
+            const i = originalIndex;
+            const name = route.name as RouteName;
+            const isActive = state.index === i;
+            const glyph = GLYPHS[name] ?? "•";
+            const label = LABELS[name] ?? route.name.toUpperCase();
+            return (
             <Pressable
               key={route.key}
               role="button"
