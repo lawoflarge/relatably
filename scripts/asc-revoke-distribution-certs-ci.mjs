@@ -26,13 +26,42 @@ import crypto from "node:crypto";
 // Codemagic exposes these via the `integrations: app_store_connect:` hook.
 // Older Codemagic CLI versions used `_KEY_ID` instead of `_KEY_IDENTIFIER`,
 // so accept both for forward/backward compatibility.
-const KEY = process.env.APP_STORE_CONNECT_PRIVATE_KEY;
+const RAW_KEY = process.env.APP_STORE_CONNECT_PRIVATE_KEY;
 const KEY_ID =
   process.env.APP_STORE_CONNECT_KEY_IDENTIFIER ||
   process.env.APP_STORE_CONNECT_KEY_ID;
 const ISSUER_ID = process.env.APP_STORE_CONNECT_ISSUER_ID;
 
-if (!KEY || !KEY_ID || !ISSUER_ID) {
+// Normalize the PEM. Codemagic has been observed serializing the .p8 in three
+// different ways depending on how the integration was uploaded:
+//   (a) Full PEM with real \n  — works as-is with crypto.createPrivateKey
+//   (b) Full PEM with literal "\n" escape sequences — fails ERR_OSSL_UNSUPPORTED
+//       because OpenSSL parses BEGIN/END as a single 1-line blob
+//   (c) Just the base64 body, no BEGIN/END markers — same OpenSSL failure
+// Build 25 attempt #3 hit case (b) or (c). Normalize both away.
+function normalizePem(raw) {
+  if (!raw) return raw;
+  let s = raw.trim();
+  // (b) literal \n -> real newline
+  if (s.includes("\\n")) s = s.replace(/\\n/g, "\n");
+  // (c) no BEGIN marker -> wrap as PKCS#8 PEM
+  if (!s.includes("BEGIN")) {
+    const b64 = s.replace(/\s+/g, "");
+    s = `-----BEGIN PRIVATE KEY-----\n${b64}\n-----END PRIVATE KEY-----\n`;
+  }
+  return s;
+}
+const KEY = normalizePem(RAW_KEY);
+
+// Diagnostic so future failures land me in the right case without leaking the
+// secret. Print length + first/last 30 chars of normalized PEM (markers only).
+if (KEY) {
+  const first = KEY.slice(0, 30).replace(/\n/g, "\\n");
+  const last = KEY.slice(-30).replace(/\n/g, "\\n");
+  console.log(`PEM length=${KEY.length}  first=${first}…  last=…${last}`);
+}
+
+if (!RAW_KEY || !KEY_ID || !ISSUER_ID) {
   console.error(
     "Missing required env vars. Need APP_STORE_CONNECT_PRIVATE_KEY, " +
       "APP_STORE_CONNECT_KEY_IDENTIFIER, APP_STORE_CONNECT_ISSUER_ID. " +
@@ -67,9 +96,7 @@ function makeToken() {
   return `${signingInput}.${b64url(sig)}`;
 }
 
-const token = makeToken();
-
-async function api(method, pathSuffix) {
+async function api(token, method, pathSuffix) {
   const url = `https://api.appstoreconnect.apple.com${pathSuffix}`;
   const r = await fetch(url, {
     method,
@@ -89,7 +116,12 @@ async function api(method, pathSuffix) {
 }
 
 async function main() {
-  const list = await api("GET", "/v1/certificates?limit=200");
+  // Generate the JWT inside main() so a PEM-parse failure flows into the
+  // try/catch and is reported as a soft warning, not a build-killing throw.
+  // We want the build to PROCEED to the signing step even if revoke fails —
+  // if 0 stale certs exist anyway, signing succeeds. Better than dying here.
+  const token = makeToken();
+  const list = await api(token, "GET", "/v1/certificates?limit=200");
   if (!list.ok) {
     console.error("Failed to list certificates:", list.status);
     console.error(JSON.stringify(list.body, null, 2).slice(0, 600));
@@ -111,7 +143,7 @@ async function main() {
   let revoked = 0;
   let failed = 0;
   for (const c of distCerts) {
-    const r = await api("DELETE", `/v1/certificates/${c.id}`);
+    const r = await api(token, "DELETE", `/v1/certificates/${c.id}`);
     if (r.ok || r.status === 204) {
       console.log(`  revoked ${c.id}  (${c.attributes?.name})`);
       revoked++;
@@ -126,6 +158,11 @@ async function main() {
 }
 
 main().catch((e) => {
-  console.error("Fatal:", e?.message ?? e);
-  // Don't fail the build — same rationale as above.
+  console.error("Revoke step soft-failed:", e?.message ?? e);
+  console.error(
+    "Continuing build — if 0 stale certs exist, signing succeeds anyway. " +
+      "If signing fails with HTTP 409, the PEM normalization above needs another case.",
+  );
+  // Intentionally NOT process.exit(1) — we want the build to proceed to
+  // Set up code signing rather than die here.
 });
