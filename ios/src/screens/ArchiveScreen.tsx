@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, FlatList, Pressable, StyleSheet } from "react-native";
 
 import { palette, radii, shadow, sp, typography } from "@/src/theme/tokens";
+import { PaperTexture } from "@/src/components/sticker/PaperTexture";
 import { BannerAdSlot } from "@/src/components/BannerAdSlot";
 import { ArchiveTileThumbnail } from "@/src/components/ArchiveTileThumbnail";
 import type { ArchiveTile } from "@/src/types/api";
@@ -27,13 +28,20 @@ function interleaveAds(tiles: ArchiveTile[]): Row[] {
 
 export function ArchiveScreen({ tiles, nextCursor, onLoadMore, onTilePress, onTileLongPress }: Props) {
   if (tiles.length === 0) {
-    return <View style={styles.center}><Text style={styles.muted}>your archive is brand new. come back tomorrow.</Text></View>;
+    return (
+      <View style={styles.center}>
+        <PaperTexture />
+        <Text style={styles.muted}>your archive is brand new. come back tomorrow.</Text>
+      </View>
+    );
   }
   const rows = interleaveAds(tiles);
   return (
-    <FlatList
-      style={styles.root}
-      data={rows}
+    <View style={{ flex: 1, backgroundColor: palette.cream }}>
+      <PaperTexture />
+      <FlatList
+        style={styles.root}
+        data={rows}
       keyExtractor={(r) => (r.kind === "ad" ? r.key : r.tile.question_id)}
       renderItem={({ item }) => {
         if (item.kind === "ad") return <BannerAdSlot slot="archive_banner" />;
@@ -53,6 +61,7 @@ export function ArchiveScreen({ tiles, nextCursor, onLoadMore, onTilePress, onTi
       initialNumToRender={30}
       contentContainerStyle={{ paddingTop: sp[7], paddingHorizontal: sp.gutter, paddingBottom: 120, gap: sp[4] }}
     />
+    </View>
   );
 }
 

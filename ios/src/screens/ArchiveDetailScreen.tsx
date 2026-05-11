@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { View, Text, FlatList, ActivityIndicator, StyleSheet } from "react-native";
 import { fetchArchiveDetail } from "@/src/lib/api";
+import { PaperTexture } from "@/src/components/sticker/PaperTexture";
 import { ShareButton } from "@/src/components/ShareButton";
 import { ShareCardVerdict } from "@/src/components/ShareCardVerdict";
 import { palette, radii, shadow, sp, typography } from "@/src/theme/tokens";
@@ -59,6 +60,7 @@ export function ArchiveDetailScreen({ questionId }: Props) {
   const verdict = detail.top_clusters[0]?.canonical_text ?? "";
   return (
     <View style={styles.root}>
+      <PaperTexture />
       <View style={styles.headerRow}>
         <View style={{ flex: 1 }}>
           <View style={styles.dateTab}>

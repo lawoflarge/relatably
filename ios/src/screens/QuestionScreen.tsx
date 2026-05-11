@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, ScrollView, ActivityIndicator, Text, StyleSheet } from "react-native";
 
 import { palette, radii, shadow, sp, typography } from "@/src/theme/tokens";
+import { PaperTexture } from "@/src/components/sticker/PaperTexture";
 import { QuestionText } from "@/src/components/QuestionText";
 import { AnswerInput } from "@/src/components/AnswerInput";
 import { LiveCounter } from "@/src/components/LiveCounter";
@@ -25,6 +26,7 @@ export function QuestionScreen({ onSubmit }: Props) {
 
   return (
     <ScrollView contentContainerStyle={styles.content} style={styles.root}>
+      <PaperTexture />
       <View style={styles.datePill}><Text style={styles.dateText}>TODAY'S DROP ★</Text></View>
       <View style={{ height: sp[4] }} />
       <QuestionText text={question.text} />

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, Pressable, StyleSheet } from "react-native";
 
 import { palette, radii, shadow, sp, typography } from "@/src/theme/tokens";
+import { PaperTexture } from "@/src/components/sticker/PaperTexture";
 import { LeaderboardRow } from "@/src/components/LeaderboardRow";
 import { BannerAdSlot } from "@/src/components/BannerAdSlot";
 import { fetchLeaderboard } from "@/src/lib/api";
@@ -52,6 +53,7 @@ export function LeaderboardScreen({ isSignedIn, currentUserId }: Props) {
 
   return (
     <View style={styles.root}>
+      <PaperTexture />
       <Text style={styles.title}>the board ★</Text>
       <View style={styles.periodRow}>
         {PERIODS.map((p) => (

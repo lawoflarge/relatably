@@ -2,6 +2,7 @@ import React, { useMemo, useRef } from "react";
 import { View, Text, StyleSheet, useWindowDimensions } from "react-native";
 
 import { palette, sp, typography } from "@/src/theme/tokens";
+import { PaperTexture } from "@/src/components/sticker/PaperTexture";
 import { ClusterBubble } from "@/src/components/ClusterBubble";
 import { ShareButton } from "@/src/components/ShareButton";
 import { ShareCardTodaysTake } from "@/src/components/ShareCardTodaysTake";
@@ -39,6 +40,7 @@ export function WordcloudScreen({ clusters, selfClusterId, totalCount, questionI
 
   return (
     <View style={styles.root}>
+      <PaperTexture />
       <View style={styles.headerRow}>
         <Text style={styles.counter}>{totalCount.toLocaleString()} VOTES · THE WORLD IS VOTING</Text>
         {shareEnabled && (

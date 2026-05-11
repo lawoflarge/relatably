@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { View, Text, FlatList, ActivityIndicator, StyleSheet } from "react-native";
 import { FriendListRow } from "@/src/components/FriendListRow";
+import { PaperTexture } from "@/src/components/sticker/PaperTexture";
 import { fetchFriends, acceptFriend } from "@/src/lib/api";
 import { palette, radii, shadow, sp, typography } from "@/src/theme/tokens";
 import type { Friendship } from "@/src/types/api";
@@ -33,6 +34,7 @@ export function FriendsScreen({ isSignedIn }: Props) {
   if (!isSignedIn) {
     return (
       <View style={styles.center}>
+        <PaperTexture />
         <View style={styles.ctaCard}>
           <Text style={styles.ctaHeading}>your people</Text>
           <Text style={styles.ctaBody}>sign in to see friends and compare answers.</Text>
@@ -44,15 +46,18 @@ export function FriendsScreen({ isSignedIn }: Props) {
   if (loading) {
     return (
       <View style={styles.center}>
+        <PaperTexture />
         <ActivityIndicator color={palette.pink} size="large" />
       </View>
     );
   }
 
   return (
-    <FlatList
-      style={styles.root}
-      data={friendships}
+    <View style={{ flex: 1, backgroundColor: palette.cream }}>
+      <PaperTexture />
+      <FlatList
+        style={styles.root}
+        data={friendships}
       keyExtractor={(f) => f.id}
       renderItem={({ item }) => (
         <FriendListRow
@@ -69,7 +74,8 @@ export function FriendsScreen({ isSignedIn }: Props) {
         <Text style={styles.emptyText}>no friends yet. share your link to invite someone!</Text>
       }
       contentContainerStyle={{ paddingTop: sp[5], paddingBottom: 120 }}
-    />
+      />
+    </View>
   );
 }
 
