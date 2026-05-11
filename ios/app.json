@@ -6,6 +6,7 @@
     "orientation": "portrait",
     "scheme": "relatably",
     "userInterfaceStyle": "light",
+    "jsEngine": "jsc",
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "co.relatably.app",
@@ -13,7 +14,7 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       },
-      "buildNumber": "21"
+      "buildNumber": "23"
     },
     "plugins": [
       "expo-apple-authentication",
