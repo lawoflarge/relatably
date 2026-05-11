@@ -3,15 +3,19 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import * as Haptics from "expo-haptics";
 
 import { palette, radii, shadow, sp, typography } from "@/src/theme/tokens";
-import { IconArchive, IconBoard, IconFriends, IconHome } from "@/src/components/icons";
 
 type RouteName = "index" | "friends" | "leaderboard" | "archive";
 
-const ICONS: Record<RouteName, React.ComponentType<{ size?: number; color?: string }>> = {
-  index: IconHome,
-  friends: IconFriends,
-  leaderboard: IconBoard,
-  archive: IconArchive,
+// Unicode glyphs instead of react-native-svg icons. The svg package
+// downgrade (15.15 -> 15.12 to match Expo SDK 54) was leaving one of
+// the IconHome/Friends/Board/Archive imports as undefined at runtime,
+// which crashed StickerTabBar with "Element type is invalid... got:
+// undefined". Glyphs render via plain <Text> -> zero native deps.
+const GLYPHS: Record<RouteName, string> = {
+  index: "■",       // TODAY  (filled square — "drop")
+  friends: "♥",     // FRIENDS
+  leaderboard: "★", // BOARD
+  archive: "▦",     // ARCHIVE (grid)
 };
 
 const LABELS: Record<RouteName, string> = {
@@ -35,21 +39,21 @@ export function StickerTabBar({ state, navigation, insets }: Props) {
         {state.routes.map((route, i) => {
           const name = route.name as RouteName;
           const isActive = state.index === i;
-          const Icon = ICONS[name];
-          const label = LABELS[name];
+          const glyph = GLYPHS[name] ?? "•";
+          const label = LABELS[name] ?? route.name.toUpperCase();
           return (
             <Pressable
               key={route.key}
               role="button"
               onPress={() => {
                 if (!isActive) {
-                  Haptics.selectionAsync().catch(() => {});
+                  try { Haptics.selectionAsync().catch(() => {}); } catch { /* noop */ }
                   navigation.navigate(name);
                 }
               }}
               style={[styles.tab, isActive && styles.tabActive]}
             >
-              <Icon size={22} color={isActive ? palette.cream : palette.ink} />
+              <Text style={[styles.glyph, { color: isActive ? palette.cream : palette.ink }]}>{glyph}</Text>
               <Text style={[styles.label, { color: isActive ? palette.cream : palette.ink }]}>{label}</Text>
             </Pressable>
           );
@@ -78,5 +82,6 @@ const styles = StyleSheet.create({
   },
   tab: { paddingHorizontal: sp[3], paddingVertical: sp[2], borderRadius: radii.pill, alignItems: "center", gap: 2, minWidth: 64 },
   tabActive: { backgroundColor: palette.ink },
+  glyph: { fontSize: 18, lineHeight: 20 },
   label: { fontFamily: typography.micro.family, fontSize: typography.micro.size, letterSpacing: 1.3 },
 });
