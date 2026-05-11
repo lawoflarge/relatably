@@ -83,14 +83,26 @@ workflows:
           keychain add-certificates
           xcode-project use-profiles
 
-      - name: Increment build number to one above TestFlight latest
+      - name: Increment build number above latest in App Store Connect
         working_directory: ios/ios
         script: |
           set -e
-          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID" || echo 0)
+          # get-latest-build-number returns the highest CFBundleVersion
+          # across BOTH TestFlight and App Store (the prior step used
+          # get-latest-app-store-build-number which ignores TestFlight,
+          # so the bump produced a value still taken by TestFlight #23).
+          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-build-number "$APP_STORE_APPLE_ID" 2>/dev/null || echo 0)
+          # Belt-and-suspenders: force a minimum so a future regression
+          # in the API call can't drop us back below 24.
+          if [ "$LATEST_BUILD_NUMBER" -lt 23 ]; then
+            LATEST_BUILD_NUMBER=23
+          fi
           NEXT_BUILD_NUMBER=$((LATEST_BUILD_NUMBER + 1))
+          echo "Latest CFBundleVersion in ASC: $LATEST_BUILD_NUMBER"
           echo "Bumping CFBundleVersion to $NEXT_BUILD_NUMBER"
           agvtool new-version -all "$NEXT_BUILD_NUMBER"
+          echo "Verifying agvtool result:"
+          agvtool what-version -terse
 
       - name: Build .ipa archive
         working_directory: ios/ios
