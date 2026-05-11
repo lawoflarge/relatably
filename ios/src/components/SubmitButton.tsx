@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Pressable, Text, View, StyleSheet } from "react-native";
 import Animated, { useSharedValue, withTiming, withSequence, useAnimatedStyle, Easing } from "react-native-reanimated";
+import * as Haptics from "expo-haptics";
 
 import { palette, radii, shadow, sp, typography, motion } from "@/src/theme/tokens";
 
@@ -42,6 +43,11 @@ export function SubmitButton({ hasText, onPress, startedAt }: Props) {
     ty.value = withSequence(withTiming(0, { duration: motion.spring.duration }));
   }
 
+  function handlePress() {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+    onPress();
+  }
+
   const shadowSpec = enabled ? shadow.l : shadow.s;
 
   return (
@@ -52,7 +58,7 @@ export function SubmitButton({ hasText, onPress, startedAt }: Props) {
         disabled={!enabled}
         onPressIn={enabled ? handlePressIn : undefined}
         onPressOut={enabled ? handlePressOut : undefined}
-        onPress={enabled ? onPress : undefined}
+        onPress={enabled ? handlePress : undefined}
         style={[
           styles.btn,
           {
