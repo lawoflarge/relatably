@@ -1,0 +1,1465 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Relatably · Anime Playful</title>
+  <link rel="stylesheet" href="../shared/reset.css">
+  <link rel="stylesheet" href="../shared/phone-frame.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Nunito:wght@600;700;800;900&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+       ANIME PLAYFUL — Relatably v1.0
+       Cel-shaded, manga-panel, candy-saturated
+       ============================================================ */
+
+    :root {
+      /* Palette */
+      --ap-night:        #0F0E1A;  /* anime indigo night bg */
+      --ap-night-2:      #1A1830;  /* secondary night */
+      --ap-ink:          #0E0E18;  /* deep night-black */
+      --ap-paper:        #FFFFFF;  /* cel-shaded panel */
+      --ap-paper-2:      #FDF7E8;  /* warm paper for archive */
+      --ap-sky:          #5BB3FF;  /* sky blue */
+      --ap-red:          #FF3B5C;  /* candy red */
+      --ap-yellow:       #FFEA29;  /* neon yellow */
+      --ap-mint:         #7FF5C4;  /* mint */
+      --ap-lavender:     #C2A1FF;  /* lavender */
+      --ap-peach:        #FFB39A;  /* peach */
+      --ap-gold:         #FFB628;  /* self aura gold */
+      --ap-gold-soft:    #FFE9A8;  /* gold soft halo */
+
+      /* Spacing scale */
+      --s-1: 4px;
+      --s-2: 8px;
+      --s-3: 12px;
+      --s-4: 16px;
+      --s-5: 20px;
+      --s-6: 24px;
+      --s-7: 32px;
+      --s-8: 48px;
+
+      /* Radii — diagonal cuts dominate, so we keep round radii small */
+      --r-1: 4px;
+      --r-2: 8px;
+      --r-3: 14px;
+      --r-pill: 999px;
+
+      /* Borders */
+      --ink-3: 3px solid var(--ap-ink);
+      --ink-4: 4px solid var(--ap-ink);
+      --ink-2: 2px solid var(--ap-ink);
+
+      /* Hard-offset shadow (cel shading "drop") */
+      --hard-shadow:   4px 4px 0 0 var(--ap-ink);
+      --hard-shadow-r: 4px 4px 0 0 var(--ap-red);
+      --hard-shadow-y: 4px 4px 0 0 var(--ap-yellow);
+      --hard-shadow-m: 4px 4px 0 0 var(--ap-mint);
+      --hard-shadow-l: 4px 4px 0 0 var(--ap-lavender);
+    }
+
+    /* ---------- Page chrome ---------- */
+    html, body {
+      background:
+        radial-gradient(1200px 600px at 20% 0%, #2A1F4D 0%, transparent 60%),
+        radial-gradient(900px 700px at 90% 30%, #3D1F38 0%, transparent 55%),
+        var(--ap-night);
+      color: var(--ap-paper);
+      font-family: 'Nunito', system-ui, sans-serif;
+      min-height: 100%;
+    }
+
+    body {
+      /* page-wide diagonal speed-line wash for the gallery */
+      background-image:
+        repeating-linear-gradient(
+          110deg,
+          rgba(255,255,255,0.025) 0px,
+          rgba(255,255,255,0.025) 1px,
+          transparent 1px,
+          transparent 14px
+        );
+    }
+
+    .page-header {
+      padding: 56px 32px 24px;
+      text-align: center;
+      position: relative;
+    }
+    .page-header::before,
+    .page-header::after {
+      content: "✦";
+      position: absolute;
+      color: var(--ap-yellow);
+      font-size: 22px;
+      top: 60px;
+    }
+    .page-header::before { left: 22%; transform: rotate(-12deg); }
+    .page-header::after  { right: 22%; transform: rotate(15deg); }
+
+    .ph-eyebrow {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 500;
+      font-size: 12px;
+      letter-spacing: 0.32em;
+      color: var(--ap-yellow);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .ph-title {
+      font-family: 'Bowlby One', system-ui, sans-serif;
+      font-size: 84px;
+      line-height: 0.92;
+      letter-spacing: 0.005em;
+      color: var(--ap-paper);
+      text-transform: uppercase;
+      text-shadow: 6px 6px 0 var(--ap-red);
+    }
+    .ph-title em {
+      color: var(--ap-yellow);
+      font-style: normal;
+    }
+    .ph-sub {
+      margin-top: 22px;
+      font-weight: 700;
+      font-size: 16px;
+      color: rgba(255,255,255,0.7);
+      letter-spacing: 0.04em;
+    }
+
+    .phone-row {
+      display: flex;
+      gap: 32px;
+      padding: 24px 32px 96px;
+      justify-content: center;
+      align-items: flex-start;
+      overflow-x: auto;
+    }
+
+    /* ============================================================
+       SHARED IN-PHONE PRIMITIVES
+       ============================================================ */
+
+    .ap-screen {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      background: var(--ap-night);
+      color: var(--ap-paper);
+      font-family: 'Nunito', system-ui, sans-serif;
+      font-weight: 700;
+      overflow: hidden;
+    }
+
+    /* Status bar (anime-flavored) */
+    .ap-status {
+      position: absolute;
+      top: 22px;
+      left: 0; right: 0;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 36px;
+      font: 800 14px/1 'Nunito', sans-serif;
+      color: var(--ap-paper);
+      z-index: 6;
+      pointer-events: none;
+    }
+    .ap-status .right { margin-left: 28px; display: flex; gap: 6px; }
+    .ap-status .left  { margin-right: 28px; font-family: 'IBM Plex Mono', monospace; font-weight: 700; }
+
+    /* Speed-line background (used on Question screen) */
+    .ap-speedlines {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image: repeating-linear-gradient(
+        110deg,
+        rgba(255,255,255,0.05) 0px,
+        rgba(255,255,255,0.05) 2px,
+        transparent 2px,
+        transparent 16px
+      );
+      animation: speed-drift 12s linear infinite;
+    }
+    @keyframes speed-drift {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-160px); }
+    }
+
+    /* Cel-shaded panel: 3px black border + hard offset shadow */
+    .ap-panel {
+      background: var(--ap-paper);
+      color: var(--ap-ink);
+      border: var(--ink-3);
+      box-shadow: var(--hard-shadow);
+    }
+
+    /* Diagonal-cut variants. clip-path slices ONE corner. */
+    .cut-tr {
+      clip-path: polygon(
+        0 0,
+        calc(100% - 22px) 0,
+        100% 22px,
+        100% 100%,
+        0 100%
+      );
+    }
+    .cut-bl {
+      clip-path: polygon(
+        0 0,
+        100% 0,
+        100% 100%,
+        22px 100%,
+        0 calc(100% - 22px)
+      );
+    }
+    .cut-tl {
+      clip-path: polygon(
+        22px 0,
+        100% 0,
+        100% 100%,
+        0 100%,
+        0 22px
+      );
+    }
+    .cut-br {
+      clip-path: polygon(
+        0 0,
+        100% 0,
+        100% calc(100% - 22px),
+        calc(100% - 22px) 100%,
+        0 100%
+      );
+    }
+
+    /* The shadow can't sit under a clip-path on the same element.
+       So we use a wrapper trick: data-cut panels use a faux shadow
+       via a ::before pseudo. */
+    .ap-panel.has-cut {
+      box-shadow: none;
+      position: relative;
+    }
+    .ap-panel.has-cut::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      /* nothing — kept for symmetry */
+    }
+    /* Hard offset is rendered by stacking a black shape behind */
+    .ap-cut-wrap {
+      position: relative;
+    }
+    .ap-cut-wrap > .shadow-layer {
+      position: absolute;
+      inset: 0;
+      background: var(--ap-ink);
+      transform: translate(4px, 4px);
+      z-index: 0;
+    }
+    .ap-cut-wrap > .ap-panel {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Tags / labels */
+    .ap-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      background: var(--ap-yellow);
+      color: var(--ap-ink);
+      border: var(--ink-2);
+      border-radius: 4px;
+    }
+
+    /* ============================================================
+       SCREEN 1 — QUESTION
+       ============================================================ */
+    .s1 .ap-speedlines { opacity: 1; }
+
+    .s1-corner-label {
+      position: absolute;
+      top: 78px;
+      right: -18px;
+      background: var(--ap-red);
+      color: var(--ap-paper);
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      padding: 6px 22px 6px 14px;
+      border: var(--ink-2);
+      transform: rotate(-8deg);
+      box-shadow: 2px 2px 0 var(--ap-ink);
+      z-index: 4;
+      clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+    }
+
+    .s1-eyebrow {
+      position: absolute;
+      top: 76px;
+      left: 24px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ap-yellow);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .s1-eyebrow .dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      background: var(--ap-red);
+      border-radius: 50%;
+      margin-right: 8px;
+      vertical-align: middle;
+      animation: pulse-dot 1.6s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%,100% { transform: scale(1); opacity: 1; }
+      50%     { transform: scale(1.35); opacity: 0.6; }
+    }
+
+    .s1-burst {
+      position: absolute;
+      top: 124px;
+      left: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .s1-burst .burst-star {
+      width: 36px; height: 36px;
+      background: var(--ap-yellow);
+      border: var(--ink-3);
+      clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    }
+    .s1-burst .burst-text {
+      font-family: 'Bowlby One', sans-serif;
+      font-size: 14px;
+      letter-spacing: 0.06em;
+      color: var(--ap-paper);
+      text-transform: uppercase;
+    }
+
+    .s1-question-wrap {
+      position: absolute;
+      top: 178px;
+      left: 20px;
+      right: 20px;
+    }
+    .s1-question {
+      font-family: 'Bowlby One', sans-serif;
+      font-size: 54px;
+      line-height: 0.94;
+      letter-spacing: -0.005em;
+      text-transform: uppercase;
+      color: var(--ap-paper);
+      text-shadow:
+        4px 4px 0 var(--ap-ink),
+        4px 4px 0 var(--ap-ink);
+    }
+    .s1-question .hl-red {
+      color: var(--ap-red);
+      display: inline-block;
+      transform: rotate(-2deg);
+    }
+    .s1-question .hl-yellow {
+      color: var(--ap-yellow);
+      display: inline-block;
+    }
+    .s1-question .hl-mint {
+      color: var(--ap-mint);
+      display: inline-block;
+      transform: rotate(1deg);
+    }
+
+    .s1-meta {
+      position: absolute;
+      top: 458px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .s1-meta .answers {
+      flex: 1;
+      background: var(--ap-paper);
+      border: var(--ink-3);
+      box-shadow: var(--hard-shadow);
+      padding: 10px 14px;
+      color: var(--ap-ink);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .s1-meta .answers .num {
+      font-family: 'Bowlby One', sans-serif;
+      font-size: 22px;
+      letter-spacing: 0.01em;
+      color: var(--ap-red);
+    }
+    .s1-meta .answers .lbl {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ap-ink);
+    }
+    .s1-meta .timer {
+      background: var(--ap-lavender);
+      color: var(--ap-ink);
+      border: var(--ink-3);
+      box-shadow: var(--hard-shadow);
+      padding: 10px 14px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .s1-meta .timer b {
+      font-family: 'Bowlby One', sans-serif;
+      font-weight: 400;
+      font-size: 18px;
+      letter-spacing: 0.01em;
+      display: block;
+      line-height: 1;
+      margin-top: 2px;
+    }
+
+    .s1-input {
+      position: absolute;
+      top: 528px;
+      left: 20px;
+      right: 20px;
+      background: var(--ap-paper);
+      border: var(--ink-3);
+      box-shadow: var(--hard-shadow);
+      padding: 16px 18px;
+      color: var(--ap-ink);
+    }
+    .s1-input .lbl {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ap-red);
+      margin-bottom: 8px;
+    }
+    .s1-input .field {
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+      color: var(--ap-ink);
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+    }
+    .s1-input .field .caret {
+      display: inline-block;
+      width: 2px;
+      height: 22px;
+      background: var(--ap-ink);
+      margin-left: 2px;
+      animation: caret-blink 1s steps(1) infinite;
+    }
+    @keyframes caret-blink { 50% { opacity: 0; } }
+    .s1-input .helper {
+      margin-top: 8px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      color: rgba(14,14,24,0.5);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .s1-submit {
+      position: absolute;
+      top: 660px;
+      left: 20px;
+      right: 20px;
+      height: 64px;
+      background: var(--ap-yellow);
+      color: var(--ap-ink);
+      border: var(--ink-4);
+      box-shadow: 6px 6px 0 var(--ap-red);
+      font-family: 'Bowlby One', sans-serif;
+      font-size: 26px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+    .s1-submit .arrow {
+      font-family: 'Bowlby One', sans-serif;
+      font-size: 26px;
+    }
+
+    .s1-mascot {
+      position: absolute;
+      bottom: 110px;
+      right: 14px;
+      width: 56px;
+      height: 56px;
+      background: var(--ap-mint);
+      border: var(--ink-3);
+      border-radius: 50%;
+      box-shadow: 3px 3px 0 var(--ap-ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: rotate(-8deg);
+    }
+    .s1-mascot::before, .s1-mascot::after {
+      content: "";
+      position: absolute;
+      width: 8px; height: 14px;
+      background: var(--ap-ink);
+      border-radius: 4px;
+      top: 18px;
+    }
+    .s1-mascot::before { left: 14px; transform: rotate(-6deg); }
+    .s1-mascot::after  { right: 14px; transform: rotate(6deg); }
+    .s1-mascot .mouth {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 18px;
+      height: 8px;
+      border: 3px solid var(--ap-ink);
+      border-top: none;
+      border-radius: 0 0 18px 18px;
+    }
+
+    /* Sparkles */
+    .sparkle {
+      position: absolute;
+      color: var(--ap-yellow);
+      font-family: 'Bowlby One', sans-serif;
+      font-size: 16px;
+      pointer-events: none;
+      text-shadow: 1px 1px 0 var(--ap-ink);
+    }
+
+    /* ============================================================
+       SCREEN 2 — WORDCLOUD
+       ============================================================ */
+    .s2 {
+      background:
+        radial-gradient(1200px 600px at 20% 110%, #2A1F4D 0%, transparent 60%),
+        var(--ap-night);
+    }
+    .s2 .ap-speedlines { opacity: 0.4; }
+
+    .s2-header {
+      position: absolute;
+      top: 76px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .s2-header .title {
+      font-family: 'Bowlby One', sans-serif;
+      font-size: 22px;
+      letter-spacing: 0.02em;
+      color: var(--ap-paper);
+      text-transform: uppercase;
+      text-shadow: 3px 3px 0 var(--ap-red);
+      flex: 1;
+    }
+    .s2-header .share {
+      width: 44px; height: 44px;
+      background: var(--ap-yellow);
+      border: var(--ink-3);
+      box-shadow: 3px 3px 0 var(--ap-ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Bowlby One', sans-serif;
+      font-size: 14px;
+      color: var(--ap-ink);
+      clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+    }
+
+    .s2-stats {
+      position: absolute;
+      top: 124px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      gap: 8px;
+    }
+    .s2-stats .pill {
+      flex: 1;
+      background: var(--ap-paper);
+      color: var(--ap-ink);
+      border: var(--ink-3);
+      box-shadow: 3px 3px 0 var(--ap-ink);
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .s2-stats .pill .n {
+      font-family: 'Bowlby One', sans-serif;
+      font-size: 18px;
+      color: var(--ap-red);
+    }
+    .s2-stats .pill.alt .n { color: var(--ap-sky); }
+    .s2-stats .pill .l {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .s2-cloud {
+      position: absolute;
+      top: 184px;
+      left: 0; right: 0;
+      bottom: 130px;
+      padding: 4px 12px;
+    }
+    .s2-cloud .cluster {
+      position: absolute;
+      background: var(--ap-paper);
+      color: var(--ap-ink);
+      border: var(--ink-3);
+      padding: 6px 12px;
+      box-shadow: 3px 3px 0 var(--ap-ink);
+      font-family: 'Bowlby One', sans-serif;
+      letter-spacing: 0.005em;
+      white-space: nowrap;
+      text-transform: lowercase;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+    .s2-cloud .cluster .n {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      font-size: 10px;
+      letter-spacing: 0.04em;
+      color: rgba(14,14,24,0.5);
+    }
+    /* Manga-bubble tail (small notch) */
+    .s2-cloud .cluster::after {
+      content: "";
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background: var(--ap-paper);
+      border-right: var(--ink-3);
+      border-bottom: var(--ink-3);
+      bottom: -9px;
+      left: 14px;
+      transform: rotate(45deg);
+    }
+    .s2-cloud .cluster.tail-tr::after { left: auto; right: 14px; bottom: -9px; }
+    .s2-cloud .cluster.tail-bl::after { top: -9px; bottom: auto; left: 14px; transform: rotate(225deg); }
+    .s2-cloud .cluster.tail-br::after { top: -9px; bottom: auto; left: auto; right: 14px; transform: rotate(225deg); }
+
+    /* Color rotation */
+    .s2-cloud .c-red     { background: var(--ap-red);      color: var(--ap-paper); }
+    .s2-cloud .c-red::after     { background: var(--ap-red); }
+    .s2-cloud .c-mint    { background: var(--ap-mint);     color: var(--ap-ink); }
+    .s2-cloud .c-mint::after    { background: var(--ap-mint); }
+    .s2-cloud .c-sky     { background: var(--ap-sky);      color: var(--ap-ink); }
+    .s2-cloud .c-sky::after     { background: var(--ap-sky); }
+    .s2-cloud .c-lav     { background: var(--ap-lavender); color: var(--ap-ink); }
+    .s2-cloud .c-lav::after     { background: var(--ap-lavender); }
+    .s2-cloud .c-peach   { background: var(--ap-peach);    color: var(--ap-ink); }
+    .s2-cloud .c-peach::after   { background: var(--ap-peach); }
+    .s2-cloud .c-yellow  { background: var(--ap-yellow);   color: var(--ap-ink); }
+    .s2-cloud .c-yellow::after  { background: var(--ap-yellow); }
+
+    /* Top cluster — golden aura */
+    .s2-cloud .cluster.self {
+      background: var(--ap-red);
+      color: var(--ap-paper);
+      border: 6px solid var(--ap-gold);
+      outline: 3px solid var(--ap-ink);
+      outline-offset: 0;
+      box-shadow:
+        0 0 0 6px rgba(255,182,40,0.35),
+        0 0 28px 6px rgba(255,182,40,0.55),
+        6px 6px 0 var(--ap-ink);
+      animation: aura-pulse 2s ease-in-out infinite;
+      z-index: 5;
+    }
+    .s2-cloud .cluster.self::after { background: var(--ap-red); border-color: var(--ap-gold); }
+    .s2-cloud .cluster.self .n { color: rgba(255,255,255,0.75); }
+    @keyframes aura-pulse {
+      0%,100% { box-shadow: 0 0 0 6px rgba(255,182,40,0.35), 0 0 28px 6px rgba(255,182,40,0.55), 6px 6px 0 var(--ap-ink); }
+      50%     { box-shadow: 0 0 0 6px rgba(255,182,40,0.55), 0 0 42px 10px rgba(255,182,40,0.75), 6px 6px 0 var(--ap-ink); }
+    }
+
+    /* Crown above self */
+    .self-crown {
+      position: absolute;
+      font-family: 'Bowlby One', sans-serif;
+      color: var(--ap-yellow);
+      font-size: 22px;
+      top: -22px;
+      left: 50%;
+      transform: translateX(-50%) rotate(-6deg);
+      text-shadow: 2px 2px 0 var(--ap-ink);
+      pointer-events: none;
+    }
+
+    .s2-banner {
+      position: absolute;
+      bottom: 110px;
+      left: 20px; right: 20px;
+      background: var(--ap-yellow);
+      color: var(--ap-ink);
+      border: var(--ink-3);
+      box-shadow: var(--hard-shadow);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    .s2-banner .star {
+      font-family: 'Bowlby One', sans-serif;
+      color: var(--ap-red);
+    }
+
+    /* ============================================================
+       SCREEN 3 — LEADERBOARD
+       ============================================================ */
+    .s3 {
+      background:
+        radial-gradient(900px 500px at 80% 0%, #3D1F38 0%, transparent 60%),
+        var(--ap-night);
+    }
+    .s3 .ap-speedlines { opacity: 0.4; }
+
+    .s3-header {
+      position: absolute;
+      top: 72px;
+      left: 20px; right: 20px;
+    }
+    .s3-header .title {
+      font-family: 'Bowlby One', sans-serif;
+      font-size: 30px;
+      color: var(--ap-paper);
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      text-shadow: 4px 4px 0 var(--ap-red);
+      margin-bottom: 12px;
+    }
+    .s3-header .toggles {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .s3-header .toggles .t {
+      flex: 1;
+      padding: 8px 10px;
+      background: var(--ap-paper);
+      color: var(--ap-ink);
+      border: var(--ink-3);
+      box-shadow: 2px 2px 0 var(--ap-ink);
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      text-align: center;
+    }
+    .s3-header .toggles .t.on {
+      background: var(--ap-yellow);
+      box-shadow: 2px 2px 0 var(--ap-red);
+    }
+    .s3-header .scope {
+      display: flex;
+      gap: 6px;
+    }
+    .s3-header .scope .s {
+      padding: 6px 12px;
+      background: transparent;
+      color: var(--ap-paper);
+      border: var(--ink-2);
+      border-color: rgba(255,255,255,0.4);
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+    .s3-header .scope .s.on {
+      background: var(--ap-mint);
+      color: var(--ap-ink);
+      border: var(--ink-2);
+    }
+
+    .s3-list {
+      position: absolute;
+      top: 222px;
+      left: 16px; right: 16px;
+      bottom: 110px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .s3-row {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px 10px 12px;
+      background: var(--ap-paper);
+      color: var(--ap-ink);
+      border: var(--ink-3);
+      box-shadow: 3px 3px 0 var(--ap-ink);
+      min-height: 48px;
+      clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+    }
+    .s3-row .rank {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      font-size: 13px;
+      color: rgba(14,14,24,0.55);
+      width: 28px;
+      letter-spacing: 0.04em;
+    }
+    .s3-row .handle {
+      flex: 1;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 16px;
+      color: var(--ap-ink);
+    }
+    .s3-row .streak {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      font-size: 11px;
+      color: var(--ap-red);
+      letter-spacing: 0.04em;
+    }
+    .s3-row .score {
+      font-family: 'Bowlby One', sans-serif;
+      font-size: 18px;
+      color: var(--ap-ink);
+      letter-spacing: 0.01em;
+    }
+
+    /* Row color rotation */
+    .s3-row.r-yellow  { background: var(--ap-yellow); }
+    .s3-row.r-mint    { background: var(--ap-mint); }
+    .s3-row.r-lav     { background: var(--ap-lavender); }
+    .s3-row.r-peach   { background: var(--ap-peach); }
+    .s3-row.r-sky     { background: var(--ap-sky); }
+
+    /* Top-3 use Bowlby for handles */
+    .s3-row.top .handle { font-family: 'Bowlby One', sans-serif; font-size: 17px; letter-spacing: 0.005em; text-transform: lowercase; }
+
+    .s3-row .crown {
+      position: absolute;
+      left: -10px;
+      top: -18px;
+      width: 38px; height: 30px;
+      background: var(--ap-yellow);
+      border: var(--ink-2);
+      transform: rotate(-12deg);
+      clip-path: polygon(0% 100%, 0% 30%, 25% 60%, 50% 0%, 75% 60%, 100% 30%, 100% 100%);
+      box-shadow: 2px 2px 0 var(--ap-ink);
+    }
+
+    /* Self row — gold aura */
+    .s3-row.self {
+      background: var(--ap-paper);
+      border: 4px solid var(--ap-gold);
+      outline: 3px solid var(--ap-ink);
+      box-shadow:
+        0 0 0 4px rgba(255,182,40,0.35),
+        4px 4px 0 var(--ap-ink),
+        0 0 26px 4px rgba(255,182,40,0.5);
+    }
+    .s3-row.self .handle::after {
+      content: "YOU";
+      display: inline-block;
+      margin-left: 8px;
+      padding: 2px 7px;
+      background: var(--ap-gold);
+      color: var(--ap-ink);
+      border: var(--ink-2);
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      transform: translateY(-2px);
+    }
+    .s3-row.self .score { color: var(--ap-red); }
+
+    /* ============================================================
+       SCREEN 4 — ARCHIVE
+       ============================================================ */
+    .s4 {
+      background:
+        radial-gradient(1000px 600px at 30% 0%, #2A1F4D 0%, transparent 65%),
+        var(--ap-night);
+    }
+    .s4 .ap-speedlines { opacity: 0.35; }
+
+    .s4-header {
+      position: absolute;
+      top: 72px;
+      left: 20px; right: 20px;
+    }
+    .s4-header .eyebrow {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      color: var(--ap-yellow);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .s4-header .title {
+      font-family: 'Bowlby One', sans-serif;
+      font-size: 36px;
+      color: var(--ap-paper);
+      letter-spacing: 0.01em;
+      text-transform: uppercase;
+      text-shadow: 4px 4px 0 var(--ap-red);
+    }
+
+    .s4-grid {
+      position: absolute;
+      top: 160px;
+      left: 16px; right: 16px;
+      bottom: 110px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      align-content: start;
+      overflow: hidden;
+    }
+    .s4-tile {
+      position: relative;
+      background: var(--ap-paper);
+      color: var(--ap-ink);
+      border: var(--ink-3);
+      box-shadow: 3px 3px 0 var(--ap-ink);
+      padding: 10px 10px 12px;
+      min-height: 132px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
+    }
+    .s4-tile.alt {
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+    }
+    .s4-tile .date {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      color: rgba(14,14,24,0.55);
+      text-transform: uppercase;
+    }
+    .s4-tile .q {
+      font-family: 'Bowlby One', sans-serif;
+      font-size: 13px;
+      letter-spacing: 0.005em;
+      line-height: 1.05;
+      color: var(--ap-ink);
+      text-transform: uppercase;
+      margin: 6px 0 8px;
+    }
+    .s4-tile .verdict {
+      position: relative;
+      display: inline-block;
+      font-family: 'Bowlby One', sans-serif;
+      font-size: 12px;
+      letter-spacing: 0.005em;
+      color: var(--ap-paper);
+      background: var(--ap-red);
+      border: var(--ink-2);
+      padding: 4px 8px;
+      text-transform: lowercase;
+      transform: rotate(-2deg);
+      max-width: 100%;
+      box-shadow: 2px 2px 0 var(--ap-ink);
+    }
+    .s4-tile.col-mint .verdict { background: var(--ap-mint); color: var(--ap-ink); }
+    .s4-tile.col-lav  .verdict { background: var(--ap-lavender); color: var(--ap-ink); }
+    .s4-tile.col-yel  .verdict { background: var(--ap-yellow); color: var(--ap-ink); }
+    .s4-tile.col-sky  .verdict { background: var(--ap-sky); color: var(--ap-ink); }
+    .s4-tile .count {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      font-size: 10px;
+      color: rgba(14,14,24,0.55);
+      letter-spacing: 0.06em;
+      margin-top: 6px;
+    }
+
+    .s4-ad {
+      grid-column: span 2;
+      background: var(--ap-yellow);
+      color: var(--ap-ink);
+      border: var(--ink-3);
+      box-shadow: 3px 3px 0 var(--ap-ink);
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%);
+    }
+    .s4-ad .tag {
+      background: var(--ap-ink);
+      color: var(--ap-yellow);
+      padding: 3px 8px;
+      font-size: 10px;
+      letter-spacing: 0.24em;
+    }
+    .s4-ad .label {
+      font-family: 'Bowlby One', sans-serif;
+      font-size: 14px;
+      color: var(--ap-ink);
+      text-transform: uppercase;
+    }
+
+    /* ============================================================
+       TAB BAR (all screens)
+       ============================================================ */
+    .ap-tabbar {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: 46px;
+      height: 64px;
+      background: var(--ap-paper);
+      border: var(--ink-3);
+      box-shadow: 4px 4px 0 var(--ap-red);
+      display: flex;
+      align-items: stretch;
+      z-index: 4;
+      clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
+    }
+    .ap-tab {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      color: var(--ap-ink);
+      position: relative;
+    }
+    .ap-tab .ico {
+      width: 22px; height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .ap-tab .ico svg {
+      width: 100%; height: 100%;
+      stroke: var(--ap-ink);
+      stroke-width: 2.5;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .ap-tab .lbl {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      color: var(--ap-ink);
+      text-transform: uppercase;
+    }
+    .ap-tab.active::before {
+      content: "";
+      position: absolute;
+      top: -3px; left: 50%;
+      transform: translateX(-50%);
+      width: 28px; height: 5px;
+      background: var(--ap-red);
+      border-bottom: var(--ink-3);
+    }
+    .ap-tab.active .ico svg {
+      stroke: var(--ap-red);
+      stroke-width: 3;
+    }
+    .ap-tab.active .lbl { color: var(--ap-red); }
+
+    /* ============================================================
+       LABEL UNDER PHONE — override .rb-phone-label font
+       ============================================================ */
+    .rb-phone-label {
+      font-family: 'IBM Plex Mono', monospace !important;
+      color: rgba(255,255,255,0.7) !important;
+      font-weight: 500 !important;
+      letter-spacing: 0.22em !important;
+      font-size: 11px !important;
+    }
+  </style>
+</head>
+<body>
+  <header class="page-header">
+    <div class="ph-eyebrow">06 · DIRECTION · ANIME PLAYFUL</div>
+    <h1 class="ph-title">RELAT<em>!</em>BLY</h1>
+    <p class="ph-sub">Cel-shaded, candy-saturated, manga-panel-coded — the daily drop turned shōnen episode.</p>
+  </header>
+
+  <main class="phone-row">
+    <!-- ============ PHONE 1 — QUESTION ============ -->
+    <div>
+      <div class="rb-phone">
+        <div class="rb-phone-island"></div>
+        <div class="rb-phone-screen" id="screen-1"></div>
+        <div class="rb-phone-bar"></div>
+      </div>
+      <div class="rb-phone-label">01 · QUESTION</div>
+    </div>
+
+    <!-- ============ PHONE 2 — WORDCLOUD ============ -->
+    <div>
+      <div class="rb-phone">
+        <div class="rb-phone-island"></div>
+        <div class="rb-phone-screen" id="screen-2"></div>
+        <div class="rb-phone-bar"></div>
+      </div>
+      <div class="rb-phone-label">02 · WORDCLOUD</div>
+    </div>
+
+    <!-- ============ PHONE 3 — LEADERBOARD ============ -->
+    <div>
+      <div class="rb-phone">
+        <div class="rb-phone-island"></div>
+        <div class="rb-phone-screen" id="screen-3"></div>
+        <div class="rb-phone-bar"></div>
+      </div>
+      <div class="rb-phone-label">03 · LEADERBOARD</div>
+    </div>
+
+    <!-- ============ PHONE 4 — ARCHIVE ============ -->
+    <div>
+      <div class="rb-phone">
+        <div class="rb-phone-island"></div>
+        <div class="rb-phone-screen" id="screen-4"></div>
+        <div class="rb-phone-bar"></div>
+      </div>
+      <div class="rb-phone-label">04 · ARCHIVE</div>
+    </div>
+  </main>
+
+  <script src="../shared/content.js"></script>
+  <script>
+    const R = window.RELATABLY;
+
+    /* SVG icons (line/cel-shaded) for tab bar */
+    const ICONS = {
+      today: '<svg viewBox="0 0 24 24"><path d="M5 4l-1 7 6-2 3 7 3-9 5 1"/><circle cx="12" cy="12" r="9"/></svg>',
+      friends: '<svg viewBox="0 0 24 24"><circle cx="9" cy="9" r="3.5"/><circle cx="17" cy="10" r="2.5"/><path d="M3 19c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M15 16c.6-1.2 2-2 3.5-2 2.5 0 4.5 2 4.5 4.5"/></svg>',
+      board: '<svg viewBox="0 0 24 24"><path d="M6 20V10"/><path d="M12 20V4"/><path d="M18 20v-7"/><path d="M3 20h18"/><path d="M9 6l3-3 3 3"/></svg>',
+      archive: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="4" rx="1"/><path d="M5 9v10a1 1 0 001 1h12a1 1 0 001-1V9"/><path d="M10 13h4"/></svg>',
+    };
+
+    function tabbar(active) {
+      const tabs = [
+        { key: 'today',   label: 'TODAY',   ico: ICONS.today },
+        { key: 'friends', label: 'FRIENDS', ico: ICONS.friends },
+        { key: 'board',   label: 'BOARD',   ico: ICONS.board },
+        { key: 'archive', label: 'ARCHIVE', ico: ICONS.archive },
+      ];
+      return `<nav class="ap-tabbar">${tabs.map(t => `
+        <div class="ap-tab ${t.key === active ? 'active' : ''}">
+          <div class="ico">${t.ico}</div>
+          <div class="lbl">${t.label}</div>
+        </div>`).join('')}</nav>`;
+    }
+
+    /* ===================== SCREEN 1 — QUESTION ===================== */
+    function renderQuestion() {
+      const el = document.getElementById('screen-1');
+      el.className = 'rb-phone-screen';
+      const ans = R.meta.totalAnswers.toLocaleString();
+      const q = R.question.text; // "what's the most overrated thing on the internet right now?"
+      // Hand-split into 3 lines with color emphasis
+      // Format: WHAT'S THE MOST <hl-red>OVERRATED</hl-red> THING ON THE <hl-yellow>INTERNET</hl-yellow> <hl-mint>RIGHT NOW?</hl-mint>
+      el.innerHTML = `
+        <div class="ap-screen s1">
+          <div class="ap-speedlines"></div>
+          <div class="ap-status">
+            <span class="left">9:41</span>
+            <span class="right">5G · 87%</span>
+          </div>
+
+          <div class="s1-eyebrow"><span class="dot"></span>${R.meta.todayLabel} · ${R.meta.dropTimeLabel}</div>
+          <div class="s1-corner-label">QUESTION 011 // MON</div>
+
+          <div class="s1-burst">
+            <div class="burst-star"></div>
+            <div class="burst-text">DROP TIME — LET'S GO</div>
+          </div>
+
+          <span class="sparkle" style="top: 152px; right: 60px; font-size: 18px; transform: rotate(15deg);">✦</span>
+          <span class="sparkle" style="top: 220px; right: 24px; font-size: 14px; transform: rotate(-10deg);">✧</span>
+          <span class="sparkle" style="top: 408px; left: 26px; font-size: 12px; transform: rotate(20deg);">✦</span>
+
+          <div class="s1-question-wrap">
+            <div class="s1-question">
+              WHAT'S THE MOST<br>
+              <span class="hl-red">OVERRATED</span> THING<br>
+              ON THE <span class="hl-yellow">INTERNET</span><br>
+              <span class="hl-mint">RIGHT NOW?</span>
+            </div>
+          </div>
+
+          <div class="s1-meta">
+            <div class="answers">
+              <span class="num">${ans}</span>
+              <span class="lbl">takes in<br>· · ·</span>
+            </div>
+            <div class="timer">LEFT<b>21:42</b></div>
+          </div>
+
+          <div class="s1-input">
+            <div class="lbl">▸ TYPE YOUR TAKE</div>
+            <div class="field">${R.user.answer}<span class="caret"></span></div>
+            <div class="helper">
+              <span>FREEFORM · MAX 80 CHARS</span>
+              <span>${R.user.answer.length}/80</span>
+            </div>
+          </div>
+
+          <button class="s1-submit">
+            SEND IT <span class="arrow">→</span>
+          </button>
+
+          <div class="s1-mascot">
+            <span class="mouth"></span>
+          </div>
+
+          ${tabbar('today')}
+        </div>
+      `;
+    }
+
+    /* ===================== SCREEN 2 — WORDCLOUD ===================== */
+    function renderWordcloud() {
+      const el = document.getElementById('screen-2');
+      el.className = 'rb-phone-screen';
+
+      // Pre-positioned packed layout (manually composed for visual quality).
+      // x,y in px relative to .s2-cloud (which is 369 wide, ~440 tall after
+      // padding). font-size scales with count. Self cluster (AI) is largest
+      // and centered with a slight rotation. The "tail" class controls
+      // which corner the speech-balloon tail emerges from.
+      const placements = {
+        c_ai:          { x: 92,  y: 110, fs: 46, color: 'self',     rot: -3, tail: 'bl' },
+        c_tiktok:      { x: 18,  y: 38,  fs: 26, color: 'c-mint',   rot: -4, tail: 'br' },
+        c_twitter:     { x: 220, y: 26,  fs: 22, color: 'c-sky',    rot:  3, tail: 'bl' },
+        c_podcasts:    { x: 16,  y: 220, fs: 20, color: 'c-lav',    rot: -2, tail: 'tr' },
+        c_nfts:        { x: 232, y: 226, fs: 18, color: 'c-yellow', rot:  4, tail: 'bl' },
+        c_influencers: { x: 12,  y: 282, fs: 17, color: 'c-peach',  rot: -3, tail: 'tr' },
+        c_linkedin:    { x: 152, y: 200, fs: 14, color: 'c-red',    rot:  2, tail: 'br' },
+        c_crypto:      { x: 232, y: 282, fs: 16, color: 'c-mint',   rot: -2, tail: 'tl' },
+        c_dating_apps: { x: 16,  y: 332, fs: 13, color: 'c-sky',    rot:  3, tail: 'tr' },
+        c_reddit:      { x: 146, y: 268, fs: 13, color: 'c-lav',    rot: -3, tail: 'br' },
+        c_threads:     { x: 152, y: 320, fs: 12, color: 'c-yellow', rot:  2, tail: 'tl' },
+        c_instagram:   { x: 232, y: 332, fs: 14, color: 'c-red',    rot: -3, tail: 'tl' },
+        c_substack:    { x: 16,  y: 376, fs: 11, color: 'c-mint',   rot:  3, tail: 'br' },
+        c_chatgpt:     { x: 104, y: 376, fs: 12, color: 'c-peach',  rot: -2, tail: 'tr' },
+        c_discord:     { x: 188, y: 376, fs: 11, color: 'c-sky',    rot:  2, tail: 'bl' },
+        c_yt_shorts:   { x: 252, y: 380, fs: 10, color: 'c-lav',    rot: -4, tail: 'tl' },
+        c_snapchat:    { x: 16,  y: 414, fs: 11, color: 'c-yellow', rot:  3, tail: 'br' },
+        c_bereal:      { x: 92,  y: 416, fs: 10, color: 'c-red',    rot: -2, tail: 'tr' },
+        c_clubhouse:   { x: 168, y: 416, fs:  9, color: 'c-mint',   rot:  3, tail: 'bl' },
+        c_bluesky:     { x: 240, y: 416, fs:  9, color: 'c-peach',  rot: -3, tail: 'tr' },
+      };
+
+      const clusters = R.clusters.map(c => {
+        const p = placements[c.id];
+        if (!p) return '';
+        const tailCls =
+          p.tail === 'tr' ? 'tail-tr' :
+          p.tail === 'bl' ? 'tail-bl' :
+          p.tail === 'br' ? 'tail-br' : '';
+        const colorCls = p.color === 'self' ? 'self' : p.color;
+        const crown = c.id === R.user.selfClusterId ? '<span class="self-crown">★</span>' : '';
+        return `
+          <div class="cluster ${colorCls} ${tailCls}"
+               style="left:${p.x}px; top:${p.y}px; font-size:${p.fs}px; transform: rotate(${p.rot}deg);">
+            ${crown}${c.text}<span class="n">${c.count.toLocaleString()}</span>
+          </div>`;
+      }).join('');
+
+      el.innerHTML = `
+        <div class="ap-screen s2">
+          <div class="ap-speedlines"></div>
+          <div class="ap-status">
+            <span class="left">9:42</span>
+            <span class="right">5G · 87%</span>
+          </div>
+
+          <div class="s2-header">
+            <div class="title">YOU CALLED IT ✦</div>
+            <div class="share">↗</div>
+          </div>
+
+          <div class="s2-stats">
+            <div class="pill"><span class="n">${R.meta.totalAnswers.toLocaleString()}</span><span class="l">takes</span></div>
+            <div class="pill alt"><span class="n">${R.meta.countriesAnswered}</span><span class="l">countries</span></div>
+          </div>
+
+          <div class="s2-cloud">${clusters}</div>
+
+          <div class="s2-banner">
+            <span class="star">✦</span> THE WORLD AGREES — <span style="color: var(--ap-red);">AI</span> WINS TONIGHT
+          </div>
+
+          ${tabbar('today')}
+        </div>
+      `;
+    }
+
+    /* ===================== SCREEN 3 — LEADERBOARD ===================== */
+    function renderLeaderboard() {
+      const el = document.getElementById('screen-3');
+      el.className = 'rb-phone-screen';
+
+      const rowColors = ['r-yellow', 'r-mint', 'r-lav', '', 'r-peach', 'r-sky', 'r-yellow', 'r-mint', 'r-lav', 'r-peach'];
+
+      const rows = R.leaderboard.entries.map((e, i) => {
+        const isTop3 = i < 3;
+        const isSelf = e.isSelf;
+        const colorCls = isSelf ? '' : rowColors[i];
+        const crown = e.crown ? '<span class="crown"></span>' : '';
+        const rankStr = String(e.rank).padStart(2, '0');
+        return `
+          <div class="s3-row ${isTop3 ? 'top' : ''} ${isSelf ? 'self' : ''} ${colorCls}">
+            ${crown}
+            <span class="rank">#${rankStr}</span>
+            <span class="handle">${e.handle}</span>
+            <span class="streak">▲${e.streak}🔥</span>
+            <span class="score">${e.score}</span>
+          </div>
+        `;
+      }).join('');
+
+      el.innerHTML = `
+        <div class="ap-screen s3">
+          <div class="ap-speedlines"></div>
+          <div class="ap-status">
+            <span class="left">9:43</span>
+            <span class="right">5G · 87%</span>
+          </div>
+
+          <div class="s3-header">
+            <div class="title">RANK CARD ✦</div>
+            <div class="toggles">
+              <div class="t on">DAILY</div>
+              <div class="t">WEEKLY</div>
+              <div class="t">ALL-TIME</div>
+            </div>
+            <div class="scope">
+              <div class="s on">GLOBAL</div>
+              <div class="s">FRIENDS</div>
+            </div>
+          </div>
+
+          <div class="s3-list">${rows}</div>
+
+          ${tabbar('board')}
+        </div>
+      `;
+    }
+
+    /* ===================== SCREEN 4 — ARCHIVE ===================== */
+    function renderArchive() {
+      const el = document.getElementById('screen-4');
+      el.className = 'rb-phone-screen';
+
+      const tileColors = ['col-red', 'col-mint', 'col-lav', 'col-yel', 'col-sky', 'col-red', 'col-mint', 'col-lav'];
+      const tiles = R.archive.map((a, i) => {
+        const altCls = i % 2 === 1 ? 'alt' : '';
+        const out = `
+          <div class="s4-tile ${altCls} ${tileColors[i]}">
+            <div>
+              <div class="date">${a.date.toUpperCase()}</div>
+              <div class="q">${a.text.toUpperCase()}</div>
+            </div>
+            <div>
+              <span class="verdict">${a.verdict}</span>
+              <div class="count">${a.count.toLocaleString()} TAKES</div>
+            </div>
+          </div>`;
+        // banner ad after tile 4
+        if (i === 3) {
+          return out + `
+            <div class="s4-ad">
+              <span class="tag">AD</span>
+              <span class="label">YOUR BRAND HERE ✦</span>
+              <span class="tag">SKIP</span>
+            </div>`;
+        }
+        return out;
+      }).join('');
+
+      el.innerHTML = `
+        <div class="ap-screen s4">
+          <div class="ap-speedlines"></div>
+          <div class="ap-status">
+            <span class="left">9:44</span>
+            <span class="right">5G · 87%</span>
+          </div>
+
+          <div class="s4-header">
+            <div class="eyebrow">▸ THE ARCHIVE · 011 EPISODES</div>
+            <div class="title">REPLAYS ✦</div>
+          </div>
+
+          <div class="s4-grid">${tiles}</div>
+
+          ${tabbar('archive')}
+        </div>
+      `;
+    }
+
+    renderQuestion();
+    renderWordcloud();
+    renderLeaderboard();
+    renderArchive();
+  </script>
+</body>
+</html>

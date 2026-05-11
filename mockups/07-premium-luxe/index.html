@@ -1,0 +1,1358 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Relatably · Premium Luxe</title>
+  <link rel="stylesheet" href="../shared/reset.css">
+  <link rel="stylesheet" href="../shared/phone-frame.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Inter+Tight:wght@300;400;500&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    /* ---------- Tokens ---------- */
+    :root {
+      --bg:         #0E0D0B;
+      --surface:    #161412;
+      --hairline:   rgba(200, 164, 114, 0.20);
+      --hairline-strong: rgba(200, 164, 114, 0.35);
+      --text-1:     #F4EFE6;
+      --text-2:     #9C958A;
+      --text-3:     #6B6660;
+      --champagne:  #C8A472;
+      --champagne-soft: #E0C49C;
+      --champagne-glow: 0 0 24px rgba(200, 164, 114, 0.40);
+      --error:      #BB6D5F;
+
+      --serif: 'Cormorant Garamond', 'Times New Roman', Georgia, serif;
+      --sans:  'Inter Tight', -apple-system, BlinkMacSystemFont, sans-serif;
+      --mono:  'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+
+      --s-1:  4px;
+      --s-2:  8px;
+      --s-3:  12px;
+      --s-4:  16px;
+      --s-5:  24px;
+      --s-6:  32px;
+      --s-7:  40px;
+      --s-8:  48px;
+      --gutter: 36px;
+    }
+
+    /* ---------- Page chrome ---------- */
+    html, body {
+      background: #07060a;
+      color: var(--text-1);
+      font-family: var(--sans);
+      font-weight: 300;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      min-height: 100vh;
+      padding: 56px 48px 96px;
+      background:
+        radial-gradient(1200px 600px at 20% 0%, rgba(200,164,114,0.05), transparent 60%),
+        radial-gradient(900px 500px at 80% 100%, rgba(200,164,114,0.03), transparent 65%),
+        #07060a;
+    }
+
+    .page-header {
+      max-width: 1840px;
+      margin: 0 auto 64px;
+      padding: 0 24px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 40px;
+      border-bottom: 1px solid rgba(200,164,114,0.12);
+      padding-bottom: 40px;
+    }
+    .page-header-mark {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-2);
+      margin-bottom: 18px;
+    }
+    .page-header h1 {
+      font-family: var(--serif);
+      font-weight: 400;
+      font-style: italic;
+      font-size: 88px;
+      line-height: 0.95;
+      letter-spacing: -0.01em;
+      color: var(--text-1);
+    }
+    .page-header h1 .roman {
+      font-style: normal;
+      font-weight: 300;
+      color: var(--text-2);
+    }
+    .page-header .sub {
+      max-width: 480px;
+      font-family: var(--sans);
+      font-weight: 300;
+      font-size: 15px;
+      line-height: 1.55;
+      color: var(--text-2);
+      letter-spacing: 0.01em;
+    }
+    .page-header .sub em {
+      color: var(--champagne-soft);
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 17px;
+    }
+    .page-meta {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-top: 14px;
+    }
+    .page-meta .dot {
+      display: inline-block;
+      width: 4px;
+      height: 4px;
+      background: var(--champagne);
+      vertical-align: middle;
+      margin: 0 10px;
+      border-radius: 50%;
+    }
+
+    .phone-row {
+      display: flex;
+      gap: 56px;
+      justify-content: center;
+      align-items: flex-start;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding: 0 24px 24px;
+    }
+
+    .rb-phone-label {
+      font-family: var(--mono);
+      font-weight: 300;
+      font-size: 11px;
+      letter-spacing: 0.28em;
+      color: var(--text-2);
+      margin-top: 22px;
+    }
+    .rb-phone-label .dot {
+      display: inline-block;
+      width: 3px;
+      height: 3px;
+      background: var(--champagne);
+      vertical-align: middle;
+      margin: 0 8px 2px;
+      border-radius: 50%;
+    }
+
+    /* ---------- Screen base ---------- */
+    .rb-phone-screen {
+      background: var(--bg);
+      color: var(--text-1);
+      font-family: var(--sans);
+      font-weight: 300;
+      position: relative;
+    }
+    .rb-phone-screen::before {
+      /* very subtle warm-grain noise for material feel */
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.035;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.78  0 0 0 0 0.65  0 0 0 0 0.45  0 0 0 0.9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+      z-index: 1;
+    }
+    .screen-inner {
+      position: relative;
+      z-index: 2;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 78px var(--gutter) 0;
+      animation: screen-in 600ms cubic-bezier(0.4, 0, 0.2, 1) both;
+    }
+
+    @keyframes screen-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Top brand stripe */
+    .brand-stripe {
+      font-family: var(--mono);
+      font-weight: 300;
+      font-size: 10.5px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--hairline);
+    }
+    .brand-stripe .left {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .brand-stripe .wordmark {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: 14px;
+      letter-spacing: 0.04em;
+      color: var(--text-1);
+      text-transform: none;
+    }
+    .brand-stripe .sep {
+      width: 3px; height: 3px;
+      background: var(--champagne);
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .brand-stripe .right {
+      color: var(--text-3);
+    }
+
+    /* Mono uppercase label */
+    .ml {
+      font-family: var(--mono);
+      font-weight: 300;
+      font-size: 10.5px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-2);
+    }
+    .ml-dim { color: var(--text-3); }
+
+    /* Section eyebrow */
+    .eyebrow {
+      font-family: var(--mono);
+      font-weight: 300;
+      font-size: 10.5px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-2);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .eyebrow::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--hairline);
+    }
+
+    /* Hairline divider */
+    .hair { height: 1px; background: var(--hairline); width: 100%; }
+
+    /* Champagne button */
+    .btn-champagne {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      height: 56px;
+      background: var(--champagne);
+      color: var(--bg);
+      font-family: var(--mono);
+      font-weight: 400;
+      font-size: 11.5px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 0;
+      cursor: pointer;
+      transition: all 200ms ease;
+      position: relative;
+    }
+    .btn-champagne::after {
+      content: "—";
+      color: var(--bg);
+      opacity: 0.6;
+      font-family: var(--serif);
+      font-style: italic;
+      letter-spacing: 0;
+    }
+    .btn-ghost {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 56px;
+      background: transparent;
+      color: var(--champagne);
+      font-family: var(--mono);
+      font-weight: 300;
+      font-size: 11px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      border: 1px solid var(--hairline-strong);
+      border-radius: 0;
+      cursor: pointer;
+    }
+
+    /* ============================
+       Screen 1 — Question
+       ============================ */
+    .s1 {}
+    .s1 .meta-row {
+      margin-top: 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .s1 .time-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--mono);
+      font-size: 10.5px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-2);
+    }
+    .s1 .time-ring {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      border: 1px solid var(--hairline-strong);
+      position: relative;
+    }
+    .s1 .time-ring::before {
+      content: "";
+      position: absolute;
+      inset: 3px;
+      border-radius: 50%;
+      background: conic-gradient(var(--champagne) 0deg 90deg, transparent 90deg 360deg);
+    }
+
+    .s1 .eyebrow-q {
+      margin-top: 48px;
+    }
+
+    .s1 .question {
+      margin-top: 28px;
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: 42px;
+      line-height: 1.18;
+      letter-spacing: -0.005em;
+      color: var(--text-1);
+    }
+    .s1 .question .pull {
+      color: var(--champagne-soft);
+    }
+
+    .s1 .counter {
+      margin-top: 28px;
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+    .s1 .counter .num {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: 22px;
+      color: var(--text-1);
+    }
+    .s1 .counter .lbl {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-2);
+    }
+
+    .s1 .input-block {
+      margin-top: 44px;
+    }
+    .s1 .input-block .field {
+      margin-top: 14px;
+      padding: 0 0 14px 0;
+      border-bottom: 1px solid var(--champagne);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .s1 .input-block .field .placeholder {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 300;
+      font-size: 20px;
+      color: var(--text-1);
+      letter-spacing: 0.005em;
+    }
+    .s1 .input-block .field .caret {
+      width: 1px;
+      height: 22px;
+      background: var(--champagne);
+      animation: caret 1.2s steps(1) infinite;
+    }
+    @keyframes caret { 50% { opacity: 0; } }
+    .s1 .input-block .field .count {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      color: var(--text-3);
+    }
+    .s1 .input-block .hint {
+      margin-top: 12px;
+      font-family: var(--sans);
+      font-weight: 300;
+      font-size: 12px;
+      color: var(--text-3);
+      letter-spacing: 0.02em;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .s1 .submit-block {
+      margin-top: 28px;
+    }
+
+    /* ============================
+       Screen 2 — Wordcloud
+       ============================ */
+    .s2 .top-strip {
+      margin-top: 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .s2 .stat {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .s2 .stat .n {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: 26px;
+      color: var(--text-1);
+      line-height: 1;
+    }
+    .s2 .stat .l {
+      font-family: var(--mono);
+      font-size: 9.5px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-2);
+    }
+    .s2 .share-btn {
+      width: 36px; height: 36px;
+      border: 1px solid var(--hairline-strong);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      background: transparent;
+      border-radius: 0;
+    }
+    .s2 .share-btn svg {
+      width: 14px; height: 14px;
+      stroke: var(--champagne);
+      stroke-width: 1.25;
+      fill: none;
+    }
+
+    .s2 .eyebrow-w {
+      margin-top: 36px;
+    }
+
+    .s2 .cloud {
+      position: relative;
+      margin-top: 18px;
+      height: 460px;
+      width: 100%;
+    }
+    .s2 .cluster {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      padding: 8px 14px;
+      border: 1px solid var(--hairline);
+      border-radius: 999px;
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      color: var(--text-1);
+      white-space: nowrap;
+      letter-spacing: 0.005em;
+      background: transparent;
+      transition: all 220ms ease;
+    }
+    .s2 .cluster .ct {
+      font-family: var(--mono);
+      font-style: normal;
+      font-size: 8.5px;
+      letter-spacing: 0.18em;
+      color: var(--text-3);
+      margin-left: 8px;
+      font-weight: 300;
+    }
+    .s2 .cluster.tier-xl {
+      font-size: 36px;
+      padding: 16px 28px;
+      background: var(--champagne);
+      border-color: var(--champagne);
+      color: var(--bg);
+      box-shadow: var(--champagne-glow);
+      animation: pulse-glow 8s ease-in-out infinite;
+      z-index: 3;
+    }
+    .s2 .cluster.tier-xl .ct { color: rgba(14,13,11,0.55); }
+    .s2 .cluster.tier-l {
+      font-size: 26px;
+      padding: 12px 22px;
+      z-index: 2;
+    }
+    .s2 .cluster.tier-m {
+      font-size: 20px;
+      padding: 10px 18px;
+    }
+    .s2 .cluster.tier-s {
+      font-size: 15px;
+      padding: 8px 14px;
+      color: var(--text-1);
+    }
+    .s2 .cluster.tier-xs {
+      font-size: 12.5px;
+      padding: 0;
+      border: none;
+      color: var(--text-2);
+    }
+    .s2 .cluster.tier-xs .ct { display: none; }
+    .s2 .cluster.self {
+      /* the user's own cluster — c_ai which is also #1 — gets the
+         champagne fill AND the self-marker italic-underline */
+      position: relative;
+    }
+    .s2 .cluster.self::after {
+      content: "you";
+      position: absolute;
+      top: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: 12px;
+      color: var(--champagne-soft);
+      letter-spacing: 0.02em;
+    }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 24px rgba(200,164,114,0.40); }
+      50%      { box-shadow: 0 0 38px rgba(200,164,114,0.62); }
+    }
+
+    .s2 .legend {
+      margin-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 12px;
+      border-top: 1px solid var(--hairline);
+    }
+    .s2 .legend .l {
+      font-family: var(--mono);
+      font-size: 9.5px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-3);
+    }
+    .s2 .legend .r {
+      display: flex; align-items: center; gap: 8px;
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 13px;
+      color: var(--champagne-soft);
+    }
+    .s2 .legend .swatch {
+      width: 8px; height: 8px;
+      background: var(--champagne);
+      box-shadow: var(--champagne-glow);
+      border-radius: 50%;
+    }
+
+    /* ============================
+       Screen 3 — Leaderboard
+       ============================ */
+    .s3 .toggles {
+      margin-top: 24px;
+      display: flex;
+      gap: 0;
+      border: 1px solid var(--hairline-strong);
+    }
+    .s3 .toggles button {
+      flex: 1;
+      padding: 12px 0;
+      background: transparent;
+      border: none;
+      border-right: 1px solid var(--hairline);
+      color: var(--text-2);
+      font-family: var(--mono);
+      font-weight: 300;
+      font-size: 10px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .s3 .toggles button:last-child { border-right: none; }
+    .s3 .toggles button.active {
+      background: var(--champagne);
+      color: var(--bg);
+      font-weight: 400;
+    }
+
+    .s3 .scope {
+      margin-top: 14px;
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+    }
+    .s3 .scope .lbl { color: var(--text-3); }
+    .s3 .scope .opt { color: var(--text-2); }
+    .s3 .scope .opt.active {
+      color: var(--champagne);
+      border-bottom: 1px solid var(--champagne);
+      padding-bottom: 2px;
+    }
+
+    .s3 .table-head {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: 28px 1fr 64px 50px;
+      gap: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--hairline-strong);
+      font-family: var(--mono);
+      font-size: 9.5px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-3);
+    }
+    .s3 .table-head .num { text-align: right; }
+
+    .s3 .row {
+      display: grid;
+      grid-template-columns: 28px 1fr 64px 50px;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--hairline);
+      align-items: center;
+    }
+    .s3 .row:last-child { border-bottom: none; }
+
+    .s3 .row .rank {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-3);
+      letter-spacing: 0.04em;
+    }
+    .s3 .row .name {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: 18px;
+      color: var(--text-1);
+      letter-spacing: 0.005em;
+    }
+    .s3 .row .score {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--text-1);
+      text-align: right;
+      letter-spacing: 0.06em;
+    }
+    .s3 .row .streak {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-2);
+      letter-spacing: 0.1em;
+      text-align: right;
+    }
+    .s3 .row .streak svg {
+      width: 9px; height: 9px;
+      stroke: var(--champagne);
+      stroke-width: 1.25;
+      fill: none;
+      vertical-align: middle;
+      margin-right: 4px;
+    }
+
+    .s3 .row.crown .name { color: var(--champagne-soft); }
+    .s3 .row.crown .rank { color: var(--champagne); }
+    .s3 .row.crown {
+      position: relative;
+    }
+    .s3 .row.crown .crown-icon {
+      display: inline-block;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    .s3 .row.crown .crown-icon svg {
+      width: 13px; height: 9px;
+      stroke: var(--champagne);
+      stroke-width: 1.25;
+      fill: none;
+    }
+
+    .s3 .row.self {
+      position: relative;
+      margin: 0 -16px;
+      padding: 14px 16px;
+      border-left: 1px solid var(--champagne);
+      background: linear-gradient(90deg, rgba(200,164,114,0.05) 0%, transparent 70%);
+    }
+    .s3 .row.self .name { color: var(--champagne-soft); }
+    .s3 .row.self .rank { color: var(--champagne); }
+    .s3 .row.self::after {
+      content: "you";
+      position: absolute;
+      right: 16px;
+      top: -8px;
+      font-family: var(--mono);
+      font-size: 8.5px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--champagne);
+      background: var(--bg);
+      padding: 0 6px;
+    }
+
+    /* ============================
+       Screen 4 — Archive
+       ============================ */
+    .s4 .title-block {
+      margin-top: 24px;
+      padding-bottom: 22px;
+      border-bottom: 1px solid var(--hairline-strong);
+    }
+    .s4 .title-block .ml { margin-bottom: 12px; }
+    .s4 .title-block h2 {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: 36px;
+      line-height: 1.05;
+      color: var(--text-1);
+      letter-spacing: -0.005em;
+    }
+    .s4 .title-block .sub {
+      margin-top: 10px;
+      font-family: var(--sans);
+      font-weight: 300;
+      font-size: 12.5px;
+      color: var(--text-2);
+      letter-spacing: 0.01em;
+    }
+
+    .s4 .archive-list {
+      display: flex;
+      flex-direction: column;
+    }
+    .s4 .a-card {
+      padding: 22px 0;
+      border-bottom: 1px solid var(--hairline);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .s4 .a-card .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .s4 .a-card .date {
+      font-family: var(--mono);
+      font-size: 9.5px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-3);
+    }
+    .s4 .a-card .count {
+      font-family: var(--mono);
+      font-size: 9.5px;
+      letter-spacing: 0.18em;
+      color: var(--text-2);
+    }
+    .s4 .a-card .q {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: 19px;
+      line-height: 1.25;
+      color: var(--text-1);
+      letter-spacing: 0.005em;
+    }
+    .s4 .a-card .verdict {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-top: 2px;
+    }
+    .s4 .a-card .verdict .lbl {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--text-3);
+    }
+    .s4 .a-card .verdict .val {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: 14px;
+      color: var(--champagne-soft);
+    }
+
+    .s4 .partner-slot {
+      margin: 6px 0 0;
+      padding: 18px 0;
+      border-top: 1px solid var(--hairline);
+      border-bottom: 1px solid var(--hairline);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .s4 .partner-slot .lbl {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--text-3);
+    }
+    .s4 .partner-slot .body {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: 13px;
+      color: var(--text-2);
+    }
+    .s4 .partner-slot .arrow {
+      font-family: var(--serif);
+      font-style: italic;
+      color: var(--champagne);
+    }
+
+    /* ============================
+       Tab bar (all screens)
+       ============================ */
+    .tabbar {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      padding: 18px 24px 42px;
+      background: linear-gradient(180deg, transparent 0%, var(--bg) 30%, var(--bg) 100%);
+      z-index: 4;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-top: 1px solid var(--hairline);
+    }
+    .tabbar .t {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 6px 0 0;
+      position: relative;
+    }
+    .tabbar .t svg {
+      width: 18px; height: 18px;
+      stroke: var(--text-3);
+      stroke-width: 1.25;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .tabbar .t .lbl {
+      font-family: var(--mono);
+      font-weight: 300;
+      font-size: 8.5px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-3);
+    }
+    .tabbar .t.active svg { stroke: var(--champagne); stroke-width: 1.4; }
+    .tabbar .t.active .lbl { color: var(--champagne); }
+    .tabbar .t.active::after {
+      content: "";
+      position: absolute;
+      top: -1px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 22px;
+      height: 1px;
+      background: var(--champagne);
+    }
+
+    /* Make the screen content scroll inside-frame if it overflows */
+    .screen-inner.pad-tabbar {
+      padding-bottom: 110px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: none;
+    }
+    .screen-inner.pad-tabbar::-webkit-scrollbar { display: none; }
+
+    /* Page footer (legend) */
+    .page-footer {
+      max-width: 1280px;
+      margin: 80px auto 0;
+      padding: 32px 24px 0;
+      border-top: 1px solid rgba(200,164,114,0.12);
+      display: flex;
+      justify-content: space-between;
+      gap: 40px;
+      font-family: var(--mono);
+      font-size: 10.5px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-3);
+    }
+    .page-footer em {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      color: var(--champagne-soft);
+      text-transform: none;
+      letter-spacing: 0.01em;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="page-header">
+    <div>
+      <div class="page-header-mark">Relatably <span style="color:var(--champagne)">·</span> Direction VII <span style="color:var(--champagne)">·</span> Premium Luxe</div>
+      <h1><span class="roman">a quiet</span> ritual<span style="color:var(--champagne)">.</span></h1>
+      <div class="page-meta">
+        Aesop &nbsp;·&nbsp; Cartier &nbsp;·&nbsp; Hodinkee &nbsp;·&nbsp; Loro Piana
+        <span class="dot"></span>
+        Dark · Champagne · Cormorant Italic
+      </div>
+    </div>
+    <div class="sub">
+      Restrained dark, champagne hairlines, and a refined italic serif. The opinion poll
+      <em>as evening publication</em> — a single question, set in type, returned to once a day.
+      No bright colors. No bounce. No shouting.
+    </div>
+  </header>
+
+  <main class="phone-row">
+
+    <!-- ============================== SCREEN 1 — QUESTION ============================== -->
+    <div>
+      <div class="rb-phone">
+        <div class="rb-phone-island"></div>
+        <div class="rb-phone-screen" id="screen-1">
+          <div class="screen-inner pad-tabbar s1">
+
+            <!-- brand stripe -->
+            <div class="brand-stripe">
+              <div class="left">
+                <span>Relatably</span>
+                <span class="sep"></span>
+                <span>N° 011</span>
+              </div>
+              <div class="right">Mon · May 11</div>
+            </div>
+
+            <!-- meta row -->
+            <div class="meta-row">
+              <div class="ml">Drop · 6:34 PM UTC</div>
+              <div class="time-left">
+                <div class="time-ring"></div>
+                <span>21h 42m</span>
+              </div>
+            </div>
+
+            <!-- eyebrow + question -->
+            <div class="eyebrow eyebrow-q">Today's Question</div>
+            <p class="question">
+              what's the <span class="pull">most overrated</span> thing on the internet right now?
+            </p>
+
+            <!-- counter -->
+            <div class="counter">
+              <span class="num">12,847</span>
+              <span class="lbl">reflections so far</span>
+            </div>
+
+            <!-- input -->
+            <div class="input-block">
+              <div class="ml ml-dim">Your reflection</div>
+              <div class="field">
+                <span class="placeholder">what's your reflection?</span>
+                <span class="caret"></span>
+              </div>
+              <div class="hint">
+                <span>Anonymous by default · 240 characters</span>
+                <span>0 / 240</span>
+              </div>
+            </div>
+
+            <!-- submit -->
+            <div class="submit-block">
+              <button class="btn-champagne">Submit</button>
+            </div>
+
+          </div>
+
+          <!-- tab bar -->
+          <nav class="tabbar">
+            <button class="t active">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+              <span class="lbl">Today</span>
+            </button>
+            <button class="t">
+              <svg viewBox="0 0 24 24"><circle cx="9" cy="9" r="3.2"/><circle cx="17" cy="11" r="2.4"/><path d="M3 19c1.4-3 4-4.4 6-4.4s4.4 1.2 6 4.4"/><path d="M14 18c1-2 2.6-3 4.2-3"/></svg>
+              <span class="lbl">Friends</span>
+            </button>
+            <button class="t">
+              <svg viewBox="0 0 24 24"><path d="M6 20V11"/><path d="M12 20V6"/><path d="M18 20v-6"/></svg>
+              <span class="lbl">Leaderboard</span>
+            </button>
+            <button class="t">
+              <svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14"/><path d="M4 9h16"/><path d="M8 5V3"/><path d="M16 5V3"/></svg>
+              <span class="lbl">Archive</span>
+            </button>
+          </nav>
+
+        </div>
+        <div class="rb-phone-bar"></div>
+      </div>
+      <div class="rb-phone-label">01 <span class="dot"></span> Question</div>
+    </div>
+
+    <!-- ============================== SCREEN 2 — WORDCLOUD ============================== -->
+    <div>
+      <div class="rb-phone">
+        <div class="rb-phone-island"></div>
+        <div class="rb-phone-screen" id="screen-2">
+          <div class="screen-inner pad-tabbar s2">
+
+            <!-- brand stripe -->
+            <div class="brand-stripe">
+              <div class="left">
+                <span>Relatably</span>
+                <span class="sep"></span>
+                <span>The Floor</span>
+              </div>
+              <div class="right">Live</div>
+            </div>
+
+            <!-- top strip -->
+            <div class="top-strip">
+              <div style="display:flex; gap:24px;">
+                <div class="stat"><span class="n">12,847</span><span class="l">Voices</span></div>
+                <div class="stat"><span class="n">87</span><span class="l">Countries</span></div>
+              </div>
+              <button class="share-btn" aria-label="share">
+                <svg viewBox="0 0 24 24"><path d="M12 4v12"/><path d="M7 9l5-5 5 5"/><path d="M5 19h14"/></svg>
+              </button>
+            </div>
+
+            <!-- eyebrow -->
+            <div class="eyebrow eyebrow-w">The world said —</div>
+
+            <!-- cloud -->
+            <div class="cloud" id="cloud"></div>
+
+            <!-- legend -->
+            <div class="legend">
+              <span class="l">Floor · live</span>
+              <span class="r"><span class="swatch"></span>your voice</span>
+            </div>
+
+          </div>
+
+          <!-- tab bar -->
+          <nav class="tabbar">
+            <button class="t active">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+              <span class="lbl">Today</span>
+            </button>
+            <button class="t">
+              <svg viewBox="0 0 24 24"><circle cx="9" cy="9" r="3.2"/><circle cx="17" cy="11" r="2.4"/><path d="M3 19c1.4-3 4-4.4 6-4.4s4.4 1.2 6 4.4"/><path d="M14 18c1-2 2.6-3 4.2-3"/></svg>
+              <span class="lbl">Friends</span>
+            </button>
+            <button class="t">
+              <svg viewBox="0 0 24 24"><path d="M6 20V11"/><path d="M12 20V6"/><path d="M18 20v-6"/></svg>
+              <span class="lbl">Leaderboard</span>
+            </button>
+            <button class="t">
+              <svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14"/><path d="M4 9h16"/><path d="M8 5V3"/><path d="M16 5V3"/></svg>
+              <span class="lbl">Archive</span>
+            </button>
+          </nav>
+
+        </div>
+        <div class="rb-phone-bar"></div>
+      </div>
+      <div class="rb-phone-label">02 <span class="dot"></span> Wordcloud</div>
+    </div>
+
+    <!-- ============================== SCREEN 3 — LEADERBOARD ============================== -->
+    <div>
+      <div class="rb-phone">
+        <div class="rb-phone-island"></div>
+        <div class="rb-phone-screen" id="screen-3">
+          <div class="screen-inner pad-tabbar s3">
+
+            <!-- brand stripe -->
+            <div class="brand-stripe">
+              <div class="left">
+                <span>Relatably</span>
+                <span class="sep"></span>
+                <span>The Ledger</span>
+              </div>
+              <div class="right">Global</div>
+            </div>
+
+            <!-- toggles -->
+            <div class="toggles">
+              <button class="active">Daily</button>
+              <button>Weekly</button>
+              <button>All-time</button>
+            </div>
+
+            <!-- scope -->
+            <div class="scope">
+              <span class="lbl">Scope —</span>
+              <span class="opt active">Global</span>
+              <span class="opt">Friends</span>
+            </div>
+
+            <!-- table head -->
+            <div class="table-head">
+              <span>Rk</span>
+              <span>Name</span>
+              <span class="num">Score</span>
+              <span class="num">Strk</span>
+            </div>
+
+            <!-- rows -->
+            <div id="leader-rows"></div>
+
+          </div>
+
+          <!-- tab bar -->
+          <nav class="tabbar">
+            <button class="t">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+              <span class="lbl">Today</span>
+            </button>
+            <button class="t">
+              <svg viewBox="0 0 24 24"><circle cx="9" cy="9" r="3.2"/><circle cx="17" cy="11" r="2.4"/><path d="M3 19c1.4-3 4-4.4 6-4.4s4.4 1.2 6 4.4"/><path d="M14 18c1-2 2.6-3 4.2-3"/></svg>
+              <span class="lbl">Friends</span>
+            </button>
+            <button class="t active">
+              <svg viewBox="0 0 24 24"><path d="M6 20V11"/><path d="M12 20V6"/><path d="M18 20v-6"/></svg>
+              <span class="lbl">Leaderboard</span>
+            </button>
+            <button class="t">
+              <svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14"/><path d="M4 9h16"/><path d="M8 5V3"/><path d="M16 5V3"/></svg>
+              <span class="lbl">Archive</span>
+            </button>
+          </nav>
+
+        </div>
+        <div class="rb-phone-bar"></div>
+      </div>
+      <div class="rb-phone-label">03 <span class="dot"></span> Leaderboard</div>
+    </div>
+
+    <!-- ============================== SCREEN 4 — ARCHIVE ============================== -->
+    <div>
+      <div class="rb-phone">
+        <div class="rb-phone-island"></div>
+        <div class="rb-phone-screen" id="screen-4">
+          <div class="screen-inner pad-tabbar s4">
+
+            <!-- brand stripe -->
+            <div class="brand-stripe">
+              <div class="left">
+                <span>Relatably</span>
+                <span class="sep"></span>
+                <span>The Archive</span>
+              </div>
+              <div class="right">Vol. 1</div>
+            </div>
+
+            <!-- title -->
+            <div class="title-block">
+              <div class="ml">An Archive of Takes</div>
+              <h2>yesterday, the world said —</h2>
+              <div class="sub">A quiet record of what we agreed on, one day at a time.</div>
+            </div>
+
+            <!-- list -->
+            <div class="archive-list" id="archive-list"></div>
+
+          </div>
+
+          <!-- tab bar -->
+          <nav class="tabbar">
+            <button class="t">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+              <span class="lbl">Today</span>
+            </button>
+            <button class="t">
+              <svg viewBox="0 0 24 24"><circle cx="9" cy="9" r="3.2"/><circle cx="17" cy="11" r="2.4"/><path d="M3 19c1.4-3 4-4.4 6-4.4s4.4 1.2 6 4.4"/><path d="M14 18c1-2 2.6-3 4.2-3"/></svg>
+              <span class="lbl">Friends</span>
+            </button>
+            <button class="t">
+              <svg viewBox="0 0 24 24"><path d="M6 20V11"/><path d="M12 20V6"/><path d="M18 20v-6"/></svg>
+              <span class="lbl">Leaderboard</span>
+            </button>
+            <button class="t active">
+              <svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14"/><path d="M4 9h16"/><path d="M8 5V3"/><path d="M16 5V3"/></svg>
+              <span class="lbl">Archive</span>
+            </button>
+          </nav>
+
+        </div>
+        <div class="rb-phone-bar"></div>
+      </div>
+      <div class="rb-phone-label">04 <span class="dot"></span> Archive</div>
+    </div>
+
+  </main>
+
+  <footer class="page-footer">
+    <div>Cormorant Garamond <span style="color:var(--champagne)">·</span> Inter Tight <span style="color:var(--champagne)">·</span> IBM Plex Mono</div>
+    <div><em>quiet confidence, restrained warmth.</em></div>
+    <div>0E0D0B <span style="color:var(--champagne)">·</span> C8A472 <span style="color:var(--champagne)">·</span> F4EFE6</div>
+  </footer>
+
+  <script src="../shared/content.js"></script>
+  <script>
+    (function () {
+      const R = window.RELATABLY;
+
+      // ---------- Screen 2 — Wordcloud ----------
+      // We position 20 clusters by hand on a 333-wide stage (393 frame - 2*30 padding)
+      // x/y are percentages of the cloud container.
+      // tier is xl / l / m / s / xs by count.
+      // The #1 cluster (c_ai) is also the self cluster — gets tier-xl + .self.
+      const positions = {
+        c_ai:           { x: 50,  y: 30,  tier: 'xl' },
+        c_tiktok:       { x: 22,  y: 60,  tier: 'l'  },
+        c_twitter:      { x: 75,  y: 58,  tier: 'l'  },
+        c_podcasts:     { x: 26,  y: 13,  tier: 'm'  },
+        c_nfts:         { x: 79,  y: 14,  tier: 'm'  },
+        c_influencers:  { x: 18,  y: 82,  tier: 'm'  },
+        c_linkedin:     { x: 80,  y: 80,  tier: 's'  },
+        c_crypto:       { x: 49,  y: 78,  tier: 's'  },
+        c_dating_apps:  { x: 50,  y: 88,  tier: 's'  },
+        c_reddit:       { x: 11,  y: 38,  tier: 's'  },
+        c_threads:      { x: 89,  y: 38,  tier: 's'  },
+        c_instagram:    { x: 14,  y: 70,  tier: 'xs' },
+        c_substack:     { x: 88,  y: 70,  tier: 'xs' },
+        c_chatgpt:      { x: 32,  y: 48,  tier: 'xs' },
+        c_discord:      { x: 67,  y: 48,  tier: 'xs' },
+        c_yt_shorts:    { x: 50,  y: 5,   tier: 'xs' },
+        c_snapchat:     { x: 9,   y: 22,  tier: 'xs' },
+        c_bereal:       { x: 91,  y: 22,  tier: 'xs' },
+        c_clubhouse:    { x: 35,  y: 95,  tier: 'xs' },
+        c_bluesky:      { x: 66,  y: 95,  tier: 'xs' },
+      };
+
+      const cloud = document.getElementById('cloud');
+      const fmtCount = n => n.toLocaleString('en-US');
+
+      R.clusters.forEach(c => {
+        const p = positions[c.id] || { x: 50, y: 50, tier: 'xs' };
+        const el = document.createElement('div');
+        el.className = 'cluster tier-' + p.tier;
+        if (c.id === R.user.selfClusterId) el.classList.add('self');
+        el.style.left = p.x + '%';
+        el.style.top  = p.y + '%';
+
+        const label = document.createElement('span');
+        label.textContent = c.text;
+
+        const ct = document.createElement('span');
+        ct.className = 'ct';
+        ct.textContent = fmtCount(c.count);
+
+        el.appendChild(label);
+        if (p.tier !== 'xs') el.appendChild(ct);
+        cloud.appendChild(el);
+      });
+
+      // ---------- Screen 3 — Leaderboard rows ----------
+      const rowsEl = document.getElementById('leader-rows');
+      const crownSvg = '<span class="crown-icon"><svg viewBox="0 0 24 16"><path d="M3 14h18"/><path d="M3 14L5 4l4 5 3-7 3 7 4-5 2 10"/></svg></span>';
+      const fireSvg  = '<svg viewBox="0 0 24 24"><path d="M12 3c0 5 5 6 5 11a5 5 0 1 1-10 0c0-3 2-4 2-7 1 2 3 2 3-4z"/></svg>';
+
+      R.leaderboard.entries.forEach(e => {
+        const row = document.createElement('div');
+        row.className = 'row';
+        if (e.crown)  row.classList.add('crown');
+        if (e.isSelf) row.classList.add('self');
+
+        row.innerHTML = `
+          <span class="rank">${String(e.rank).padStart(2, '0')}</span>
+          <span class="name">${e.crown ? crownSvg : ''}${e.handle}</span>
+          <span class="score">${e.score}</span>
+          <span class="streak">${fireSvg}${e.streak}</span>
+        `;
+        rowsEl.appendChild(row);
+      });
+
+      // ---------- Screen 4 — Archive ----------
+      const archEl = document.getElementById('archive-list');
+      R.archive.forEach((a, i) => {
+        const card = document.createElement('div');
+        card.className = 'a-card';
+        card.innerHTML = `
+          <div class="top">
+            <span class="date">${a.date}</span>
+            <span class="count">${fmtCount(a.count)} voices</span>
+          </div>
+          <div class="q">${a.text}</div>
+          <div class="verdict">
+            <span class="lbl">Verdict</span>
+            <span class="val">${a.verdict}</span>
+          </div>
+        `;
+        archEl.appendChild(card);
+
+        if (i === 3) {
+          const ad = document.createElement('div');
+          ad.className = 'partner-slot';
+          ad.innerHTML = `
+            <span class="lbl">Partner</span>
+            <span class="body">a quiet word from our patron</span>
+            <span class="arrow">→</span>
+          `;
+          archEl.appendChild(ad);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

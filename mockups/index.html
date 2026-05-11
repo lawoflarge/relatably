@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Relatably · 7 Design Directions</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:        #0c0c0e;
+      --bg-elev:   #15151a;
+      --bg-card:   #1a1a20;
+      --border:    rgba(255,255,255,0.08);
+      --border-2:  rgba(255,255,255,0.16);
+      --text-1:    #f3f0eb;
+      --text-2:    #a09c95;
+      --text-3:    #5a5750;
+      --accent:    #c8a472;
+      --serif:     'Source Serif 4', Georgia, serif;
+      --sans:      'Inter Tight', -apple-system, BlinkMacSystemFont, sans-serif;
+      --mono:      'JetBrains Mono', ui-monospace, monospace;
+
+      --r-md: 18px;
+      --r-lg: 28px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text-1);
+      font-family: var(--sans);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      background:
+        radial-gradient(60% 40% at 50% 0%, rgba(200,164,114,0.05) 0%, transparent 70%),
+        var(--bg);
+    }
+    img { display: block; }
+    a { color: inherit; text-decoration: none; }
+
+    /* ===== top hero ===== */
+    .hero {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 96px 48px 64px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 64px;
+      align-items: end;
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-eyebrow {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      width: 24px; height: 1px;
+      background: var(--accent);
+    }
+    .hero-title {
+      font-family: var(--serif);
+      font-weight: 300;
+      font-size: 88px;
+      line-height: 0.96;
+      letter-spacing: -0.025em;
+      margin: 0;
+    }
+    .hero-title em {
+      font-style: italic;
+      color: var(--accent);
+      font-weight: 400;
+    }
+    .hero-sub {
+      margin: 28px 0 0;
+      max-width: 560px;
+      font-size: 17px;
+      line-height: 1.55;
+      color: var(--text-2);
+      font-weight: 300;
+    }
+    .hero-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-2);
+      letter-spacing: 0.05em;
+      text-align: right;
+    }
+    .hero-meta .k { color: var(--text-3); }
+    .hero-meta .v { color: var(--text-1); }
+    .hero-meta-row { display: flex; gap: 8px; justify-content: flex-end; }
+
+    /* ===== how-to strip ===== */
+    .howto {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 40px 48px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      border-bottom: 1px solid var(--border);
+    }
+    .howto-step {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .howto-num {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      color: var(--accent);
+      padding-top: 4px;
+    }
+    .howto-text { color: var(--text-2); font-size: 14px; line-height: 1.55; font-weight: 300; }
+    .howto-text strong { color: var(--text-1); font-weight: 500; }
+
+    /* ===== grid of directions ===== */
+    .grid {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 64px 48px 96px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 80px;
+    }
+
+    .card {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 56px;
+      align-items: start;
+    }
+    .card:nth-child(even) {
+      grid-template-columns: 360px 1fr;
+    }
+    .card:nth-child(even) .card-preview { order: 2; }
+    .card:nth-child(even) .card-meta { order: 1; }
+
+    .card-preview {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1800 / 1100;
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      box-shadow: 0 30px 80px -30px rgba(0,0,0,0.5);
+      cursor: pointer;
+      transition: transform 200ms ease-out, border-color 200ms ease-out;
+    }
+    .card-preview:hover {
+      transform: translateY(-3px);
+      border-color: var(--border-2);
+    }
+    .card-preview iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 1800px;
+      height: 1100px;
+      border: 0;
+      transform-origin: top left;
+      pointer-events: none;
+    }
+    .card-preview-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding: 24px 28px;
+      pointer-events: none;
+      background: linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 30%);
+    }
+    .card-num {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      color: rgba(255,255,255,0.65);
+      text-transform: uppercase;
+    }
+    .card-open {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      color: rgba(255,255,255,0.85);
+      text-transform: uppercase;
+      padding: 8px 14px;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 999px;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(20px);
+    }
+
+    .card-meta { padding-top: 8px; }
+    .card-eyebrow {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+    .card-title {
+      font-family: var(--serif);
+      font-weight: 400;
+      font-style: italic;
+      font-size: 44px;
+      line-height: 1.0;
+      letter-spacing: -0.02em;
+      margin: 0 0 18px;
+      color: var(--text-1);
+    }
+    .card-pitch {
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text-2);
+      font-weight: 300;
+      margin: 0 0 28px;
+    }
+
+    .swatch-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 24px;
+    }
+    .swatch {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
+    .spec {
+      border-top: 1px solid var(--border);
+      padding-top: 18px;
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      gap: 8px 16px;
+      font-size: 13px;
+      font-weight: 300;
+    }
+    .spec dt { color: var(--text-3); font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; padding-top: 3px; }
+    .spec dd { margin: 0; color: var(--text-1); }
+    .spec dd em { color: var(--text-2); font-style: italic; }
+
+    .card-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 28px;
+    }
+    .btn {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      padding: 13px 22px;
+      border-radius: 999px;
+      transition: all 180ms ease-out;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #0c0c0e;
+      border: 1px solid var(--accent);
+    }
+    .btn-primary:hover { filter: brightness(1.1); }
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-1);
+      border: 1px solid var(--border-2);
+    }
+    .btn-secondary:hover { border-color: var(--text-1); }
+
+    /* ===== footer ===== */
+    .foot {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 48px 48px 96px;
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 32px;
+      align-items: end;
+    }
+    .foot-title {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 300;
+      font-size: 36px;
+      line-height: 1.1;
+      margin: 0 0 18px;
+      max-width: 720px;
+    }
+    .foot-body {
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text-2);
+      font-weight: 300;
+      max-width: 640px;
+      margin: 0;
+    }
+    .foot-body code {
+      font-family: var(--mono);
+      font-size: 12px;
+      background: var(--bg-card);
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      color: var(--text-1);
+    }
+    .foot-meta {
+      text-align: right;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-3);
+    }
+
+    /* ===== responsive ===== */
+    @media (max-width: 980px) {
+      .hero { grid-template-columns: 1fr; padding: 64px 32px 48px; }
+      .hero-title { font-size: 56px; }
+      .hero-meta { text-align: left; }
+      .hero-meta-row { justify-content: flex-start; }
+      .howto { grid-template-columns: 1fr; padding: 32px; gap: 20px; }
+      .grid { padding: 48px 32px; gap: 56px; }
+      .card, .card:nth-child(even) { grid-template-columns: 1fr; gap: 24px; }
+      .card:nth-child(even) .card-preview { order: 0; }
+      .card:nth-child(even) .card-meta { order: 1; }
+      .card-title { font-size: 36px; }
+      .foot { grid-template-columns: 1fr; padding: 32px; }
+      .foot-meta { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div>
+      <div class="hero-eyebrow">overnight build · 2026-05-11</div>
+      <h1 class="hero-title">Relatably,<br><em>in seven languages.</em></h1>
+      <p class="hero-sub">
+        Seven competing visual directions for Relatably 1.0 — same product,
+        same screens, same seed data. Only the design language changes. Compare
+        them, pick one, and we lock the look for ship.
+      </p>
+    </div>
+    <div class="hero-meta">
+      <div class="hero-meta-row"><span class="k">canvas</span><span class="v">4 screens × 7 directions = 28</span></div>
+      <div class="hero-meta-row"><span class="k">seed</span><span class="v">shared/content.js</span></div>
+      <div class="hero-meta-row"><span class="k">frame</span><span class="v">iPhone 15 Pro · 393×852</span></div>
+      <div class="hero-meta-row"><span class="k">brief</span><span class="v">shared/BRIEF.md</span></div>
+      <div class="hero-meta-row"><span class="k">overview</span><span class="v">OVERVIEW.md</span></div>
+    </div>
+  </header>
+
+  <!-- HOW-TO -->
+  <section class="howto">
+    <div class="howto-step">
+      <div class="howto-num">01</div>
+      <div class="howto-text">
+        <strong>Skim all 7.</strong> Scroll this gallery — get a gut read on which language fits the brand.
+      </div>
+    </div>
+    <div class="howto-step">
+      <div class="howto-num">02</div>
+      <div class="howto-text">
+        <strong>Open 2–3 favourites.</strong> Click the preview to see them full-size with crisp typography.
+      </div>
+    </div>
+    <div class="howto-step">
+      <div class="howto-num">03</div>
+      <div class="howto-text">
+        <strong>Read its DESIGN.md.</strong> If the spec holds, that's your direction. We'll write the implementation plan together.
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 CARDS -->
+  <main class="grid" id="grid"></main>
+
+  <!-- FOOTER -->
+  <footer class="foot">
+    <div>
+      <h2 class="foot-title">Picked one?</h2>
+      <p class="foot-body">
+        Tell me which number, or which pair to remix. I'll convert the chosen
+        DESIGN.md into a React Native implementation plan via
+        <code>/superpowers:writing-plans</code>. Each DESIGN.md is intentionally
+        complete enough to ship from — no further design work required.
+      </p>
+    </div>
+    <div class="foot-meta">
+      relatably / mockups<br>
+      2026-05-11
+    </div>
+  </footer>
+
+  <script>
+    const DIRECTIONS = [
+      {
+        n: '01',
+        folder: '01-sticker-pop',
+        title: 'Sticker Pop',
+        pitch: 'Y2K maximalist on cream paper. Every surface is a peelable sticker with a hard ink shadow. Duolingo confidence — childlike but designed.',
+        vibe: 'playful · loud · friendly',
+        audience: 'Gen-Z mass market, "this is fun"',
+        risk: 'reads too young for status moments',
+        fonts: 'Bagel Fat One · Hanken Grotesk · Space Grotesk',
+        swatches: ['#FFF7E8', '#1A1A1A', '#FF4FA3', '#FFD43B', '#7AE6C3', '#7BC8F6'],
+      },
+      {
+        n: '02',
+        folder: '02-editorial-daily',
+        title: 'Editorial Daily',
+        pitch: 'NYT magazine on warm newsprint. Italic serif headlines, oxblood accent, typographic wordcloud — the daily ritual treated as a published issue.',
+        vibe: 'mature · slow · ownable',
+        audience: 'Substack/Letterboxd-coded Gen-Z',
+        risk: 'too literary for impulse-tap behaviour',
+        fonts: 'Source Serif 4 · IBM Plex Sans · JetBrains Mono',
+        swatches: ['#F4ECDD', '#FFFFFF', '#161413', '#C8392B', '#B8902A', '#5C5852'],
+      },
+      {
+        n: '03',
+        folder: '03-glass-status',
+        title: 'Glass Status',
+        pitch: 'Midnight base, iridescent glass surfaces, neon gradient ticker. Polymarket × Linear × Cash App Pro — makes the daily question feel like a market.',
+        vibe: 'premium · live · cool',
+        audience: 'tech-fluent prosumer Gen-Z',
+        risk: 'could read as generic crypto without restraint',
+        fonts: 'Geist · Geist Mono',
+        swatches: ['#08090E', '#7B5CFF', '#5CE1FF', '#FFD66B', '#FF4F87', '#F5F7FA'],
+      },
+      {
+        n: '04',
+        folder: '04-bubble-chat',
+        title: 'Bubble Chat',
+        pitch: 'Pastel group-chat warmth. Cluster bubbles literally look like iMessage. Of all 7, this fits the brand name "Relatably" most literally — human-scale friendliness.',
+        vibe: 'warm · soft · social',
+        audience: 'Hinge/Geneva/Lapse-coded Gen-Z',
+        risk: 'has been done — risk of feeling generic',
+        fonts: 'Hanken Grotesk · DM Serif Display · DM Mono',
+        swatches: ['#FBF8F3', '#1F1A24', '#F5A3B7', '#C8B5FF', '#A0E3C8', '#FFCBA0'],
+      },
+      {
+        n: '05',
+        folder: '05-brutalist-raw',
+        title: 'Brutalist Raw',
+        pitch: 'Bone paper, monospace everywhere, hard cobalt + tangerine. Are.na meets Vercel docs meets a Bloomberg terminal. Maximum typographic confidence, zero decoration.',
+        vibe: 'sharp · indie · confident',
+        audience: 'design-fluent Gen-Z, designers',
+        risk: 'inaccessible at scale, reads "art project"',
+        fonts: 'JetBrains Mono (+ Inter Tight for the question)',
+        swatches: ['#F7F4EC', '#FFFFFF', '#0E0E0E', '#1B3CFF', '#FF6A18', '#FF188C'],
+      },
+      {
+        n: '06',
+        folder: '06-anime-playful',
+        title: 'Anime Playful',
+        pitch: 'Cel-shaded panels, 3px black outlines, diagonal cuts, speed lines. Persona 5 menus × Splatoon × Sailor Moon. Hyper-expressive, gamified, big emotion.',
+        vibe: 'loud · gamified · charged',
+        audience: 'anime/gamer-adjacent Gen-Z',
+        risk: 'culturally narrow; harder to scale to gen-pop',
+        fonts: 'Bowlby One · Nunito · IBM Plex Mono',
+        swatches: ['#0F0E1A', '#FF3B5C', '#FFEA29', '#7FF5C4', '#FFB628', '#5BB3FF'],
+      },
+      {
+        n: '07',
+        folder: '07-premium-luxe',
+        title: 'Premium Luxe',
+        pitch: 'Deep ink, champagne hairlines, italic Cormorant headlines. Aesop × Dior × Cartier. Quiet luxury — the daily question as a piece of restrained craft.',
+        vibe: 'quiet · refined · craft',
+        audience: 'taste-fluent Gen-Z, aesthetic-driven',
+        risk: 'tonal mismatch with "lighthearted BuzzFeed" brief',
+        fonts: 'Cormorant Garamond · Inter Tight · IBM Plex Mono',
+        swatches: ['#0E0D0B', '#161412', '#F4EFE6', '#C8A472', '#E0C49C', '#9C958A'],
+      },
+    ];
+
+    const grid = document.getElementById('grid');
+    DIRECTIONS.forEach((d, idx) => {
+      const card = document.createElement('article');
+      card.className = 'card';
+      card.innerHTML = `
+        <a class="card-preview" href="./${d.folder}/index.html" target="_blank" rel="noopener" aria-label="Open ${d.title} mockup">
+          <iframe src="./${d.folder}/index.html" title="${d.title} preview"></iframe>
+          <div class="card-preview-overlay">
+            <span class="card-num">${d.n} · ${d.title}</span>
+            <span class="card-open">open ↗</span>
+          </div>
+        </a>
+        <div class="card-meta">
+          <div class="card-eyebrow">direction ${d.n}</div>
+          <h2 class="card-title">${d.title}</h2>
+          <p class="card-pitch">${d.pitch}</p>
+          <div class="swatch-row">
+            ${d.swatches.map(s => `<div class="swatch" style="background:${s}" title="${s}"></div>`).join('')}
+          </div>
+          <dl class="spec">
+            <dt>fonts</dt><dd>${d.fonts}</dd>
+            <dt>vibe</dt><dd>${d.vibe}</dd>
+            <dt>audience</dt><dd>${d.audience}</dd>
+            <dt>risk</dt><dd><em>${d.risk}</em></dd>
+          </dl>
+          <div class="card-actions">
+            <a class="btn btn-primary" href="./${d.folder}/index.html" target="_blank" rel="noopener">view mockup →</a>
+            <a class="btn btn-secondary" href="./${d.folder}/DESIGN.md" target="_blank" rel="noopener">DESIGN.md</a>
+          </div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+
+    // Auto-scale iframes based on container size — so previews look right on any screen.
+    function scaleIframes() {
+      document.querySelectorAll('.card-preview').forEach((el) => {
+        const w = el.clientWidth;
+        const scale = w / 1800;
+        const iframe = el.querySelector('iframe');
+        if (iframe) {
+          iframe.style.transform = `scale(${scale})`;
+          iframe.style.width = `1800px`;
+          iframe.style.height = `${el.clientHeight / scale}px`;
+        }
+      });
+    }
+    window.addEventListener('load', scaleIframes);
+    window.addEventListener('resize', scaleIframes);
+    setTimeout(scaleIframes, 100);
+    setTimeout(scaleIframes, 600);
+    setTimeout(scaleIframes, 1500);
+  </script>
+</body>
+</html>

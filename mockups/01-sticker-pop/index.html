@@ -1,0 +1,1212 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Relatably · Sticker Pop</title>
+  <link rel="stylesheet" href="../shared/reset.css">
+  <link rel="stylesheet" href="../shared/phone-frame.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Hanken+Grotesk:wght@500;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ========== DESIGN TOKENS ========== */
+    :root {
+      /* Palette */
+      --sp-cream:    #FFF7E8;
+      --sp-lemon:    #FFDF6B;
+      --sp-lemon-2:  #FFD43B;
+      --sp-ink:      #1A1A1A;
+      --sp-ink-soft: #4A4541;
+      --sp-pink:     #FF4FA3;
+      --sp-mint:     #7AE6C3;
+      --sp-blue:     #7BC8F6;
+      --sp-red:      #FF5A4F;
+      --sp-paper-2:  #FBEED1;
+
+      /* Sticker shadow — always offset, never blurred */
+      --sp-shadow-s: 2px 2px 0 var(--sp-ink);
+      --sp-shadow-m: 4px 4px 0 var(--sp-ink);
+      --sp-shadow-l: 6px 6px 0 var(--sp-ink);
+
+      /* Type */
+      --sp-display: 'Bagel Fat One', system-ui, sans-serif;
+      --sp-body:    'Hanken Grotesk', system-ui, sans-serif;
+      --sp-mono:    'Space Grotesk', ui-monospace, monospace;
+
+      /* Spacing scale (4px base) */
+      --sp-1: 4px;
+      --sp-2: 8px;
+      --sp-3: 12px;
+      --sp-4: 16px;
+      --sp-5: 24px;
+      --sp-6: 32px;
+      --sp-7: 48px;
+      --sp-8: 64px;
+
+      /* Borders */
+      --sp-stroke: 3px solid var(--sp-ink);
+      --sp-stroke-thin: 2px solid var(--sp-ink);
+
+      /* Radii (organic blob, not rectangle) */
+      --sp-r-s: 14px;
+      --sp-r-m: 22px;
+      --sp-r-l: 28px;
+      --sp-r-xl: 36px;
+      --sp-r-pill: 999px;
+    }
+
+    /* ========== PAGE CHROME ========== */
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 12% 10%, rgba(255, 79, 163, 0.18) 0, transparent 35%),
+        radial-gradient(circle at 88% 18%, rgba(122, 230, 195, 0.22) 0, transparent 38%),
+        radial-gradient(circle at 50% 92%, rgba(123, 200, 246, 0.20) 0, transparent 42%),
+        radial-gradient(circle at 80% 80%, rgba(255, 212, 59, 0.18) 0, transparent 40%),
+        var(--sp-cream);
+      background-attachment: fixed;
+      font-family: var(--sp-body);
+      color: var(--sp-ink);
+      padding: 64px 32px 96px;
+      overflow-x: auto;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image:
+        radial-gradient(rgba(26,26,26,0.06) 1px, transparent 1px),
+        radial-gradient(rgba(26,26,26,0.04) 1px, transparent 1px);
+      background-size: 14px 14px, 28px 28px;
+      background-position: 0 0, 7px 7px;
+      mix-blend-mode: multiply;
+    }
+
+    .page-header {
+      max-width: 1860px;
+      margin: 0 auto 56px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: var(--sp-6);
+      position: relative;
+      z-index: 1;
+    }
+    .page-header__brand {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-4);
+    }
+    .page-header__mark {
+      width: 64px; height: 64px;
+      border-radius: 20px;
+      background: var(--sp-pink);
+      border: var(--sp-stroke);
+      box-shadow: var(--sp-shadow-m);
+      display: grid;
+      place-items: center;
+      transform: rotate(-4deg);
+      position: relative;
+    }
+    .page-header__mark::before {
+      content: "";
+      position: absolute;
+      top: -6px; right: -6px;
+      width: 22px; height: 22px;
+      background: var(--sp-lemon-2);
+      border: var(--sp-stroke-thin);
+      border-radius: 50%;
+      box-shadow: 2px 2px 0 var(--sp-ink);
+    }
+    .page-header__mark svg { width: 36px; height: 36px; color: var(--sp-cream); }
+    .page-header__title {
+      font-family: var(--sp-display);
+      font-size: 68px;
+      line-height: 0.95;
+      letter-spacing: -0.01em;
+      color: var(--sp-ink);
+      margin: 0;
+    }
+    .page-header__subtitle {
+      font-family: var(--sp-body);
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: 0.04em;
+      color: var(--sp-ink-soft);
+      margin-top: 6px;
+    }
+    .page-header__meta {
+      font-family: var(--sp-mono);
+      font-weight: 600;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      text-align: right;
+      color: var(--sp-ink);
+      padding: var(--sp-3) var(--sp-4);
+      background: var(--sp-cream);
+      border: var(--sp-stroke);
+      border-radius: var(--sp-r-s);
+      box-shadow: var(--sp-shadow-s);
+      transform: rotate(2deg);
+    }
+    .page-header__meta strong { display: block; font-size: 13px; }
+
+    .phone-row {
+      display: flex;
+      gap: 56px;
+      justify-content: flex-start;
+      align-items: flex-start;
+      padding: 0 24px 24px;
+      min-width: max-content;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+    .phone-row > div { display: flex; flex-direction: column; align-items: center; }
+    .rb-phone-label {
+      color: var(--sp-ink) !important;
+      font-family: var(--sp-mono) !important;
+      font-weight: 600 !important;
+      letter-spacing: 0.18em !important;
+      padding: 8px 14px;
+      background: var(--sp-cream);
+      border: var(--sp-stroke-thin);
+      border-radius: var(--sp-r-pill);
+      box-shadow: 3px 3px 0 var(--sp-ink);
+      margin-top: 22px !important;
+    }
+
+    /* ========== SCREEN BASE ========== */
+    .sp-screen {
+      width: 100%;
+      height: 100%;
+      background: var(--sp-cream);
+      color: var(--sp-ink);
+      font-family: var(--sp-body);
+      position: relative;
+      overflow: hidden;
+    }
+    .sp-screen::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        radial-gradient(rgba(26,26,26,0.08) 1px, transparent 1px);
+      background-size: 6px 6px;
+      opacity: 0.45;
+      z-index: 0;
+    }
+    .sp-stage {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 70px 22px 0;
+    }
+
+    /* ========== TOP META BAR ========== */
+    .sp-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--sp-3);
+      margin-bottom: var(--sp-5);
+    }
+    .sp-datepill {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-2);
+      padding: 8px 12px;
+      background: var(--sp-cream);
+      border: var(--sp-stroke-thin);
+      border-radius: var(--sp-r-pill);
+      box-shadow: 3px 3px 0 var(--sp-ink);
+      font-family: var(--sp-mono);
+      font-weight: 600;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      transform: rotate(-2deg);
+    }
+    .sp-datepill__dot {
+      width: 8px; height: 8px;
+      background: var(--sp-pink);
+      border-radius: 50%;
+      border: 1.5px solid var(--sp-ink);
+    }
+    .sp-timer {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      background: var(--sp-lemon);
+      border: var(--sp-stroke-thin);
+      border-radius: var(--sp-r-pill);
+      box-shadow: 3px 3px 0 var(--sp-ink);
+      font-family: var(--sp-mono);
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      transform: rotate(2deg);
+    }
+    .sp-timer__ring {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background:
+        conic-gradient(var(--sp-ink) 0deg 270deg, transparent 270deg 360deg);
+      border: 1.5px solid var(--sp-ink);
+      flex-shrink: 0;
+    }
+
+    /* ========== SCREEN 1: QUESTION ========== */
+    .sp-q-eyebrow {
+      font-family: var(--sp-mono);
+      font-weight: 600;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--sp-ink-soft);
+      margin-bottom: var(--sp-3);
+    }
+    .sp-q-question {
+      font-family: var(--sp-display);
+      font-size: 52px;
+      line-height: 0.96;
+      letter-spacing: -0.01em;
+      color: var(--sp-ink);
+      margin: 0 0 var(--sp-4);
+    }
+    .sp-q-question .hi {
+      background: var(--sp-lemon-2);
+      padding: 0 6px;
+      border-radius: 6px;
+      display: inline-block;
+      transform: rotate(-1deg);
+      box-shadow: 3px 3px 0 var(--sp-ink);
+      border: 2px solid var(--sp-ink);
+      margin: 4px 0;
+    }
+    .sp-q-counter {
+      font-family: var(--sp-mono);
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      color: var(--sp-ink-soft);
+      margin-bottom: var(--sp-5);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sp-q-counter__dot {
+      width: 8px; height: 8px;
+      background: var(--sp-mint);
+      border-radius: 50%;
+      border: 1.5px solid var(--sp-ink);
+      animation: sp-pulse 1.8s ease-in-out infinite;
+    }
+    @keyframes sp-pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+
+    /* Sticker input with peeling-corner */
+    .sp-input-wrap {
+      position: relative;
+      margin-bottom: var(--sp-4);
+    }
+    .sp-input {
+      width: 100%;
+      background: #fff;
+      border: var(--sp-stroke);
+      border-radius: var(--sp-r-m);
+      padding: 18px 20px;
+      font-family: var(--sp-body);
+      font-weight: 700;
+      font-size: 17px;
+      color: var(--sp-ink);
+      box-shadow: var(--sp-shadow-m);
+      clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 0 100%);
+      /* peel corner: top-right is clipped */
+    }
+    .sp-input::placeholder {
+      color: rgba(26,26,26,0.45);
+      font-weight: 700;
+    }
+    .sp-input--focus {
+      background: #fff;
+      box-shadow: var(--sp-shadow-l);
+    }
+    .sp-input--focus::after { display: none; }
+    /* The "peel triangle" lemon flap */
+    .sp-input-wrap::after {
+      content: "";
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      width: 30px;
+      height: 30px;
+      background: var(--sp-lemon-2);
+      clip-path: polygon(100% 0, 100% 100%, 0 0);
+      border-top: 3px solid var(--sp-ink);
+      border-right: 3px solid var(--sp-ink);
+      border-top-right-radius: var(--sp-r-m);
+    }
+    .sp-input-wrap--focus .sp-input {
+      outline: 4px solid var(--sp-pink);
+      outline-offset: 2px;
+    }
+    .sp-input-state-label {
+      font-family: var(--sp-mono);
+      font-weight: 600;
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--sp-ink-soft);
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    /* Submit sticker */
+    .sp-submit {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--sp-2);
+      background: var(--sp-pink);
+      color: var(--sp-cream);
+      border: var(--sp-stroke);
+      border-radius: var(--sp-r-l);
+      padding: 18px 28px;
+      font-family: var(--sp-display);
+      font-size: 22px;
+      letter-spacing: 0.01em;
+      box-shadow: var(--sp-shadow-l);
+      transform: rotate(-2deg);
+      width: 100%;
+      cursor: pointer;
+    }
+    .sp-submit__arrow {
+      display: inline-block;
+      width: 24px; height: 24px;
+      background: var(--sp-cream);
+      border-radius: 50%;
+      border: 2.5px solid var(--sp-ink);
+      color: var(--sp-ink);
+      display: inline-grid;
+      place-items: center;
+      font-size: 14px;
+      font-family: var(--sp-body);
+      font-weight: 800;
+    }
+    .sp-q-helper {
+      font-family: var(--sp-mono);
+      font-weight: 600;
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--sp-ink-soft);
+      text-align: center;
+      margin-top: var(--sp-3);
+    }
+    .sp-q-helper span { color: var(--sp-pink); font-weight: 700; }
+
+    /* ========== SCREEN 2: WORDCLOUD ========== */
+    .sp-wc-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--sp-2);
+      margin-bottom: var(--sp-4);
+    }
+    .sp-wc-stat {
+      font-family: var(--sp-mono);
+      font-weight: 700;
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--sp-ink-soft);
+    }
+    .sp-wc-stat strong {
+      color: var(--sp-ink);
+      font-family: var(--sp-display);
+      font-size: 18px;
+      letter-spacing: 0;
+      display: block;
+      line-height: 1;
+      margin-bottom: 3px;
+    }
+    .sp-wc-share {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--sp-mint);
+      border: var(--sp-stroke-thin);
+      border-radius: var(--sp-r-pill);
+      padding: 8px 14px;
+      font-family: var(--sp-body);
+      font-weight: 800;
+      font-size: 13px;
+      box-shadow: 3px 3px 0 var(--sp-ink);
+      transform: rotate(3deg);
+      cursor: pointer;
+    }
+
+    .sp-wc-title {
+      font-family: var(--sp-display);
+      font-size: 22px;
+      line-height: 1;
+      margin: 0 0 var(--sp-2);
+      letter-spacing: -0.01em;
+    }
+    .sp-wc-sub {
+      font-family: var(--sp-mono);
+      font-weight: 600;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--sp-ink-soft);
+      margin-bottom: var(--sp-4);
+    }
+
+    .sp-cloud {
+      position: relative;
+      flex: 1;
+      width: 100%;
+    }
+    .sp-bub {
+      position: absolute;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--sp-display);
+      letter-spacing: -0.01em;
+      border: var(--sp-stroke-thin);
+      border-radius: var(--sp-r-m);
+      padding: 8px 12px;
+      background: #fff;
+      color: var(--sp-ink);
+      box-shadow: var(--sp-shadow-s);
+      white-space: nowrap;
+      line-height: 1;
+    }
+    .sp-bub--xl { font-size: 44px; padding: 16px 22px; border-width: 3px; border-radius: var(--sp-r-l); box-shadow: var(--sp-shadow-m); }
+    .sp-bub--l  { font-size: 30px; padding: 12px 16px; border-width: 3px; border-radius: var(--sp-r-l); box-shadow: var(--sp-shadow-m); }
+    .sp-bub--m  { font-size: 22px; padding: 10px 14px; border-radius: var(--sp-r-m); box-shadow: var(--sp-shadow-m); }
+    .sp-bub--s  { font-size: 16px; padding: 8px 12px; box-shadow: var(--sp-shadow-s); }
+    .sp-bub--xs { font-size: 13px; padding: 6px 10px; }
+    .sp-bub--self {
+      background: var(--sp-pink);
+      color: var(--sp-cream);
+      border-width: 3px;
+      border-color: var(--sp-ink);
+      box-shadow: var(--sp-shadow-l);
+      animation: sp-wobble 4s ease-in-out infinite;
+    }
+    @keyframes sp-wobble {
+      0%, 100% { transform: rotate(var(--rot, -2deg)); }
+      50%       { transform: rotate(calc(var(--rot, -2deg) + 2deg)); }
+    }
+    .sp-bub__you {
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      background: var(--sp-lemon-2);
+      color: var(--sp-ink);
+      font-family: var(--sp-body);
+      font-weight: 800;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      padding: 3px 8px;
+      border: 2px solid var(--sp-ink);
+      border-radius: 6px;
+      box-shadow: 2px 2px 0 var(--sp-ink);
+      transform: rotate(-12deg);
+    }
+
+    /* ========== SCREEN 3: LEADERBOARD ========== */
+    .sp-lb-title {
+      font-family: var(--sp-display);
+      font-size: 36px;
+      line-height: 0.95;
+      margin: 0 0 var(--sp-3);
+    }
+    .sp-lb-toggle {
+      display: flex;
+      gap: 6px;
+      padding: 5px;
+      background: #fff;
+      border: var(--sp-stroke-thin);
+      border-radius: var(--sp-r-pill);
+      box-shadow: 3px 3px 0 var(--sp-ink);
+      margin-bottom: var(--sp-3);
+    }
+    .sp-lb-toggle__opt {
+      flex: 1;
+      padding: 8px 10px;
+      text-align: center;
+      font-family: var(--sp-body);
+      font-weight: 800;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      border-radius: var(--sp-r-pill);
+      color: var(--sp-ink-soft);
+      cursor: pointer;
+    }
+    .sp-lb-toggle__opt.is-active {
+      background: var(--sp-ink);
+      color: var(--sp-cream);
+    }
+    .sp-lb-scope {
+      display: flex;
+      gap: 6px;
+      margin-bottom: var(--sp-4);
+    }
+    .sp-lb-scope__pill {
+      padding: 6px 12px;
+      font-family: var(--sp-mono);
+      font-weight: 600;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      border: 2px solid var(--sp-ink);
+      border-radius: var(--sp-r-pill);
+      background: var(--sp-cream);
+      box-shadow: 2px 2px 0 var(--sp-ink);
+      cursor: pointer;
+    }
+    .sp-lb-scope__pill.is-active {
+      background: var(--sp-blue);
+    }
+
+    .sp-lb-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .sp-lb-row {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      padding: 12px 14px;
+      background: #fff;
+      border: var(--sp-stroke-thin);
+      border-radius: var(--sp-r-m);
+      box-shadow: var(--sp-shadow-s);
+    }
+    .sp-lb-row--crown {
+      background: var(--sp-lemon-2);
+      border-width: 3px;
+      box-shadow: var(--sp-shadow-m);
+      padding-top: 14px;
+    }
+    .sp-lb-row--self {
+      background: var(--sp-pink);
+      color: var(--sp-cream);
+      border-width: 3px;
+      box-shadow: var(--sp-shadow-m);
+    }
+    .sp-lb-row__rank {
+      font-family: var(--sp-display);
+      font-size: 22px;
+      width: 32px;
+      text-align: center;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+    .sp-lb-row__avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 2px solid var(--sp-ink);
+      display: grid;
+      place-items: center;
+      font-family: var(--sp-display);
+      font-size: 14px;
+      flex-shrink: 0;
+      background: var(--sp-mint);
+      color: var(--sp-ink);
+    }
+    .sp-lb-row--crown .sp-lb-row__avatar { background: var(--sp-pink); color: var(--sp-cream); }
+    .sp-lb-row--self  .sp-lb-row__avatar { background: var(--sp-lemon); color: var(--sp-ink); }
+    .sp-lb-row__main { flex: 1; min-width: 0; }
+    .sp-lb-row__handle {
+      font-family: var(--sp-body);
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: 0;
+      line-height: 1.1;
+    }
+    .sp-lb-row__streak {
+      font-family: var(--sp-mono);
+      font-weight: 600;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.75;
+      margin-top: 2px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .sp-lb-row__score {
+      font-family: var(--sp-display);
+      font-size: 20px;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+    .sp-lb-row__crown-sticker {
+      position: absolute;
+      top: -14px;
+      left: -10px;
+      background: var(--sp-pink);
+      color: var(--sp-cream);
+      font-family: var(--sp-display);
+      font-size: 12px;
+      padding: 4px 10px;
+      border: 2.5px solid var(--sp-ink);
+      border-radius: 10px;
+      box-shadow: 2px 2px 0 var(--sp-ink);
+      transform: rotate(-8deg);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .sp-lb-row__you-tab {
+      position: absolute;
+      top: -10px;
+      right: 14px;
+      background: var(--sp-lemon-2);
+      color: var(--sp-ink);
+      font-family: var(--sp-body);
+      font-weight: 800;
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      padding: 3px 9px;
+      border: 2px solid var(--sp-ink);
+      border-radius: 6px;
+      box-shadow: 2px 2px 0 var(--sp-ink);
+      transform: rotate(4deg);
+    }
+
+    /* ========== SCREEN 4: ARCHIVE ========== */
+    .sp-ar-title {
+      font-family: var(--sp-display);
+      font-size: 40px;
+      line-height: 0.94;
+      margin: 0 0 var(--sp-1);
+    }
+    .sp-ar-sub {
+      font-family: var(--sp-mono);
+      font-weight: 600;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--sp-ink-soft);
+      margin-bottom: var(--sp-4);
+    }
+    .sp-ar-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .sp-ar-tile {
+      position: relative;
+      background: #fff;
+      border: var(--sp-stroke-thin);
+      border-radius: var(--sp-r-m);
+      padding: 28px 12px 12px;
+      box-shadow: var(--sp-shadow-s);
+      min-height: 130px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .sp-ar-tile:nth-child(odd)  { transform: rotate(-1.5deg); }
+    .sp-ar-tile:nth-child(even) { transform: rotate(1.5deg); }
+    .sp-ar-tile__date {
+      position: absolute;
+      top: -10px; left: 10px;
+      background: var(--sp-ink);
+      color: var(--sp-cream);
+      font-family: var(--sp-mono);
+      font-weight: 700;
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: 6px;
+      box-shadow: 2px 2px 0 var(--sp-ink);
+    }
+    .sp-ar-tile__q {
+      font-family: var(--sp-body);
+      font-weight: 700;
+      font-size: 10.5px;
+      line-height: 1.25;
+      color: var(--sp-ink-soft);
+    }
+    .sp-ar-tile__verdict {
+      font-family: var(--sp-display);
+      font-size: 18px;
+      line-height: 0.95;
+      letter-spacing: -0.01em;
+      color: var(--sp-ink);
+      margin-top: 6px;
+    }
+    .sp-ar-tile__count {
+      font-family: var(--sp-mono);
+      font-weight: 700;
+      font-size: 9px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--sp-ink-soft);
+      margin-top: 4px;
+    }
+    /* color rotation for tiles */
+    .sp-ar-tile:nth-child(1) .sp-ar-tile__verdict { color: var(--sp-pink); }
+    .sp-ar-tile:nth-child(2) .sp-ar-tile__verdict { color: var(--sp-ink); }
+    .sp-ar-tile:nth-child(3) .sp-ar-tile__verdict { color: var(--sp-ink); }
+    .sp-ar-tile:nth-child(4) .sp-ar-tile__verdict { color: var(--sp-pink); }
+    .sp-ar-tile:nth-child(5) .sp-ar-tile__verdict { color: var(--sp-ink); }
+    .sp-ar-tile:nth-child(6) .sp-ar-tile__verdict { color: var(--sp-pink); }
+    .sp-ar-tile:nth-child(7) .sp-ar-tile__verdict { color: var(--sp-ink); }
+    .sp-ar-tile:nth-child(8) .sp-ar-tile__verdict { color: var(--sp-pink); }
+
+    .sp-ar-ad {
+      grid-column: 1 / -1;
+      background: var(--sp-lemon);
+      border: var(--sp-stroke);
+      border-radius: var(--sp-r-m);
+      padding: 12px 14px;
+      box-shadow: var(--sp-shadow-m);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--sp-2);
+      transform: rotate(-1deg);
+    }
+    .sp-ar-ad__label {
+      font-family: var(--sp-mono);
+      font-weight: 700;
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--sp-ink-soft);
+    }
+    .sp-ar-ad__copy {
+      font-family: var(--sp-display);
+      font-size: 14px;
+      line-height: 1;
+      color: var(--sp-ink);
+    }
+    .sp-ar-ad__cta {
+      font-family: var(--sp-body);
+      font-weight: 800;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      padding: 5px 10px;
+      background: var(--sp-ink);
+      color: var(--sp-cream);
+      border-radius: var(--sp-r-pill);
+    }
+
+    /* ========== TAB BAR ========== */
+    .sp-tabbar {
+      position: absolute;
+      left: 14px; right: 14px; bottom: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 8px 10px;
+      background: var(--sp-cream);
+      border: var(--sp-stroke);
+      border-radius: var(--sp-r-pill);
+      box-shadow: var(--sp-shadow-m);
+      z-index: 3;
+    }
+    .sp-tab {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 6px 0;
+      color: var(--sp-ink-soft);
+      font-family: var(--sp-mono);
+      font-weight: 600;
+      font-size: 9px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: var(--sp-r-pill);
+    }
+    .sp-tab svg { width: 22px; height: 22px; display: block; }
+    .sp-tab.is-active {
+      background: var(--sp-ink);
+      color: var(--sp-cream);
+      padding: 6px 10px;
+    }
+
+    /* Scrim above tabbar so content fades out */
+    .sp-scrim {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 110px;
+      background: linear-gradient(to bottom, transparent, var(--sp-cream) 55%);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Confetti / sparkle decorations */
+    .sp-decor {
+      position: absolute;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .sp-decor svg { display: block; }
+
+  </style>
+</head>
+<body>
+
+  <header class="page-header">
+    <div class="page-header__brand">
+      <div class="page-header__mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 11c0-3.3 2.7-6 6-6h10c3.3 0 6 2.7 6 6v6c0 3.3-2.7 6-6 6h-6l-6 5v-5c-2.2-.6-4-2.6-4-5z"/>
+          <circle cx="13" cy="14" r="1.5" fill="currentColor"/>
+          <circle cx="19" cy="14" r="1.5" fill="currentColor"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="page-header__title">Relatably / Sticker Pop</h1>
+        <div class="page-header__subtitle">Y2K maximalist · candy pastel · Duolingo-meets-Imprint · unapologetically friendly</div>
+      </div>
+    </div>
+    <div class="page-header__meta">
+      Direction 01<br>
+      <strong>STICKER&nbsp;POP</strong>
+    </div>
+  </header>
+
+  <main class="phone-row">
+    <div>
+      <div class="rb-phone rb-phone--light">
+        <div class="rb-phone-island"></div>
+        <div class="rb-phone-screen" id="screen-1"></div>
+        <div class="rb-phone-bar"></div>
+      </div>
+      <div class="rb-phone-label">01 · QUESTION</div>
+    </div>
+
+    <div>
+      <div class="rb-phone rb-phone--light">
+        <div class="rb-phone-island"></div>
+        <div class="rb-phone-screen" id="screen-2"></div>
+        <div class="rb-phone-bar"></div>
+      </div>
+      <div class="rb-phone-label">02 · WORDCLOUD</div>
+    </div>
+
+    <div>
+      <div class="rb-phone rb-phone--light">
+        <div class="rb-phone-island"></div>
+        <div class="rb-phone-screen" id="screen-3"></div>
+        <div class="rb-phone-bar"></div>
+      </div>
+      <div class="rb-phone-label">03 · LEADERBOARD</div>
+    </div>
+
+    <div>
+      <div class="rb-phone rb-phone--light">
+        <div class="rb-phone-island"></div>
+        <div class="rb-phone-screen" id="screen-4"></div>
+        <div class="rb-phone-bar"></div>
+      </div>
+      <div class="rb-phone-label">04 · ARCHIVE</div>
+    </div>
+  </main>
+
+  <script src="../shared/content.js"></script>
+  <script>
+    const R = window.RELATABLY;
+
+    // ====== Reusable bits ======
+    const escapeHtml = (s) => s.replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+
+    const tabBarHTML = (active) => {
+      const tabs = [
+        { id: 'today',       label: 'TODAY',       svg: '<path d="M12 2 L20 9 V20 H4 V9 Z"/>' },
+        { id: 'friends',     label: 'FRIENDS',     svg: '<circle cx="9" cy="9" r="3.5"/><circle cx="16" cy="11" r="2.5"/><path d="M3 19c1-3 4-4.5 6-4.5s5 1.5 6 4.5"/><path d="M14 19c0.5-2 2.5-3 4-3s3 1 3 3"/>' },
+        { id: 'leaderboard', label: 'BOARD',       svg: '<rect x="3" y="13" width="5" height="8"/><rect x="9.5" y="7" width="5" height="14"/><rect x="16" y="10" width="5" height="11"/>' },
+        { id: 'archive',     label: 'ARCHIVE',     svg: '<rect x="3" y="6" width="18" height="5" rx="1"/><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M10 15h4"/>' },
+      ];
+      return `
+        <div class="sp-scrim"></div>
+        <nav class="sp-tabbar">
+          ${tabs.map(t => `
+            <button class="sp-tab ${t.id === active ? 'is-active' : ''}" aria-current="${t.id === active ? 'page' : 'false'}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${t.svg}</svg>
+              <span>${t.label}</span>
+            </button>
+          `).join('')}
+        </nav>
+      `;
+    };
+
+    const topbarHTML = () => `
+      <div class="sp-topbar">
+        <span class="sp-datepill">
+          <span class="sp-datepill__dot"></span>
+          ${R.meta.todayLabel} · ${R.meta.dropTimeLabel}
+        </span>
+        <span class="sp-timer">
+          <span class="sp-timer__ring"></span>
+          ${R.meta.timeLeftLabel.toUpperCase()}
+        </span>
+      </div>
+    `;
+
+    // ====== SCREEN 1: QUESTION ======
+    function renderQuestion() {
+      const totalLabel = R.meta.totalAnswers.toLocaleString('en-US');
+      // Split question to highlight "overrated"
+      const qHTML = R.question.text.replace('overrated', '<span class="hi">overrated</span>');
+
+      document.getElementById('screen-1').innerHTML = `
+        <div class="sp-stage">
+          ${topbarHTML()}
+          <div class="sp-q-eyebrow">TODAY&rsquo;S DROP &#9733;</div>
+          <h1 class="sp-q-question">${qHTML}</h1>
+          <div class="sp-q-counter">
+            <span class="sp-q-counter__dot"></span>
+            ${totalLabel} votes and counting
+          </div>
+
+          <span class="sp-input-state-label">YOUR TAKE &mdash; FOCUSED</span>
+          <div class="sp-input-wrap sp-input-wrap--focus">
+            <input class="sp-input sp-input--focus" value="AI generated everything" readonly>
+          </div>
+
+          <span class="sp-input-state-label" style="margin-top:8px;">YOUR TAKE &mdash; EMPTY</span>
+          <div class="sp-input-wrap">
+            <input class="sp-input" placeholder="your take?" readonly>
+          </div>
+
+          <div style="margin-top:18px;">
+            <button class="sp-submit">
+              DROP IT
+              <span class="sp-submit__arrow">&rarr;</span>
+            </button>
+          </div>
+          <div class="sp-q-helper">hold <span>3 sec</span> to lock it in &#9733;</div>
+        </div>
+        ${tabBarHTML('today')}
+      `;
+    }
+
+    // ====== SCREEN 2: WORDCLOUD ======
+    // Manual layout — packed organic cluster.
+    // Positions are tuned for a 349x720 inner canvas.
+    // Top cluster (AI) is gravitationally central.
+    function renderWordcloud() {
+      // Pre-positioned layout. x/y are top-left in px within .sp-cloud.
+      // size: xl | l | m | s | xs
+      // rot:  rotation in deg
+      const layout = {
+        c_ai:          { x: 76,  y: 110, size: 'xl', rot: -3, color: 'pink' },   // self - hot pink
+        c_tiktok:      { x: 18,  y: 200, size: 'l',  rot:  2, color: 'mint' },
+        c_twitter:     { x: 200, y: 200, size: 'l',  rot: -2, color: 'blue' },
+        c_podcasts:    { x: 36,  y: 30,  size: 'm',  rot: -4, color: 'lemon' },
+        c_nfts:        { x: 220, y: 50,  size: 'm',  rot:  3, color: 'mint' },
+        c_influencers: { x: 20,  y: 286, size: 'm',  rot:  1, color: 'pink2' },
+        c_linkedin:    { x: 190, y: 290, size: 'm',  rot: -2, color: 'lemon' },
+        c_crypto:      { x: 30,  y: 358, size: 's',  rot: -3, color: 'mint' },
+        c_dating_apps: { x: 130, y: 360, size: 's',  rot:  2, color: 'blue' },
+        c_reddit:      { x: 254, y: 358, size: 's',  rot: -2, color: 'pink2' },
+        c_threads:     { x: 16,  y: 414, size: 's',  rot:  3, color: 'lemon' },
+        c_instagram:   { x: 116, y: 416, size: 's',  rot: -3, color: 'mint' },
+        c_substack:    { x: 230, y: 414, size: 's',  rot:  2, color: 'blue' },
+        c_chatgpt:     { x: 14,  y: 468, size: 'xs', rot: -2, color: 'pink2' },
+        c_discord:     { x: 100, y: 468, size: 'xs', rot:  2, color: 'lemon' },
+        c_yt_shorts:   { x: 178, y: 468, size: 'xs', rot: -1, color: 'mint' },
+        c_snapchat:    { x: 282, y: 468, size: 'xs', rot:  3, color: 'blue' },
+        c_bereal:      { x: 24,  y: 508, size: 'xs', rot:  2, color: 'lemon' },
+        c_clubhouse:   { x: 108, y: 506, size: 'xs', rot: -3, color: 'pink2' },
+        c_bluesky:     { x: 210, y: 508, size: 'xs', rot:  1, color: 'blue' },
+      };
+
+      const colorBg = {
+        pink:   'var(--sp-pink)',     // reserved for self
+        pink2:  '#FFD7E8',
+        mint:   'var(--sp-mint)',
+        lemon:  'var(--sp-lemon)',
+        blue:   'var(--sp-blue)',
+      };
+      const colorText = {
+        pink:   'var(--sp-cream)',
+        pink2:  'var(--sp-ink)',
+        mint:   'var(--sp-ink)',
+        lemon:  'var(--sp-ink)',
+        blue:   'var(--sp-ink)',
+      };
+
+      const totalLabel = R.meta.totalAnswers.toLocaleString('en-US');
+      const bubbles = R.clusters.map(c => {
+        const cfg = layout[c.id];
+        if (!cfg) return '';
+        const isSelf = c.id === R.user.selfClusterId;
+        const cls = `sp-bub sp-bub--${cfg.size}${isSelf ? ' sp-bub--self' : ''}`;
+        const bg = isSelf ? 'var(--sp-pink)' : colorBg[cfg.color];
+        const fg = isSelf ? 'var(--sp-cream)' : colorText[cfg.color];
+        const youTab = isSelf ? `<span class="sp-bub__you">YOU</span>` : '';
+        return `
+          <div class="${cls}"
+               style="left:${cfg.x}px; top:${cfg.y}px; --rot:${cfg.rot}deg; transform: rotate(${cfg.rot}deg); background:${bg}; color:${fg};">
+            ${escapeHtml(c.text)}
+            ${youTab}
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('screen-2').innerHTML = `
+        <div class="sp-stage" style="padding-bottom: 0;">
+          <div class="sp-wc-top">
+            <div>
+              <div class="sp-wc-stat"><strong>${totalLabel}</strong>answers</div>
+            </div>
+            <div>
+              <div class="sp-wc-stat" style="text-align:center;"><strong>${R.meta.countriesAnswered}</strong>countries</div>
+            </div>
+            <button class="sp-wc-share">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="6" cy="12" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="18" cy="18" r="3"/>
+                <path d="M8.6 13.5l6.8 3.5M8.6 10.5l6.8-3.5"/>
+              </svg>
+              SHARE
+            </button>
+          </div>
+
+          <h2 class="sp-wc-title">the verdict so far</h2>
+          <div class="sp-wc-sub">tap a sticker for stories &#9733;</div>
+
+          <div class="sp-cloud">
+            ${bubbles}
+          </div>
+        </div>
+        ${tabBarHTML('today')}
+      `;
+    }
+
+    // ====== SCREEN 3: LEADERBOARD ======
+    function renderLeaderboard() {
+      const rows = R.leaderboard.entries.map(e => {
+        const initial = e.handle.charAt(0).toUpperCase();
+        const rowCls = [
+          'sp-lb-row',
+          e.crown ? 'sp-lb-row--crown' : '',
+          e.isSelf ? 'sp-lb-row--self' : '',
+        ].filter(Boolean).join(' ');
+        const crownSticker = e.crown
+          ? `<span class="sp-lb-row__crown-sticker">
+               <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M2 8l5 4 5-7 5 7 5-4-2 12H4z"/></svg>
+               #1
+             </span>`
+          : '';
+        const youTab = e.isSelf
+          ? `<span class="sp-lb-row__you-tab">YOU</span>`
+          : '';
+        const flame = `<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 4 5 5 5 10a5 5 0 11-10 0c0-2 1-3 1-5 1 1 2 1 3 0-1-2 0-4 1-5z"/></svg>`;
+        return `
+          <div class="${rowCls}">
+            ${crownSticker}
+            ${youTab}
+            <div class="sp-lb-row__rank">${e.rank.toString().padStart(2,'0')}</div>
+            <div class="sp-lb-row__avatar">${initial}</div>
+            <div class="sp-lb-row__main">
+              <div class="sp-lb-row__handle">@${escapeHtml(e.handle)}</div>
+              <div class="sp-lb-row__streak">${flame} ${e.streak}-day streak</div>
+            </div>
+            <div class="sp-lb-row__score">${e.score}</div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('screen-3').innerHTML = `
+        <div class="sp-stage" style="padding-bottom: 0; overflow-y: auto;">
+          <h2 class="sp-lb-title">the board &#9733;</h2>
+          <div class="sp-lb-toggle">
+            <span class="sp-lb-toggle__opt is-active">Daily</span>
+            <span class="sp-lb-toggle__opt">Weekly</span>
+            <span class="sp-lb-toggle__opt">All-time</span>
+          </div>
+          <div class="sp-lb-scope">
+            <span class="sp-lb-scope__pill is-active">GLOBAL</span>
+            <span class="sp-lb-scope__pill">FRIENDS</span>
+          </div>
+          <div class="sp-lb-rows">
+            ${rows}
+          </div>
+          <div style="height: 110px;"></div>
+        </div>
+        ${tabBarHTML('leaderboard')}
+      `;
+    }
+
+    // ====== SCREEN 4: ARCHIVE ======
+    function renderArchive() {
+      const tiles = R.archive.map((a, i) => `
+        <div class="sp-ar-tile">
+          <div class="sp-ar-tile__date">${a.date.toUpperCase()}</div>
+          <div>
+            <div class="sp-ar-tile__q">${escapeHtml(a.text)}</div>
+            <div class="sp-ar-tile__verdict">${escapeHtml(a.verdict)}</div>
+          </div>
+          <div class="sp-ar-tile__count">${a.count.toLocaleString('en-US')} answers</div>
+        </div>
+      `);
+
+      // insert ad after 4th tile (index 3)
+      const ad = `
+        <div class="sp-ar-ad">
+          <div>
+            <div class="sp-ar-ad__label">SPONSORED</div>
+            <div class="sp-ar-ad__copy">drop incoming &#9733;</div>
+          </div>
+          <span class="sp-ar-ad__cta">TAP</span>
+        </div>
+      `;
+      const ordered = [
+        tiles[0], tiles[1], tiles[2], tiles[3],
+        ad,
+        tiles[4], tiles[5], tiles[6], tiles[7],
+      ].join('');
+
+      document.getElementById('screen-4').innerHTML = `
+        <div class="sp-stage" style="padding-bottom: 0; overflow-y: auto;">
+          <h2 class="sp-ar-title">the archive</h2>
+          <div class="sp-ar-sub">every drop, kept forever &#9733;</div>
+          <div class="sp-ar-grid">
+            ${ordered}
+          </div>
+          <div style="height: 110px;"></div>
+        </div>
+        ${tabBarHTML('archive')}
+      `;
+    }
+
+    renderQuestion();
+    renderWordcloud();
+    renderLeaderboard();
+    renderArchive();
+  </script>
+</body>
+</html>

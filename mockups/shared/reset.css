@@ -1,0 +1,6 @@
+/* Tiny reset — keeps every mockup playing by the same rules. */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+img, svg { display: block; max-width: 100%; }
+:focus-visible { outline: 2px solid #4f8cff; outline-offset: 2px; border-radius: 4px; }

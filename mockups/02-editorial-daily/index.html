@@ -1,0 +1,1276 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Relatably · Editorial Daily</title>
+  <link rel="stylesheet" href="../shared/reset.css">
+  <link rel="stylesheet" href="../shared/phone-frame.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ---------------------------------------------------------------
+       EDITORIAL DAILY — design tokens
+       NYT-magazine-on-paper for a Gen-Z daily ritual.
+       --------------------------------------------------------------- */
+    :root {
+      --paper:        #F4ECDD;   /* warm newsprint cream */
+      --paper-2:      #FFFFFF;   /* clean card cut */
+      --paper-edge:   #EAE0CC;   /* paper grain edge */
+      --ink:          #161413;   /* warm near-black */
+      --ink-soft:     #2A2624;
+      --subtext:      #5C5852;
+      --rule:         #161413;   /* hairline rules */
+      --rule-soft:    rgba(22,20,19,0.18);
+      --oxblood:      #C8392B;   /* the hot color of the day */
+      --oxblood-dk:   #A22E22;
+      --marigold:     #B8902A;   /* crown / called-it */
+      --error:        #C8392B;
+
+      --serif:  "Source Serif 4", "Iowan Old Style", "Georgia", serif;
+      --sans:   "IBM Plex Sans", "Helvetica Neue", "Arial", sans-serif;
+      --mono:   "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+      --gutter: 24px;
+      --s-1:  4px;
+      --s-2:  8px;
+      --s-3:  12px;
+      --s-4:  16px;
+      --s-5:  24px;
+      --s-6:  32px;
+      --s-7:  48px;
+      --s-8:  64px;
+    }
+
+    /* ---------- page ---------- */
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--sans);
+      min-height: 100vh;
+      padding: 64px 32px 96px;
+      /* very subtle newsprint texture */
+      background-image:
+        radial-gradient(rgba(22,20,19,0.03) 1px, transparent 1px),
+        radial-gradient(rgba(22,20,19,0.02) 1px, transparent 1px);
+      background-size: 3px 3px, 7px 7px;
+      background-position: 0 0, 2px 2px;
+    }
+
+    .page-header {
+      max-width: 1860px;
+      margin: 0 auto 56px;
+      padding: 0 0 24px;
+      border-bottom: 1px solid var(--rule);
+      position: relative;
+    }
+    .page-masthead-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink);
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 20px;
+    }
+    .page-masthead-top .left,
+    .page-masthead-top .right { display: flex; gap: 18px; }
+    .page-masthead-top .dot { color: var(--oxblood); }
+    .page-wordmark {
+      font-family: var(--serif);
+      font-weight: 700;
+      font-size: 72px;
+      line-height: 0.95;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin: 0;
+    }
+    .page-wordmark .swash {
+      font-style: italic;
+      font-weight: 400;
+      color: var(--oxblood);
+    }
+    .page-subtitle {
+      margin-top: 12px;
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 300;
+      font-size: 22px;
+      line-height: 1.35;
+      color: var(--ink-soft);
+      max-width: 720px;
+    }
+    .page-edition {
+      position: absolute;
+      right: 0;
+      bottom: 28px;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--subtext);
+      text-align: right;
+      line-height: 1.6;
+    }
+    .page-edition strong { color: var(--ink); font-weight: 600; }
+
+    .phone-row {
+      display: flex;
+      gap: 40px;
+      justify-content: center;
+      align-items: flex-start;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 24px;
+    }
+
+    /* Override phone label color for the cream page */
+    .rb-phone-label {
+      color: rgba(22,20,19,0.55) !important;
+      font-family: var(--mono);
+      letter-spacing: 0.18em;
+    }
+
+    /* ---------------------------------------------------------------
+       inside the phone screen
+       --------------------------------------------------------------- */
+    .ed-screen {
+      width: 100%;
+      height: 100%;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--sans);
+      position: relative;
+      overflow: hidden;
+      animation: ed-fade 320ms ease-out both;
+    }
+    @keyframes ed-fade {
+      from { opacity: 0; transform: translateY(2px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    /* status bar inside the screen — paper-light */
+    .ed-statusbar {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 59px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 32px 0 32px;
+      padding-top: 18px;
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--ink);
+      pointer-events: none;
+      z-index: 4;
+    }
+    .ed-statusbar .right { display: flex; gap: 6px; align-items: center; }
+    .ed-statusbar .right svg { display: block; }
+
+    /* shared masthead inside the phone */
+    .ed-masthead {
+      padding: 64px 24px 0;
+      position: relative;
+    }
+    .ed-masthead-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-family: var(--mono);
+      font-size: 9.5px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink);
+      padding-bottom: 8px;
+    }
+    .ed-masthead-row .dot { color: var(--oxblood); padding: 0 6px; }
+    .ed-masthead-row .vol { color: var(--subtext); }
+    .ed-masthead-rule {
+      height: 1px;
+      background: var(--rule);
+      margin: 0;
+    }
+    .ed-masthead-rule.double {
+      height: 4px;
+      border-top: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+      background: transparent;
+    }
+
+    /* ----- shared tab bar ----- */
+    .ed-tabbar {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      padding: 12px 24px 30px;
+      background: var(--paper);
+      border-top: 1px solid var(--rule);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      z-index: 3;
+    }
+    .ed-tab {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--subtext);
+      padding: 4px 0 0;
+    }
+    .ed-tab svg { display: block; }
+    .ed-tab.is-active { color: var(--oxblood); }
+    .ed-tab.is-active .ed-tab-dot {
+      width: 4px; height: 4px; border-radius: 50%;
+      background: var(--oxblood); margin-top: 2px;
+    }
+    .ed-tab-dot { width: 4px; height: 4px; }
+
+    /* =================================================================
+       SCREEN 1 — QUESTION
+       ================================================================= */
+    .s1 .ed-masthead { padding-top: 64px; }
+    .s1-body {
+      padding: 0 24px;
+      margin-top: 0;
+    }
+    .s1-meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 0 10px;
+      font-family: var(--mono);
+      font-size: 9.5px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--subtext);
+      border-bottom: 1px solid var(--rule);
+    }
+    .s1-meta-row .dropped { color: var(--ink); }
+    .s1-timer {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--oxblood);
+    }
+    .s1-timer-bar {
+      display: inline-block;
+      width: 36px;
+      height: 2px;
+      background: var(--rule-soft);
+      position: relative;
+    }
+    .s1-timer-bar::after {
+      content: "";
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 42%;
+      background: var(--oxblood);
+    }
+    .s1-kicker {
+      margin-top: 18px;
+      font-family: var(--mono);
+      font-size: 9.5px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--oxblood);
+    }
+    .s1-question {
+      margin-top: 8px;
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: 44px;
+      line-height: 1.04;
+      color: var(--ink);
+      letter-spacing: -0.012em;
+    }
+    .s1-question .dropcap {
+      float: left;
+      font-style: normal;
+      font-weight: 700;
+      font-size: 88px;
+      line-height: 0.85;
+      padding: 6px 10px 0 0;
+      color: var(--oxblood);
+    }
+    .s1-rule {
+      height: 1px;
+      background: var(--rule);
+      margin: 24px 0 0;
+    }
+    .s1-byline {
+      margin-top: 12px;
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 300;
+      font-size: 13px;
+      color: var(--subtext);
+      display: flex;
+      justify-content: space-between;
+    }
+    .s1-byline strong { color: var(--ink); font-weight: 600; font-style: normal; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em; }
+
+    .s1-input-block { margin-top: 28px; }
+    .s1-input-label {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--subtext);
+      padding-bottom: 6px;
+    }
+    .s1-input-line {
+      border: 0;
+      border-bottom: 1px solid var(--rule);
+      padding: 8px 0 10px;
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 300;
+      font-size: 17px;
+      color: var(--subtext);
+      width: 100%;
+      background: transparent;
+    }
+    .s1-input-line.is-focus {
+      border-bottom: 1px solid var(--oxblood);
+      color: var(--ink);
+      font-style: normal;
+      font-weight: 400;
+      font-family: var(--sans);
+      position: relative;
+    }
+    .s1-input-line.is-focus::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0; bottom: -1px;
+      height: 1px;
+      background: var(--oxblood);
+    }
+    .s1-input-caret {
+      display: inline-block;
+      width: 8px; height: 16px;
+      background: var(--oxblood);
+      vertical-align: -3px;
+      margin-left: 2px;
+      animation: ed-caret 900ms steps(2) infinite;
+    }
+    @keyframes ed-caret { 50% { opacity: 0; } }
+    .s1-input-hint {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--subtext);
+      padding-top: 6px;
+    }
+    .s1-input-hint .focus { color: var(--oxblood); }
+
+    .s1-submit {
+      margin-top: 22px;
+      width: 100%;
+      background: var(--ink);
+      color: var(--paper);
+      font-family: var(--mono);
+      font-weight: 600;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      padding: 17px 16px;
+      border: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      border-radius: 0;
+    }
+    .s1-submit::after {
+      content: "→";
+      font-family: var(--serif);
+      font-size: 16px;
+    }
+
+    .s1-counter-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-top: 22px;
+      padding-top: 14px;
+      border-top: 1px solid var(--rule);
+    }
+    .s1-counter-num {
+      font-family: var(--serif);
+      font-weight: 700;
+      font-size: 22px;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+    .s1-counter-label {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--subtext);
+      max-width: 180px;
+      text-align: right;
+      line-height: 1.5;
+    }
+    .s1-folio {
+      position: absolute;
+      bottom: 96px;
+      left: 0; right: 0;
+      text-align: center;
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--subtext);
+    }
+
+    /* =================================================================
+       SCREEN 2 — WORDCLOUD (typographic only)
+       ================================================================= */
+    .s2-strip {
+      padding: 0 24px;
+      margin-top: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .s2-strip .label {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--subtext);
+      line-height: 1.6;
+    }
+    .s2-strip .stat {
+      font-family: var(--serif);
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+    .s2-strip .stat .small { font-family: var(--mono); font-size: 9.5px; font-weight: 400; letter-spacing: 0.14em; color: var(--subtext); margin-left: 4px; text-transform: uppercase; }
+    .s2-share {
+      position: absolute;
+      top: 70px;
+      right: 24px;
+      width: 28px; height: 28px;
+      border: 1px solid var(--rule);
+      display: flex; align-items: center; justify-content: center;
+      background: var(--paper);
+      z-index: 3;
+    }
+    .s2-share svg { width: 12px; height: 12px; }
+
+    .s2-headline {
+      padding: 14px 24px 8px;
+      font-family: var(--mono);
+      font-size: 9.5px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--oxblood);
+    }
+    .s2-sub {
+      padding: 0 24px 12px;
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 300;
+      font-size: 19px;
+      line-height: 1.25;
+      color: var(--ink);
+      border-bottom: 1px solid var(--rule);
+    }
+
+    /* the typographic word page */
+    .s2-cloud {
+      position: relative;
+      padding: 18px 22px 24px;
+      height: 460px;
+      overflow: hidden;
+    }
+    .s2-w {
+      font-family: var(--serif);
+      color: var(--ink);
+      line-height: 0.92;
+      letter-spacing: -0.012em;
+      display: inline-block;
+      vertical-align: baseline;
+      white-space: nowrap;
+    }
+    .s2-w.italic { font-style: italic; font-weight: 400; }
+    .s2-w.bold   { font-weight: 700; }
+    .s2-w.sans   { font-family: var(--sans); font-weight: 500; letter-spacing: -0.005em; }
+    .s2-w.mono   { font-family: var(--mono); font-weight: 500; }
+    .s2-w.dim    { color: var(--subtext); }
+
+    /* the self-cluster — oxblood + underline + caret */
+    .s2-self {
+      color: var(--oxblood);
+      position: relative;
+      padding-bottom: 6px;
+    }
+    .s2-self::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 1px;
+      background: var(--oxblood);
+    }
+    .s2-self-tag {
+      display: inline-block;
+      margin-left: 6px;
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 300;
+      font-size: 12px;
+      color: var(--oxblood);
+      vertical-align: middle;
+      letter-spacing: 0;
+    }
+
+    .s2-footrule {
+      position: absolute;
+      left: 24px; right: 24px;
+      bottom: 110px;
+      height: 1px;
+      background: var(--rule);
+      z-index: 2;
+    }
+    .s2-footnote {
+      position: absolute;
+      left: 24px; right: 24px;
+      bottom: 100px;
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 300;
+      font-size: 12px;
+      color: var(--subtext);
+      display: flex;
+      justify-content: space-between;
+      z-index: 2;
+    }
+    .s2-footnote .mark { color: var(--oxblood); font-family: var(--mono); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; font-style: normal; }
+
+    /* =================================================================
+       SCREEN 3 — LEADERBOARD (NYT table)
+       ================================================================= */
+    .s3-title {
+      padding: 14px 24px 6px;
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: 30px;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+    .s3-deck {
+      padding: 0 24px 14px;
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 300;
+      font-size: 13px;
+      color: var(--subtext);
+      border-bottom: 1px solid var(--rule);
+    }
+    .s3-toggles {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 24px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .s3-period {
+      display: flex;
+      gap: 18px;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+    .s3-period span { color: var(--subtext); padding-bottom: 4px; }
+    .s3-period .is-on { color: var(--oxblood); border-bottom: 1px solid var(--oxblood); }
+    .s3-scope {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink);
+      display: flex; gap: 8px; align-items: center;
+    }
+    .s3-scope .arrow { color: var(--oxblood); }
+    .s3-tablehead {
+      display: grid;
+      grid-template-columns: 36px 1fr 64px 36px;
+      gap: 8px;
+      padding: 10px 24px;
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--subtext);
+      border-bottom: 1px solid var(--rule);
+    }
+    .s3-tablehead .right { text-align: right; }
+    .s3-rows { padding: 0; }
+    .s3-row {
+      display: grid;
+      grid-template-columns: 36px 1fr 64px 36px;
+      gap: 8px;
+      align-items: center;
+      padding: 11px 24px;
+      border-bottom: 1px solid var(--rule-soft);
+      position: relative;
+    }
+    .s3-row:last-child { border-bottom: 1px solid var(--rule); }
+    .s3-rank {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--subtext);
+      letter-spacing: 0.04em;
+    }
+    .s3-handle {
+      font-family: var(--serif);
+      font-weight: 400;
+      font-size: 17px;
+      color: var(--ink);
+      letter-spacing: -0.005em;
+    }
+    .s3-handle .self-tag {
+      font-style: italic;
+      font-weight: 300;
+      font-size: 13px;
+      color: var(--oxblood);
+      margin-left: 6px;
+    }
+    .s3-score {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      text-align: right;
+      letter-spacing: 0.02em;
+    }
+    .s3-streak {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.06em;
+      color: var(--subtext);
+      text-align: right;
+    }
+    .s3-streak .num { color: var(--ink); font-weight: 500; }
+
+    .s3-row.is-crown .s3-rank { color: var(--marigold); font-weight: 600; }
+    .s3-row.is-crown .s3-handle::before {
+      content: "♚";
+      color: var(--marigold);
+      margin-right: 6px;
+      font-size: 12px;
+      vertical-align: 1px;
+    }
+    .s3-row.is-self {
+      background: rgba(200,57,43,0.04);
+    }
+    .s3-row.is-self::before {
+      content: "";
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: var(--oxblood);
+    }
+    .s3-row.is-self .s3-rank { color: var(--oxblood); font-weight: 600; }
+    .s3-row.is-self .s3-handle { color: var(--ink); }
+    .s3-row.is-self .s3-score  { color: var(--oxblood); }
+
+    .s3-foot {
+      padding: 14px 24px;
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 300;
+      font-size: 12px;
+      color: var(--subtext);
+      display: flex;
+      justify-content: space-between;
+    }
+    .s3-foot .num { font-family: var(--mono); font-style: normal; color: var(--ink); }
+
+    /* =================================================================
+       SCREEN 4 — ARCHIVE (Sunday paper)
+       ================================================================= */
+    .s4-title {
+      padding: 14px 24px 6px;
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: 30px;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+    .s4-deck {
+      padding: 0 24px 14px;
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 300;
+      font-size: 13px;
+      color: var(--subtext);
+      border-bottom: 1px solid var(--rule);
+    }
+    .s4-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      padding: 0 18px;
+      position: relative;
+    }
+    /* the gutter rule between columns */
+    .s4-cols::after {
+      content: "";
+      position: absolute;
+      top: 14px; bottom: 14px;
+      left: 50%;
+      width: 1px;
+      background: var(--rule);
+    }
+    .s4-col { display: flex; flex-direction: column; }
+    .s4-tile {
+      padding: 14px 8px 14px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .s4-tile:first-child { padding-top: 16px; }
+    .s4-date {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--subtext);
+    }
+    .s4-q {
+      margin-top: 6px;
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: 15px;
+      line-height: 1.18;
+      color: var(--ink);
+      letter-spacing: -0.005em;
+    }
+    .s4-verdict {
+      margin-top: 8px;
+      font-family: var(--sans);
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--oxblood);
+      letter-spacing: -0.005em;
+      line-height: 1.15;
+    }
+    .s4-count {
+      margin-top: 6px;
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.14em;
+      color: var(--subtext);
+    }
+
+    .s4-ad {
+      grid-column: 1 / -1;
+      margin: 8px 6px;
+      padding: 14px 14px;
+      border: 1px solid var(--rule);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--paper-2);
+    }
+    .s4-ad-label {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--subtext);
+    }
+    .s4-ad-copy {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: 13px;
+      color: var(--ink);
+      flex: 1;
+      padding: 0 12px;
+      line-height: 1.2;
+    }
+    .s4-ad-cta {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--oxblood);
+    }
+  </style>
+</head>
+<body>
+
+<header class="page-header">
+  <div class="page-masthead-top">
+    <div class="left">
+      <span>VOL. I</span>
+      <span class="dot">●</span>
+      <span>NO. 042</span>
+      <span class="dot">●</span>
+      <span>EDITORIAL DAILY</span>
+    </div>
+    <div class="right">
+      <span>RELATABLY</span>
+      <span class="dot">●</span>
+      <span>DESIGN DIRECTION 02 / 07</span>
+    </div>
+  </div>
+  <h1 class="page-wordmark">Relat<span class="swash">ably</span>.</h1>
+  <p class="page-subtitle">Editorial Daily — NYT-magazine-on-paper for Gen Z. The drop is The Daily; the wordcloud is the front page; the archive is the back catalog.</p>
+  <div class="page-edition">
+    <strong>Monday, May&nbsp;11, 2026</strong><br>
+    Late edition · paper-first
+  </div>
+</header>
+
+<main class="phone-row">
+
+  <!-- ========================= SCREEN 1 — QUESTION ========================= -->
+  <div>
+    <div class="rb-phone rb-phone--light">
+      <div class="rb-phone-island"></div>
+      <div class="rb-phone-screen" id="screen-1">
+        <div class="ed-screen s1">
+          <div class="ed-statusbar">
+            <span class="time">9:41</span>
+            <span class="right">
+              <svg width="16" height="10" viewBox="0 0 16 10" fill="currentColor"><rect x="0" y="6" width="3" height="4"/><rect x="4" y="4" width="3" height="6"/><rect x="8" y="2" width="3" height="8"/><rect x="12" y="0" width="3" height="10"/></svg>
+              <svg width="14" height="10" viewBox="0 0 14 10" fill="none" stroke="currentColor" stroke-width="1"><path d="M1 5 Q7 0 13 5"/><path d="M3 7 Q7 4 11 7"/><circle cx="7" cy="9" r="0.8" fill="currentColor"/></svg>
+              <svg width="22" height="10" viewBox="0 0 22 10" fill="none" stroke="currentColor" stroke-width="1"><rect x="0.5" y="1.5" width="18" height="7" rx="1.5"/><rect x="2" y="3" width="13" height="4" fill="currentColor"/><rect x="20" y="3.5" width="1.5" height="3" fill="currentColor"/></svg>
+            </span>
+          </div>
+
+          <div class="ed-masthead">
+            <div class="ed-masthead-row">
+              <span>RELATABLY <span class="dot">▎</span> THE DAILY <span class="dot">▎</span> <span id="s1-date"></span></span>
+              <span class="vol">VOL.&nbsp;I&nbsp;·&nbsp;NO.&nbsp;042</span>
+            </div>
+            <div class="ed-masthead-rule double"></div>
+          </div>
+
+          <div class="s1-body">
+            <div class="s1-meta-row">
+              <span class="dropped">DROPPED <span id="s1-drop"></span></span>
+              <span class="s1-timer"><span class="s1-timer-bar"></span><span id="s1-time-left"></span></span>
+            </div>
+
+            <div class="s1-kicker">— TODAY'S QUESTION —</div>
+            <h2 class="s1-question" id="s1-question"></h2>
+            <div class="s1-rule"></div>
+            <p class="s1-byline">
+              <em>filed by the world, anonymous &amp; otherwise</em>
+              <strong>FRONT PAGE</strong>
+            </p>
+
+            <div class="s1-input-block">
+              <div class="s1-input-label">YOUR TAKE</div>
+              <div class="s1-input-line is-focus">
+                AI generated everything<span class="s1-input-caret"></span>
+              </div>
+              <div class="s1-input-hint">
+                <span class="focus">▎ FOCUSED · ANSWERING ANONYMOUSLY</span>
+                <span>23 / 140</span>
+              </div>
+            </div>
+
+            <button class="s1-submit">SUBMIT ANONYMOUSLY</button>
+
+            <div class="s1-counter-row">
+              <span class="s1-counter-num" id="s1-count"></span>
+              <span class="s1-counter-label">answers filed so far<br>across <span id="s1-countries"></span> countries</span>
+            </div>
+          </div>
+
+          <div class="s1-folio">— A.1 —</div>
+
+          <nav class="ed-tabbar">
+            <div class="ed-tab is-active">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="3" width="12" height="11"/><line x1="2" y1="6" x2="14" y2="6"/><line x1="5" y1="3" x2="5" y2="1.5"/><line x1="11" y1="3" x2="11" y2="1.5"/></svg>
+              <span>TODAY</span>
+              <span class="ed-tab-dot"></span>
+            </div>
+            <div class="ed-tab">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="5" cy="6" r="2.5"/><circle cx="11" cy="6" r="2.5"/><path d="M1 14 c0-2.5 2-4 4-4 s4 1.5 4 4"/><path d="M7 14 c0-2.5 2-4 4-4 s4 1.5 4 4"/></svg>
+              <span>FRIENDS</span>
+            </div>
+            <div class="ed-tab">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="9" width="3" height="5"/><rect x="6.5" y="6" width="3" height="8"/><rect x="10" y="3" width="3" height="11"/></svg>
+              <span>RANKS</span>
+            </div>
+            <div class="ed-tab">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="2" width="12" height="12"/><line x1="2" y1="6" x2="14" y2="6"/><line x1="2" y1="10" x2="14" y2="10"/></svg>
+              <span>ARCHIVE</span>
+            </div>
+          </nav>
+        </div>
+      </div>
+      <div class="rb-phone-bar"></div>
+    </div>
+    <div class="rb-phone-label">01 · QUESTION</div>
+  </div>
+
+  <!-- ========================= SCREEN 2 — WORDCLOUD ========================= -->
+  <div>
+    <div class="rb-phone rb-phone--light">
+      <div class="rb-phone-island"></div>
+      <div class="rb-phone-screen" id="screen-2">
+        <div class="ed-screen s2">
+          <div class="ed-statusbar">
+            <span class="time">9:41</span>
+            <span class="right">
+              <svg width="16" height="10" viewBox="0 0 16 10" fill="currentColor"><rect x="0" y="6" width="3" height="4"/><rect x="4" y="4" width="3" height="6"/><rect x="8" y="2" width="3" height="8"/><rect x="12" y="0" width="3" height="10"/></svg>
+              <svg width="14" height="10" viewBox="0 0 14 10" fill="none" stroke="currentColor" stroke-width="1"><path d="M1 5 Q7 0 13 5"/><path d="M3 7 Q7 4 11 7"/><circle cx="7" cy="9" r="0.8" fill="currentColor"/></svg>
+              <svg width="22" height="10" viewBox="0 0 22 10" fill="none" stroke="currentColor" stroke-width="1"><rect x="0.5" y="1.5" width="18" height="7" rx="1.5"/><rect x="2" y="3" width="13" height="4" fill="currentColor"/><rect x="20" y="3.5" width="1.5" height="3" fill="currentColor"/></svg>
+            </span>
+          </div>
+
+          <div class="ed-masthead">
+            <div class="ed-masthead-row">
+              <span>RELATABLY <span class="dot">▎</span> THE FRONT PAGE <span class="dot">▎</span> <span id="s2-date"></span></span>
+              <span class="vol">LIVE</span>
+            </div>
+            <div class="ed-masthead-rule double"></div>
+          </div>
+
+          <button class="s2-share" aria-label="share">
+            <svg viewBox="0 0 12 12" fill="none" stroke="#161413" stroke-width="1.2"><path d="M6 1 L6 8 M3 4 L6 1 L9 4 M2 7 L2 11 L10 11 L10 7"/></svg>
+          </button>
+
+          <div class="s2-strip">
+            <div class="label">TOTAL FILED<br><span class="stat" id="s2-total"></span></div>
+            <div class="label" style="text-align:right;">FROM<br><span class="stat" id="s2-countries"></span><span class="small">countries</span></div>
+          </div>
+
+          <div class="s2-headline">— YESTERDAY: THE WORLD SAID —</div>
+          <p class="s2-sub">the most overrated thing on the internet, by collective verdict, weighed against itself</p>
+
+          <div class="s2-cloud" id="s2-cloud">
+            <!-- typographic cluster, rendered below -->
+          </div>
+
+          <div class="s2-footrule"></div>
+          <p class="s2-footnote">
+            <span class="mark">↑ YOURS</span>
+            <em>3,204 of 12,847 said AI</em>
+          </p>
+
+          <nav class="ed-tabbar">
+            <div class="ed-tab is-active">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="3" width="12" height="11"/><line x1="2" y1="6" x2="14" y2="6"/><line x1="5" y1="3" x2="5" y2="1.5"/><line x1="11" y1="3" x2="11" y2="1.5"/></svg>
+              <span>TODAY</span>
+              <span class="ed-tab-dot"></span>
+            </div>
+            <div class="ed-tab">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="5" cy="6" r="2.5"/><circle cx="11" cy="6" r="2.5"/><path d="M1 14 c0-2.5 2-4 4-4 s4 1.5 4 4"/><path d="M7 14 c0-2.5 2-4 4-4 s4 1.5 4 4"/></svg>
+              <span>FRIENDS</span>
+            </div>
+            <div class="ed-tab">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="9" width="3" height="5"/><rect x="6.5" y="6" width="3" height="8"/><rect x="10" y="3" width="3" height="11"/></svg>
+              <span>RANKS</span>
+            </div>
+            <div class="ed-tab">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="2" width="12" height="12"/><line x1="2" y1="6" x2="14" y2="6"/><line x1="2" y1="10" x2="14" y2="10"/></svg>
+              <span>ARCHIVE</span>
+            </div>
+          </nav>
+        </div>
+      </div>
+      <div class="rb-phone-bar"></div>
+    </div>
+    <div class="rb-phone-label">02 · WORDCLOUD</div>
+  </div>
+
+  <!-- ========================= SCREEN 3 — LEADERBOARD ========================= -->
+  <div>
+    <div class="rb-phone rb-phone--light">
+      <div class="rb-phone-island"></div>
+      <div class="rb-phone-screen" id="screen-3">
+        <div class="ed-screen s3">
+          <div class="ed-statusbar">
+            <span class="time">9:41</span>
+            <span class="right">
+              <svg width="16" height="10" viewBox="0 0 16 10" fill="currentColor"><rect x="0" y="6" width="3" height="4"/><rect x="4" y="4" width="3" height="6"/><rect x="8" y="2" width="3" height="8"/><rect x="12" y="0" width="3" height="10"/></svg>
+              <svg width="14" height="10" viewBox="0 0 14 10" fill="none" stroke="currentColor" stroke-width="1"><path d="M1 5 Q7 0 13 5"/><path d="M3 7 Q7 4 11 7"/><circle cx="7" cy="9" r="0.8" fill="currentColor"/></svg>
+              <svg width="22" height="10" viewBox="0 0 22 10" fill="none" stroke="currentColor" stroke-width="1"><rect x="0.5" y="1.5" width="18" height="7" rx="1.5"/><rect x="2" y="3" width="13" height="4" fill="currentColor"/><rect x="20" y="3.5" width="1.5" height="3" fill="currentColor"/></svg>
+            </span>
+          </div>
+
+          <div class="ed-masthead">
+            <div class="ed-masthead-row">
+              <span>RELATABLY <span class="dot">▎</span> THE STANDINGS <span class="dot">▎</span> <span id="s3-date"></span></span>
+              <span class="vol">PAGE&nbsp;B.2</span>
+            </div>
+            <div class="ed-masthead-rule double"></div>
+          </div>
+
+          <h2 class="s3-title">The Standings.</h2>
+          <p class="s3-deck">who was first to the world's verdict — ranked, hairline by hairline.</p>
+
+          <div class="s3-toggles">
+            <div class="s3-period">
+              <span class="is-on">DAILY</span>
+              <span>WEEKLY</span>
+              <span>ALL-TIME</span>
+            </div>
+            <div class="s3-scope">GLOBAL <span class="arrow">▾</span></div>
+          </div>
+
+          <div class="s3-tablehead">
+            <span>#</span>
+            <span>READER</span>
+            <span class="right">SCORE</span>
+            <span class="right">STRK</span>
+          </div>
+
+          <div class="s3-rows" id="s3-rows"><!-- rows render --></div>
+
+          <p class="s3-foot">
+            <em>updated continuously</em>
+            <span class="num" id="s3-total">12,847 votes counted</span>
+          </p>
+
+          <nav class="ed-tabbar">
+            <div class="ed-tab">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="3" width="12" height="11"/><line x1="2" y1="6" x2="14" y2="6"/><line x1="5" y1="3" x2="5" y2="1.5"/><line x1="11" y1="3" x2="11" y2="1.5"/></svg>
+              <span>TODAY</span>
+            </div>
+            <div class="ed-tab">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="5" cy="6" r="2.5"/><circle cx="11" cy="6" r="2.5"/><path d="M1 14 c0-2.5 2-4 4-4 s4 1.5 4 4"/><path d="M7 14 c0-2.5 2-4 4-4 s4 1.5 4 4"/></svg>
+              <span>FRIENDS</span>
+            </div>
+            <div class="ed-tab is-active">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="9" width="3" height="5"/><rect x="6.5" y="6" width="3" height="8"/><rect x="10" y="3" width="3" height="11"/></svg>
+              <span>RANKS</span>
+              <span class="ed-tab-dot"></span>
+            </div>
+            <div class="ed-tab">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="2" width="12" height="12"/><line x1="2" y1="6" x2="14" y2="6"/><line x1="2" y1="10" x2="14" y2="10"/></svg>
+              <span>ARCHIVE</span>
+            </div>
+          </nav>
+        </div>
+      </div>
+      <div class="rb-phone-bar"></div>
+    </div>
+    <div class="rb-phone-label">03 · LEADERBOARD</div>
+  </div>
+
+  <!-- ========================= SCREEN 4 — ARCHIVE ========================= -->
+  <div>
+    <div class="rb-phone rb-phone--light">
+      <div class="rb-phone-island"></div>
+      <div class="rb-phone-screen" id="screen-4">
+        <div class="ed-screen s4">
+          <div class="ed-statusbar">
+            <span class="time">9:41</span>
+            <span class="right">
+              <svg width="16" height="10" viewBox="0 0 16 10" fill="currentColor"><rect x="0" y="6" width="3" height="4"/><rect x="4" y="4" width="3" height="6"/><rect x="8" y="2" width="3" height="8"/><rect x="12" y="0" width="3" height="10"/></svg>
+              <svg width="14" height="10" viewBox="0 0 14 10" fill="none" stroke="currentColor" stroke-width="1"><path d="M1 5 Q7 0 13 5"/><path d="M3 7 Q7 4 11 7"/><circle cx="7" cy="9" r="0.8" fill="currentColor"/></svg>
+              <svg width="22" height="10" viewBox="0 0 22 10" fill="none" stroke="currentColor" stroke-width="1"><rect x="0.5" y="1.5" width="18" height="7" rx="1.5"/><rect x="2" y="3" width="13" height="4" fill="currentColor"/><rect x="20" y="3.5" width="1.5" height="3" fill="currentColor"/></svg>
+            </span>
+          </div>
+
+          <div class="ed-masthead">
+            <div class="ed-masthead-row">
+              <span>RELATABLY <span class="dot">▎</span> BACK ISSUES <span class="dot">▎</span> <span id="s4-date"></span></span>
+              <span class="vol">PAGE&nbsp;C.1</span>
+            </div>
+            <div class="ed-masthead-rule double"></div>
+          </div>
+
+          <h2 class="s4-title">The Archive of Takes.</h2>
+          <p class="s4-deck">every question this week, every verdict — set in print.</p>
+
+          <div class="s4-cols" id="s4-cols"><!-- tiles render --></div>
+
+          <nav class="ed-tabbar">
+            <div class="ed-tab">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="3" width="12" height="11"/><line x1="2" y1="6" x2="14" y2="6"/><line x1="5" y1="3" x2="5" y2="1.5"/><line x1="11" y1="3" x2="11" y2="1.5"/></svg>
+              <span>TODAY</span>
+            </div>
+            <div class="ed-tab">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="5" cy="6" r="2.5"/><circle cx="11" cy="6" r="2.5"/><path d="M1 14 c0-2.5 2-4 4-4 s4 1.5 4 4"/><path d="M7 14 c0-2.5 2-4 4-4 s4 1.5 4 4"/></svg>
+              <span>FRIENDS</span>
+            </div>
+            <div class="ed-tab">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="9" width="3" height="5"/><rect x="6.5" y="6" width="3" height="8"/><rect x="10" y="3" width="3" height="11"/></svg>
+              <span>RANKS</span>
+            </div>
+            <div class="ed-tab is-active">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="2" width="12" height="12"/><line x1="2" y1="6" x2="14" y2="6"/><line x1="2" y1="10" x2="14" y2="10"/></svg>
+              <span>ARCHIVE</span>
+              <span class="ed-tab-dot"></span>
+            </div>
+          </nav>
+        </div>
+      </div>
+      <div class="rb-phone-bar"></div>
+    </div>
+    <div class="rb-phone-label">04 · ARCHIVE</div>
+  </div>
+
+</main>
+
+<script src="../shared/content.js"></script>
+<script>
+(function () {
+  const R = window.RELATABLY;
+  if (!R) return;
+
+  /* helpers */
+  const fmt  = n => n.toLocaleString("en-US");
+  const $    = id => document.getElementById(id);
+  const setT = (id, t) => { const el = $(id); if (el) el.textContent = t; };
+
+  /* ---------- SCREEN 1 ---------- */
+  setT("s1-date", R.meta.todayLabel);
+  setT("s1-drop", R.meta.dropTimeLabel);
+  setT("s1-time-left", R.meta.timeLeftLabel);
+  // Question with drop cap on first letter
+  const qEl = $("s1-question");
+  const qt  = R.question.text;
+  qEl.innerHTML =
+    '<span class="dropcap">' + qt.charAt(0).toUpperCase() + '</span>' +
+    qt.slice(1).replace(/\?$/, "") + "?";
+  setT("s1-count", fmt(R.meta.totalAnswers));
+  setT("s1-countries", R.meta.countriesAnswered);
+
+  /* ---------- SCREEN 2 — typographic wordcloud ---------- */
+  setT("s2-date", R.meta.todayLabel);
+  setT("s2-total", fmt(R.meta.totalAnswers));
+  setT("s2-countries", R.meta.countriesAnswered);
+
+  // Hand-tuned typographic layout — positions, sizes and styles
+  // chosen for editorial composition (asymmetric, balanced page).
+  // Sizes are clamped so the 20 clusters fit the 345px-wide / ~460px-tall
+  // cloud panel. The self-cluster (c_ai) gets oxblood + underline + caret.
+  const W = {
+    c_ai:          { x: 14,  y: 28,  size: 86, cls: "s2-w italic s2-self" },
+    c_tiktok:      { x: 188, y: 84,  size: 50, cls: "s2-w bold" },
+    c_twitter:     { x: 18,  y: 122, size: 42, cls: "s2-w italic" },
+    c_podcasts:    { x: 210, y: 138, size: 30, cls: "s2-w sans" },
+    c_nfts:        { x: 26,  y: 178, size: 34, cls: "s2-w bold" },
+    c_influencers: { x: 122, y: 196, size: 22, cls: "s2-w italic" },
+    c_linkedin:    { x: 244, y: 192, size: 24, cls: "s2-w sans" },
+    c_crypto:      { x: 16,  y: 236, size: 28, cls: "s2-w italic" },
+    c_dating_apps: { x: 120, y: 240, size: 22, cls: "s2-w sans" },
+    c_reddit:      { x: 248, y: 240, size: 20, cls: "s2-w" },
+    c_threads:     { x: 24,  y: 282, size: 19, cls: "s2-w sans" },
+    c_instagram:   { x: 96,  y: 288, size: 21, cls: "s2-w italic dim" },
+    c_substack:    { x: 220, y: 282, size: 18, cls: "s2-w" },
+    c_chatgpt:     { x: 24,  y: 326, size: 18, cls: "s2-w mono dim" },
+    c_discord:     { x: 116, y: 330, size: 16, cls: "s2-w dim" },
+    c_yt_shorts:   { x: 198, y: 326, size: 17, cls: "s2-w italic dim" },
+    c_snapchat:    { x: 26,  y: 364, size: 14, cls: "s2-w sans dim" },
+    c_bereal:      { x: 116, y: 366, size: 14, cls: "s2-w dim" },
+    c_clubhouse:   { x: 196, y: 368, size: 13, cls: "s2-w mono dim" },
+    c_bluesky:     { x: 278, y: 366, size: 13, cls: "s2-w italic dim" }
+  };
+  const ROT = {
+    c_twitter:  -3,
+    c_crypto:   -2,
+    c_linkedin:  2,
+    c_threads:  -2,
+    c_substack:  3,
+    c_yt_shorts:-3,
+    c_bluesky:   4
+  };
+  const cloud = $("s2-cloud");
+  R.clusters.forEach(c => {
+    const s = W[c.id];
+    if (!s) return;
+    const span = document.createElement("span");
+    span.className = s.cls;
+    span.style.position = "absolute";
+    span.style.left = s.x + "px";
+    span.style.top  = s.y + "px";
+    span.style.fontSize = s.size + "px";
+    const rot = ROT[c.id];
+    if (rot) span.style.transform = "rotate(" + rot + "deg)";
+    if (c.id === "c_ai") {
+      span.innerHTML = c.text + '<span class="s2-self-tag">← yours</span>';
+    } else {
+      span.textContent = c.text;
+    }
+    cloud.appendChild(span);
+  });
+
+  /* ---------- SCREEN 3 — leaderboard ---------- */
+  setT("s3-date", R.meta.todayLabel);
+  setT("s3-total", fmt(R.meta.totalAnswers) + " votes counted");
+  const rows = $("s3-rows");
+  R.leaderboard.entries.forEach(e => {
+    const row = document.createElement("div");
+    row.className = "s3-row" + (e.crown ? " is-crown" : "") + (e.isSelf ? " is-self" : "");
+    const rank = "[" + String(e.rank).padStart(2, "0") + "]";
+    row.innerHTML =
+      '<span class="s3-rank">' + rank + '</span>' +
+      '<span class="s3-handle">' + e.handle +
+        (e.isSelf ? '<span class="self-tag">— you</span>' : '') +
+      '</span>' +
+      '<span class="s3-score">' + fmt(e.score) + '</span>' +
+      '<span class="s3-streak"><span class="num">' + e.streak + '</span>d</span>';
+    rows.appendChild(row);
+  });
+
+  /* ---------- SCREEN 4 — archive ---------- */
+  setT("s4-date", R.meta.todayLabel);
+  const cols = $("s4-cols");
+  // two-column masonry; alternate items L/R
+  const colL = document.createElement("div"); colL.className = "s4-col";
+  const colR = document.createElement("div"); colR.className = "s4-col";
+  cols.appendChild(colL);
+  cols.appendChild(colR);
+
+  R.archive.forEach((a, i) => {
+    const tile = document.createElement("div");
+    tile.className = "s4-tile";
+    tile.innerHTML =
+      '<div class="s4-date">' + a.date.toUpperCase() + ' · ED.</div>' +
+      '<div class="s4-q">' + a.text + '</div>' +
+      '<div class="s4-verdict">' + a.verdict + '</div>' +
+      '<div class="s4-count">' + fmt(a.count) + ' VOTES</div>';
+    (i % 2 === 0 ? colL : colR).appendChild(tile);
+
+    // After tile #4 (i === 3), insert the banner ad stub spanning the gutter
+    if (i === 3) {
+      const ad = document.createElement("div");
+      ad.className = "s4-ad";
+      ad.innerHTML =
+        '<span class="s4-ad-label">SPONSORED</span>' +
+        '<span class="s4-ad-copy">a quiet weekly newsletter, in the same voice as this paper.</span>' +
+        '<span class="s4-ad-cta">SUBSCRIBE →</span>';
+      // place ad in the longer column; since 2 items per col so far, append to colL after-row
+      colL.appendChild(ad);
+    }
+  });
+})();
+</script>
+</body>
+</html>
