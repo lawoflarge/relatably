@@ -27,7 +27,12 @@ workflows:
         working_directory: ios
         script: |
           set -e
-          npm install -g pnpm
+          # pnpm is already installed on Codemagic mac_mini_m2 runners.
+          # Install only if missing.
+          if ! command -v pnpm >/dev/null 2>&1; then
+            npm install -g pnpm
+          fi
+          pnpm --version
           pnpm install --frozen-lockfile
 
       - name: Expo prebuild (generate native iOS project)
