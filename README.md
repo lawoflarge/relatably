@@ -2,15 +2,19 @@
 
 Daily synchronized opinion ritual for Gen Z. One question per day at a globally-random moment, free-text answers aggregate into a live wordcloud, and the first person to call the eventual #1 answer is crowned "most relatable on Earth."
 
-**Status:** Phases 1, 2, 3, and 4 shipped and tagged. Phase 5 (archive + admin tools) is next.
+**Status:** Phases 1–6 shipped to production at <https://relatably.vercel.app>. Sticker Pop UI v1.0 design language landed on `main` 2026-05-11 (PR #1 + PR #2). Phase 7 — App Store submission — is the next ship. iOS build #20 is on internal TestFlight; build #21 with the new UI needs a Mac (`eas build`) before App Review.
 
 ## Design + plans
 
-- Spec: [`docs/superpowers/specs/2026-05-08-relatably-design.md`](docs/superpowers/specs/2026-05-08-relatably-design.md) — single source of truth for product, UX, technical architecture, monetization, growth strategy, and kill criteria.
+- Visual identity spec: [`mockups/01-sticker-pop/DESIGN.md`](mockups/01-sticker-pop/DESIGN.md) — Sticker Pop v1.0 (palette, typography, spacing, radii, shadow, motion, components, voice, a11y).
+- All 7 explored directions: [`mockups/index.html`](mockups/index.html) (open with `python -m http.server` from `mockups/`) + [`mockups/OVERVIEW.md`](mockups/OVERVIEW.md).
+- Sticker Pop implementation plan: [`docs/superpowers/plans/2026-05-11-relatably-sticker-pop-implementation.md`](docs/superpowers/plans/2026-05-11-relatably-sticker-pop-implementation.md) — 22 tasks, executed via subagent-driven development on `feat/sticker-pop-ui`, merged into `main` 2026-05-11.
+- Product spec: [`docs/superpowers/specs/2026-05-08-relatably-design.md`](docs/superpowers/specs/2026-05-08-relatably-design.md).
 - Phase 1 plan: [`docs/superpowers/plans/2026-05-08-relatably-phase1-core-loop.md`](docs/superpowers/plans/2026-05-08-relatably-phase1-core-loop.md) — complete.
 - Phase 2 plan: [`docs/superpowers/plans/2026-05-08-relatably-phase2-daily-ritual.md`](docs/superpowers/plans/2026-05-08-relatably-phase2-daily-ritual.md) — complete.
 - Phase 3 plan: [`docs/superpowers/plans/2026-05-08-relatably-phase3-leaderboard-anticheat.md`](docs/superpowers/plans/2026-05-08-relatably-phase3-leaderboard-anticheat.md) — complete.
 - Phase 4 plan: [`docs/superpowers/plans/2026-05-09-relatably-phase4-share-monetization.md`](docs/superpowers/plans/2026-05-09-relatably-phase4-share-monetization.md) — complete.
+- Phase 5 plan: [`docs/superpowers/plans/2026-05-09-relatably-phase5-archive-admin.md`](docs/superpowers/plans/2026-05-09-relatably-phase5-archive-admin.md) — complete.
 
 ## Repo layout
 
@@ -18,18 +22,23 @@ Daily synchronized opinion ritual for Gen Z. One question per day at a globally-
 api/                  Next.js 16 backend (Vercel deploy target). Vitest tests.
 firebase/             Firestore Security Rules + indexes + emulator config.
 firebase/functions/   Cloud Functions v2 (TypeScript). prepareNextDrop, triggerDrop, fanoutPush, moderationReview.
-firebase/scripts/     Admin TS-Node CLI (seed-questions).
-ios/                  Expo (React Native) iOS client. Jest + RNTL tests.
+firebase/scripts/     Admin TS-Node CLI (seed-questions, seed-launch-questions, seed-remote-config).
+ios/                  Expo (React Native) iOS client. Sticker Pop UI v1.0. Jest + RNTL tests (154 passing).
+mockups/              v1.0 visual-identity exploration. 7 directions × 4 screens, served via python -m http.server.
 docs/superpowers/     Specs and implementation plans.
 ```
 
 ## Branches + tags
 
-- `main` — initial commit
+- `main` — Sticker Pop UI shipped; Phases 1–6 live in prod
 - `phase-1-core-loop` (tag `phase-1-complete`) — Firebase rework + Phase 1
 - `phase-2-daily-ritual` (tag `phase-2-complete`) — Phase 2 daily ritual subsystem
 - `phase-3-leaderboard-anticheat` (tag `phase-3-complete`) — Phase 3 leaderboard + anti-cheat
 - `phase-4-share-monetization` (tag `phase-4-complete`) — Phase 4 share + monetization
+- `phase-5-archive-admin` (tag `phase-5-complete`) — Phase 5 archive + admin console
+- `phase-6-launch-hardening` (tag `phase-6-plan-seed`) — Phase 6 zero-cost launch hardening
+- `design/sticker-pop-mockups` — 7 design directions + chosen Sticker Pop visual identity (merged via PR #2 2026-05-11)
+- `feat/sticker-pop-ui` — Sticker Pop UI implementation, 22 commits (merged via PR #1 2026-05-11)
 
 ## Stack
 
@@ -52,9 +61,9 @@ docs/superpowers/     Specs and implementation plans.
 
 - `cd api && pnpm test` — 98 vitest tests (18 files; mocked Admin SDK).
 - `cd firebase/functions && pnpm test` — 66 vitest tests (13 files; emulator-backed + pure-fn). Requires Java for Firestore emulator.
-- `cd ios && npx jest --runInBand` — 75 jest tests (21 files; React Native Testing Library). `--runInBand` avoids parallel-worker contention on Windows.
+- `cd ios && pnpm test` — 154 jest tests across 36 files (React Native Testing Library + Sticker Pop primitives + Phyllotaxis layout helpers).
 
-Total: **239 tests across all 3 codebases.**
+Total: **318+ tests across all 3 codebases.**
 
 ## Local dev
 
