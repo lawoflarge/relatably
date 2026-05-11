@@ -27,18 +27,27 @@ workflows:
         working_directory: ios
         script: |
           set -e
-          # The pre-installed `pnpm` on Codemagic mac_mini_m2 is a corepack
-          # shim whose trust keys are stale -> signature verification fails
-          # when corepack tries to fetch the latest pnpm release from npm.
-          # Bypass corepack entirely and install a pinned pnpm via npm.
+          # Bypass Codemagic's stale-corepack pnpm shim (signature verification
+          # fails when corepack tries to fetch latest pnpm at runtime).
           corepack disable 2>/dev/null || true
-          # Remove the corepack shim symlinks if they shadow npm-installed pnpm.
           sudo rm -f /usr/local/bin/pnpm /usr/local/bin/pnpx 2>/dev/null || true
           npm install -g pnpm@10.11.0
           hash -r 2>/dev/null || true
           which pnpm
           pnpm --version
-          pnpm install --frozen-lockfile
+          # Hard 12-min timeout so the build fails fast instead of stalling
+          # the entire 60-min build budget. Verbose reporter + network
+          # concurrency cap = readable logs and steadier registry behavior.
+          # PNPM_HOME on PATH so the global install is picked up.
+          export PNPM_HOME="$HOME/.local/share/pnpm"
+          export PATH="$PNPM_HOME:$PATH"
+          timeout 720 pnpm install \
+            --frozen-lockfile \
+            --reporter=append-only \
+            --network-concurrency=8 \
+            --fetch-retries=3 \
+            --fetch-retry-mintimeout=10000 \
+            --fetch-retry-maxtimeout=60000
 
       - name: Expo prebuild (generate native iOS project)
         working_directory: ios
