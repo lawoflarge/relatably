@@ -27,11 +27,16 @@ workflows:
         working_directory: ios
         script: |
           set -e
-          # pnpm is already installed on Codemagic mac_mini_m2 runners.
-          # Install only if missing.
-          if ! command -v pnpm >/dev/null 2>&1; then
-            npm install -g pnpm
-          fi
+          # The pre-installed `pnpm` on Codemagic mac_mini_m2 is a corepack
+          # shim whose trust keys are stale -> signature verification fails
+          # when corepack tries to fetch the latest pnpm release from npm.
+          # Bypass corepack entirely and install a pinned pnpm via npm.
+          corepack disable 2>/dev/null || true
+          # Remove the corepack shim symlinks if they shadow npm-installed pnpm.
+          sudo rm -f /usr/local/bin/pnpm /usr/local/bin/pnpx 2>/dev/null || true
+          npm install -g pnpm@10.11.0
+          hash -r 2>/dev/null || true
+          which pnpm
           pnpm --version
           pnpm install --frozen-lockfile
 
