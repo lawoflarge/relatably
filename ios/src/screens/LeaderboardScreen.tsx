@@ -1,5 +1,8 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, Pressable, StyleSheet } from "react-native";
+
+import { palette, radii, shadow, sp, typography } from "@/src/theme/tokens";
+import { PaperTexture } from "@/src/components/sticker/PaperTexture";
 import { LeaderboardRow } from "@/src/components/LeaderboardRow";
 import { BannerAdSlot } from "@/src/components/BannerAdSlot";
 import { fetchLeaderboard } from "@/src/lib/api";
@@ -7,12 +10,13 @@ import type { LeaderboardEntry, LeaderboardPeriod, LeaderboardScope } from "@/sr
 
 interface Props {
   isSignedIn: boolean;
+  currentUserId?: string;
 }
 
 const PERIODS: { key: LeaderboardPeriod; label: string }[] = [
-  { key: "daily", label: "today" },
-  { key: "weekly", label: "this week" },
-  { key: "alltime", label: "all-time" },
+  { key: "daily", label: "DAILY" },
+  { key: "weekly", label: "WEEKLY" },
+  { key: "alltime", label: "ALL-TIME" },
 ];
 
 type ListRow =
@@ -29,7 +33,7 @@ function interleaveAd(entries: LeaderboardEntry[]): ListRow[] {
   return rows;
 }
 
-export function LeaderboardScreen({ isSignedIn }: Props) {
+export function LeaderboardScreen({ isSignedIn, currentUserId }: Props) {
   const [period, setPeriod] = useState<LeaderboardPeriod>("daily");
   const [scope, setScope] = useState<LeaderboardScope>("global");
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
@@ -39,48 +43,38 @@ export function LeaderboardScreen({ isSignedIn }: Props) {
     let cancelled = false;
     setLoading(true);
     fetchLeaderboard({ period, scope })
-      .then((res) => {
-        if (!cancelled) setEntries(res.entries);
-      })
-      .catch(() => {
-        if (!cancelled) setEntries([]);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
+      .then((res) => { if (!cancelled) setEntries(res.entries); })
+      .catch(() => { if (!cancelled) setEntries([]); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [period, scope]);
 
   const rows = interleaveAd(entries);
 
   return (
     <View style={styles.root}>
-      <View style={styles.tabs}>
+      <PaperTexture />
+      <Text style={styles.title}>the board ★</Text>
+      <View style={styles.periodRow}>
         {PERIODS.map((p) => (
-          <Pressable key={p.key} onPress={() => setPeriod(p.key)} style={styles.tab}>
-            <Text style={[styles.tabLabel, period === p.key && styles.tabLabelActive]}>{p.label}</Text>
+          <Pressable key={p.key} onPress={() => setPeriod(p.key)} style={pillStyle(period === p.key)}>
+            <Text style={pillTextStyle(period === p.key)}>{p.label}</Text>
           </Pressable>
         ))}
       </View>
       <View style={styles.scopeRow}>
-        <Pressable onPress={() => setScope("global")} style={styles.scopeBtn}>
-          <Text style={[styles.scopeLabel, scope === "global" && styles.scopeLabelActive]}>global</Text>
+        <Pressable onPress={() => setScope("global")} style={pillStyle(scope === "global")}>
+          <Text style={pillTextStyle(scope === "global")}>GLOBAL</Text>
         </Pressable>
         <Pressable
           onPress={() => isSignedIn && setScope("friends")}
-          style={styles.scopeBtn}
           disabled={!isSignedIn}
+          style={[pillStyle(scope === "friends"), !isSignedIn && styles.disabled]}
         >
-          <Text style={[styles.scopeLabel, scope === "friends" && styles.scopeLabelActive, !isSignedIn && styles.disabled]}>
-            friends
-          </Text>
+          <Text style={pillTextStyle(scope === "friends")}>FRIENDS</Text>
         </Pressable>
       </View>
-      {!isSignedIn && (
-        <Text style={styles.hint}>sign in to see friend leaderboards</Text>
-      )}
+      {!isSignedIn && <Text style={styles.hint}>sign in to see friend leaderboards</Text>}
       {loading ? (
         <Text style={styles.muted}>loading…</Text>
       ) : (
@@ -94,29 +88,53 @@ export function LeaderboardScreen({ isSignedIn }: Props) {
                 rank={item.rank}
                 handle={item.entry.handle}
                 score={item.entry.score}
-                locale={item.entry.locale}
+                streakDays={(item.entry as LeaderboardEntry & { streak_days?: number }).streak_days ?? 0}
+                isSelf={!!currentUserId && item.entry.user_id === currentUserId}
+                crown={item.rank === 1}
               />
             );
           }}
           ListEmptyComponent={<Text style={styles.muted}>no entries yet</Text>}
           initialNumToRender={20}
+          contentContainerStyle={{ paddingBottom: 120 }}
         />
       )}
     </View>
   );
 }
 
+function pillStyle(active: boolean) {
+  return {
+    backgroundColor: active ? palette.blue : palette.cream,
+    borderColor: palette.ink,
+    borderWidth: 2,
+    borderRadius: radii.pill,
+    paddingHorizontal: sp[3],
+    paddingVertical: sp[2],
+    shadowColor: shadow.s.color,
+    shadowOffset: shadow.s.offset,
+    shadowRadius: shadow.s.radius,
+    shadowOpacity: shadow.s.opacity,
+    elevation: shadow.s.elevation,
+  } as const;
+}
+
+function pillTextStyle(active: boolean) {
+  return {
+    fontFamily: typography.body.family,
+    fontSize: 13,
+    color: palette.ink,
+    letterSpacing: 0.6,
+    opacity: active ? 1 : 0.7,
+  } as const;
+}
+
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#000", paddingTop: 60 },
-  tabs: { flexDirection: "row", paddingHorizontal: 16, marginBottom: 12 },
-  tab: { paddingVertical: 8, paddingHorizontal: 12, marginRight: 8 },
-  tabLabel: { color: "#888", fontSize: 14 },
-  tabLabelActive: { color: "#aaff00", fontWeight: "700" },
-  scopeRow: { flexDirection: "row", paddingHorizontal: 16, marginBottom: 12, gap: 16 },
-  scopeBtn: { paddingVertical: 4 },
-  scopeLabel: { color: "#666", fontSize: 13 },
-  scopeLabelActive: { color: "#fff" },
-  disabled: { color: "#444" },
-  hint: { color: "#888", fontSize: 12, paddingHorizontal: 16, marginBottom: 8 },
-  muted: { color: "#888", fontSize: 14, padding: 16, textAlign: "center" },
+  root: { flex: 1, backgroundColor: palette.cream, paddingTop: sp[7], paddingHorizontal: sp.gutter },
+  title: { fontFamily: typography.h2.family, fontSize: typography.h2.size, lineHeight: typography.h2.line, color: palette.ink, marginBottom: sp[4] },
+  periodRow: { flexDirection: "row", gap: sp[2], marginBottom: sp[3] },
+  scopeRow: { flexDirection: "row", gap: sp[2], marginBottom: sp[3] },
+  disabled: { opacity: 0.5 },
+  hint: { fontFamily: typography.label.family, fontSize: 12, color: palette.inkSoft, marginBottom: sp[3] },
+  muted: { fontFamily: typography.label.family, fontSize: 14, color: palette.inkSoft, padding: sp[4], textAlign: "center" },
 });

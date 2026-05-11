@@ -7,14 +7,14 @@ describe("ArchiveTileThumbnail", () => {
     expect(queryAllByTestId("archive-thumb-bubble")).toHaveLength(0);
   });
 
-  it("renders one bubble per text up to 5 max", () => {
+  it("renders one bubble per text up to 3 max", () => {
     const { getAllByTestId } = render(
       <ArchiveTileThumbnail texts={["a", "b", "c", "d", "e", "f", "g"]} />,
     );
-    expect(getAllByTestId("archive-thumb-bubble")).toHaveLength(5);
+    expect(getAllByTestId("archive-thumb-bubble")).toHaveLength(3);
   });
 
-  it("renders all texts when count <= 5", () => {
+  it("renders all texts when count <= 3", () => {
     const { getAllByText } = render(
       <ArchiveTileThumbnail texts={["yes", "no", "maybe"]} />,
     );

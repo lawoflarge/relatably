@@ -23,7 +23,7 @@ describe("ArchiveScreen", () => {
     const { getByText } = render(
       <ArchiveScreen tiles={[]} nextCursor={null} onLoadMore={() => {}} onTilePress={() => {}} onTileLongPress={() => {}} />,
     );
-    expect(getByText(/coming soon/i)).toBeTruthy();
+    expect(getByText(/brand new/i)).toBeTruthy();
   });
 
   it("renders one tile per archive entry", () => {

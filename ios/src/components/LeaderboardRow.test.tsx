@@ -2,19 +2,31 @@ import { render } from "@testing-library/react-native";
 import { LeaderboardRow } from "./LeaderboardRow";
 
 describe("LeaderboardRow", () => {
-  it("renders rank, handle, and score", () => {
+  it("zero-pads the rank to two digits", () => {
     const { getByText } = render(
-      <LeaderboardRow rank={1} handle="@coolname" score={1500} locale="us" />,
+      <LeaderboardRow rank={1} handle="ace.exe" score={1284} streakDays={12} isSelf={false} crown />
     );
-    expect(getByText("#1")).toBeTruthy();
-    expect(getByText("@coolname")).toBeTruthy();
-    expect(getByText("1500")).toBeTruthy();
+    expect(getByText("01")).toBeTruthy();
   });
 
-  it("falls back to anonymous label when handle is null", () => {
+  it("renders 'anon' when handle is null", () => {
     const { getByText } = render(
-      <LeaderboardRow rank={42} handle={null} score={100} locale="us" />,
+      <LeaderboardRow rank={2} handle={null} score={500} streakDays={0} isSelf={false} crown={false} />
     );
-    expect(getByText(/anon/i)).toBeTruthy();
+    expect(getByText("anon")).toBeTruthy();
+  });
+
+  it("renders crown sticker for #1", () => {
+    const { getByText } = render(
+      <LeaderboardRow rank={1} handle="ace.exe" score={1284} streakDays={12} isSelf={false} crown />
+    );
+    expect(getByText("★ #1")).toBeTruthy();
+  });
+
+  it("renders YOU tab when isSelf", () => {
+    const { getByText } = render(
+      <LeaderboardRow rank={4} handle="levin" score={982} streakDays={4} isSelf crown={false} />
+    );
+    expect(getByText("YOU")).toBeTruthy();
   });
 });
