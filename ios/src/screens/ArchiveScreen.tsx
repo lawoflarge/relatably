@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, FlatList, Pressable, StyleSheet } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { palette, radii, shadow, sp, typography } from "@/src/theme/tokens";
 import { PaperTexture } from "@/src/components/sticker/PaperTexture";
@@ -27,11 +28,17 @@ function interleaveAds(tiles: ArchiveTile[]): Row[] {
 }
 
 export function ArchiveScreen({ tiles, nextCursor, onLoadMore, onTilePress, onTileLongPress }: Props) {
+  const insets = useSafeAreaInsets();
   if (tiles.length === 0) {
     return (
       <View style={styles.center}>
         <PaperTexture />
-        <Text style={styles.muted}>your archive is brand new. come back tomorrow.</Text>
+        <View style={[styles.emptyCard, { transform: [{ rotate: "-1.5deg" }] }]}>
+          <Text style={styles.emptyHeading}>fresh archive</Text>
+          <Text style={styles.emptyBody}>
+            once you answer your first drop, yesterday's verdict shows up here. come back tomorrow.
+          </Text>
+        </View>
       </View>
     );
   }
@@ -59,7 +66,7 @@ export function ArchiveScreen({ tiles, nextCursor, onLoadMore, onTilePress, onTi
       onEndReached={() => { if (nextCursor) onLoadMore(); }}
       onEndReachedThreshold={0.5}
       initialNumToRender={30}
-      contentContainerStyle={{ paddingTop: sp[7], paddingHorizontal: sp.gutter, paddingBottom: 120, gap: sp[4] }}
+      contentContainerStyle={{ paddingTop: insets.top + sp[5], paddingHorizontal: sp.gutter, paddingBottom: 120, gap: sp[4] }}
     />
     </View>
   );
@@ -67,8 +74,17 @@ export function ArchiveScreen({ tiles, nextCursor, onLoadMore, onTilePress, onTi
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: palette.cream },
-  center: { flex: 1, backgroundColor: palette.cream, alignItems: "center", justifyContent: "center", paddingHorizontal: sp[6] },
+  center: { flex: 1, backgroundColor: palette.cream, alignItems: "center", justifyContent: "center", paddingHorizontal: sp.gutter },
   muted: { fontFamily: typography.bodyL.family, fontSize: 16, color: palette.inkSoft, textAlign: "center" },
+  emptyCard: {
+    backgroundColor: "#FFFFFF",
+    borderColor: palette.ink, borderWidth: 3, borderRadius: radii.m,
+    paddingHorizontal: sp[5], paddingVertical: sp[5],
+    gap: sp[3], alignItems: "center", maxWidth: 360,
+    shadowColor: shadow.m.color, shadowOffset: shadow.m.offset, shadowRadius: shadow.m.radius, shadowOpacity: shadow.m.opacity, elevation: shadow.m.elevation,
+  },
+  emptyHeading: { fontFamily: typography.h2.family, fontSize: typography.h2.size, lineHeight: typography.h2.line, color: palette.ink, textAlign: "center" },
+  emptyBody: { fontFamily: typography.bodyL.family, fontSize: typography.bodyL.size, lineHeight: typography.bodyL.line, color: palette.inkSoft, textAlign: "center" },
   tile: {
     position: "relative",
     backgroundColor: "#FFFFFF", borderColor: palette.ink, borderWidth: 2, borderRadius: radii.m,

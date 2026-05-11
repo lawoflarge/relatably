@@ -1,9 +1,20 @@
 import { render, waitFor, fireEvent } from "@testing-library/react-native";
+
+jest.mock("react-native-safe-area-context", () => ({
+  useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+  SafeAreaProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 import { FriendsScreen } from "./FriendsScreen";
 
 jest.mock("@/src/lib/api", () => ({
   fetchFriends: jest.fn(),
   acceptFriend: jest.fn(),
+}));
+
+// Avoid loading firebase/auth (ESM) through the SignInWithApple -> auth chain.
+jest.mock("@/src/components/SignInWithApple", () => ({
+  SignInWithApple: () => null,
 }));
 
 import { fetchFriends, acceptFriend } from "@/src/lib/api";

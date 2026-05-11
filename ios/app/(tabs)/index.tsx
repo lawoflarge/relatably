@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { View, StyleSheet, Text, Pressable } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import { PaperTexture } from "@/src/components/sticker/PaperTexture";
 import { WordcloudScreen, type Cluster } from "@/src/screens/WordcloudScreen";
 import { SubmitButton } from "@/src/components/SubmitButton";
 import { QuestionText } from "@/src/components/QuestionText";
@@ -30,11 +33,13 @@ import {
   markInterstitialShownFor,
 } from "@/src/lib/interstitialGate";
 import { loadInterstitialOnce } from "@/src/lib/ads";
+import { palette, radii, shadow, sp, typography } from "@/src/theme/tokens";
 import type { TodayQuestion, Yesterday } from "@/src/types/api";
 
-type Phase = "loading" | "reveal" | "question" | "wordcloud" | "error";
+type Phase = "loading" | "reveal" | "question" | "wordcloud" | "no_drop" | "error";
 
 export default function HomeScreen() {
+  const insets = useSafeAreaInsets();
   const [phase, setPhase] = useState<Phase>("loading");
   const [yesterday, setYesterday] = useState<Yesterday | null>(null);
   const [question, setQuestion] = useState<TodayQuestion | null>(null);
@@ -62,6 +67,7 @@ export default function HomeScreen() {
 
   const loadQuestion = useCallback(() => {
     setErrorMsg(null);
+    setPhase("loading");
     fetchTodayQuestion()
       .then((q) => {
         setQuestion(q);
@@ -70,8 +76,13 @@ export default function HomeScreen() {
       })
       .catch((e: unknown) => {
         const msg = e instanceof Error ? e.message : "fetch failed";
-        setErrorMsg(msg);
-        setPhase("error");
+        // 404 = no live question right now. That's an expected state between drops.
+        if (/\b404\b/.test(msg)) {
+          setPhase("no_drop");
+        } else {
+          setErrorMsg(msg);
+          setPhase("error");
+        }
       });
   }, []);
 
@@ -87,7 +98,6 @@ export default function HomeScreen() {
           return;
         }
       } catch (e) {
-        // Soft-fail: just proceed to today's question.
         console.warn("yesterday fetch failed", e);
       }
       loadQuestion();
@@ -165,15 +175,19 @@ export default function HomeScreen() {
   };
 
   const totalCount = clusters.reduce((s, c) => s + c.submission_count, 0);
+  const topPad = insets.top + sp[5];
 
   return (
-    <>
-      <StatusBar style="light" />
+    <View style={styles.root}>
+      <StatusBar style="dark" />
+      <PaperTexture />
+
       {phase === "loading" && (
         <View style={styles.center}>
-          <Text style={styles.muted}>loading…</Text>
+          <Text style={styles.muted}>preparing today's drop…</Text>
         </View>
       )}
+
       {phase === "reveal" && yesterday && (
         <RevealAnimation
           questionId={yesterday.id}
@@ -183,24 +197,40 @@ export default function HomeScreen() {
           onComplete={handleRevealComplete}
         />
       )}
-      {phase === "error" && (
-        <View style={styles.center}>
-          <Text style={styles.error}>{errorMsg}</Text>
-          <Pressable
-            role="button"
-            onPress={loadQuestion}
-            style={styles.retryBtn}
-          >
-            <Text style={styles.retryLabel}>RETRY</Text>
-          </Pressable>
+
+      {phase === "no_drop" && (
+        <View style={[styles.center, { paddingHorizontal: sp.gutter }]}>
+          <View style={[styles.card, { transform: [{ rotate: "-1.5deg" }] }]}>
+            <Text style={styles.cardHeading}>no drop yet</Text>
+            <Text style={styles.cardBody}>
+              today's question hasn't unlocked. one question, one global drop — once a day, at a random moment in UTC.
+            </Text>
+            <Pressable role="button" onPress={loadQuestion} style={styles.pillBtn}>
+              <Text style={styles.pillLabel}>CHECK AGAIN</Text>
+            </Pressable>
+          </View>
         </View>
       )}
+
+      {phase === "error" && (
+        <View style={[styles.center, { paddingHorizontal: sp.gutter }]}>
+          <View style={[styles.card, { transform: [{ rotate: "1.5deg" }] }]}>
+            <Text style={styles.cardHeading}>no signal</Text>
+            <Text style={styles.cardBody}>couldn't reach the drop. tap to retry.</Text>
+            {errorMsg && <Text style={styles.errorDetail}>{errorMsg}</Text>}
+            <Pressable role="button" onPress={loadQuestion} style={styles.pillBtn}>
+              <Text style={styles.pillLabel}>RETRY</Text>
+            </Pressable>
+          </View>
+        </View>
+      )}
+
       {phase === "question" && question && (
-        <View style={styles.container}>
+        <View style={[styles.container, { paddingTop: topPad }]}>
           <QuestionText text={question.text} />
           <AnswerInput value={text} onChangeText={setText} />
           <LiveCounter count={totalCount} />
-          {errorMsg && <Text style={styles.error}>{errorMsg}</Text>}
+          {errorMsg && <Text style={styles.errorDetail}>{errorMsg}</Text>}
           <SubmitButton
             hasText={text.trim().length > 0}
             onPress={handleSubmit}
@@ -208,6 +238,7 @@ export default function HomeScreen() {
           />
         </View>
       )}
+
       {phase === "wordcloud" && question && (
         <WordcloudScreen
           clusters={clusters}
@@ -219,26 +250,69 @@ export default function HomeScreen() {
           dateLabel={new Date().toISOString().slice(0, 10)}
         />
       )}
-    </>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#000", paddingTop: 80, paddingHorizontal: 16 },
-  center: { flex: 1, backgroundColor: "#000", alignItems: "center", justifyContent: "center" },
-  muted: { color: "#888", fontSize: 16 },
-  error: { color: "tomato", fontSize: 14, textAlign: "center", marginTop: 12 },
-  retryBtn: {
-    marginTop: 24,
-    paddingHorizontal: 32,
-    paddingVertical: 14,
-    borderRadius: 12,
-    backgroundColor: "#aaff00",
+  root: { flex: 1, backgroundColor: palette.cream },
+  container: { flex: 1, paddingHorizontal: sp.gutter },
+  center: { flex: 1, alignItems: "center", justifyContent: "center" },
+  muted: { fontFamily: typography.bodyL.family, fontSize: 16, color: palette.inkSoft },
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderColor: palette.ink,
+    borderWidth: 3,
+    borderRadius: radii.m,
+    paddingHorizontal: sp[5],
+    paddingVertical: sp[5],
+    alignItems: "center",
+    gap: sp[3],
+    shadowColor: shadow.m.color,
+    shadowOffset: shadow.m.offset,
+    shadowRadius: shadow.m.radius,
+    shadowOpacity: shadow.m.opacity,
+    elevation: shadow.m.elevation,
+    maxWidth: 360,
   },
-  retryLabel: {
-    color: "#000",
-    fontSize: 16,
-    fontWeight: "800",
-    letterSpacing: 1.5,
+  cardHeading: {
+    fontFamily: typography.h2.family,
+    fontSize: typography.h2.size,
+    lineHeight: typography.h2.line,
+    color: palette.ink,
+    textAlign: "center",
+  },
+  cardBody: {
+    fontFamily: typography.bodyL.family,
+    fontSize: typography.bodyL.size,
+    lineHeight: typography.bodyL.line,
+    color: palette.inkSoft,
+    textAlign: "center",
+  },
+  errorDetail: {
+    fontFamily: typography.bodyS.family,
+    fontSize: typography.bodyS.size,
+    color: palette.red,
+    textAlign: "center",
+  },
+  pillBtn: {
+    marginTop: sp[2],
+    paddingHorizontal: sp[5],
+    paddingVertical: sp[3],
+    borderRadius: radii.pill,
+    backgroundColor: palette.pink,
+    borderColor: palette.ink,
+    borderWidth: 3,
+    shadowColor: shadow.s.color,
+    shadowOffset: shadow.s.offset,
+    shadowRadius: shadow.s.radius,
+    shadowOpacity: shadow.s.opacity,
+    elevation: shadow.s.elevation,
+  },
+  pillLabel: {
+    fontFamily: typography.label.family,
+    fontSize: 13,
+    letterSpacing: 1.3,
+    color: palette.cream,
   },
 });

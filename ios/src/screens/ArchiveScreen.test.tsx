@@ -1,4 +1,10 @@
 import { fireEvent, render } from "@testing-library/react-native";
+
+jest.mock("react-native-safe-area-context", () => ({
+  useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+  SafeAreaProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 import { ArchiveScreen } from "./ArchiveScreen";
 import type { ArchiveTile } from "@/src/types/api";
 
@@ -23,7 +29,7 @@ describe("ArchiveScreen", () => {
     const { getByText } = render(
       <ArchiveScreen tiles={[]} nextCursor={null} onLoadMore={() => {}} onTilePress={() => {}} onTileLongPress={() => {}} />,
     );
-    expect(getByText(/brand new/i)).toBeTruthy();
+    expect(getByText(/fresh archive/i)).toBeTruthy();
   });
 
   it("renders one tile per archive entry", () => {

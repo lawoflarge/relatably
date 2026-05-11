@@ -34,7 +34,7 @@ interface Props {
 
 export function StickerTabBar({ state, navigation, insets }: Props) {
   return (
-    <View style={[styles.outer, { paddingBottom: insets.bottom + 12 }]} pointerEvents="box-none">
+    <View style={[styles.outer, { paddingBottom: Math.max(insets.bottom, 8) }]} pointerEvents="box-none">
       <View style={styles.bar}>
         {state.routes.map((route, i) => {
           const name = route.name as RouteName;

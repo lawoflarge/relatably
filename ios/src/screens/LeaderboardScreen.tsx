@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, Pressable, StyleSheet } from "react-native";
+import { View, Text, FlatList, Pressable, StyleSheet, Alert } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { palette, radii, shadow, sp, typography } from "@/src/theme/tokens";
 import { PaperTexture } from "@/src/components/sticker/PaperTexture";
 import { LeaderboardRow } from "@/src/components/LeaderboardRow";
 import { BannerAdSlot } from "@/src/components/BannerAdSlot";
+import { SignInWithApple } from "@/src/components/SignInWithApple";
 import { fetchLeaderboard } from "@/src/lib/api";
 import type { LeaderboardEntry, LeaderboardPeriod, LeaderboardScope } from "@/src/types/api";
 
@@ -34,10 +36,13 @@ function interleaveAd(entries: LeaderboardEntry[]): ListRow[] {
 }
 
 export function LeaderboardScreen({ isSignedIn, currentUserId }: Props) {
+  const insets = useSafeAreaInsets();
   const [period, setPeriod] = useState<LeaderboardPeriod>("daily");
   const [scope, setScope] = useState<LeaderboardScope>("global");
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [authBump, setAuthBump] = useState(0);
+  const effectiveSignedIn = isSignedIn || authBump > 0;
 
   useEffect(() => {
     let cancelled = false;
@@ -52,7 +57,7 @@ export function LeaderboardScreen({ isSignedIn, currentUserId }: Props) {
   const rows = interleaveAd(entries);
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { paddingTop: insets.top + sp[4] }]}>
       <PaperTexture />
       <Text style={styles.title}>the board ★</Text>
       <View style={styles.periodRow}>
@@ -67,14 +72,25 @@ export function LeaderboardScreen({ isSignedIn, currentUserId }: Props) {
           <Text style={pillTextStyle(scope === "global")}>GLOBAL</Text>
         </Pressable>
         <Pressable
-          onPress={() => isSignedIn && setScope("friends")}
-          disabled={!isSignedIn}
-          style={[pillStyle(scope === "friends"), !isSignedIn && styles.disabled]}
+          onPress={() => effectiveSignedIn && setScope("friends")}
+          disabled={!effectiveSignedIn}
+          style={[pillStyle(scope === "friends"), !effectiveSignedIn && styles.disabled]}
         >
           <Text style={pillTextStyle(scope === "friends")}>FRIENDS</Text>
         </Pressable>
       </View>
-      {!isSignedIn && <Text style={styles.hint}>sign in to see friend leaderboards</Text>}
+      {!effectiveSignedIn && (
+        <View style={styles.signInBlock}>
+          <Text style={styles.hint}>sign in to see friend leaderboards</Text>
+          <SignInWithApple
+            onSignedIn={() => setAuthBump((n) => n + 1)}
+            onError={(err) => {
+              const msg = err instanceof Error ? err.message : "sign-in failed";
+              if (!/canceled/i.test(msg)) Alert.alert("sign in failed", msg);
+            }}
+          />
+        </View>
+      )}
       {loading ? (
         <Text style={styles.muted}>loading…</Text>
       ) : (
@@ -130,11 +146,12 @@ function pillTextStyle(active: boolean) {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: palette.cream, paddingTop: sp[7], paddingHorizontal: sp.gutter },
+  root: { flex: 1, backgroundColor: palette.cream, paddingHorizontal: sp.gutter },
   title: { fontFamily: typography.h2.family, fontSize: typography.h2.size, lineHeight: typography.h2.line, color: palette.ink, marginBottom: sp[4] },
   periodRow: { flexDirection: "row", gap: sp[2], marginBottom: sp[3] },
   scopeRow: { flexDirection: "row", gap: sp[2], marginBottom: sp[3] },
   disabled: { opacity: 0.5 },
-  hint: { fontFamily: typography.label.family, fontSize: 12, color: palette.inkSoft, marginBottom: sp[3] },
+  hint: { fontFamily: typography.label.family, fontSize: 12, color: palette.inkSoft },
+  signInBlock: { alignItems: "center", gap: sp[3], marginBottom: sp[4] },
   muted: { fontFamily: typography.label.family, fontSize: 14, color: palette.inkSoft, padding: sp[4], textAlign: "center" },
 });
