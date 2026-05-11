@@ -62,15 +62,45 @@ workflows:
           set -e
           pod install
 
+      - name: Revoke stale distribution certs
+        script: |
+          set -e
+          # Why: Codemagic destroys the keychain at end of each build, so
+          # the private key for any existing iOS Distribution cert in ASC
+          # is lost. The next build generates a fresh RSA key and tries to
+          # mint a new cert, but Apple caps active certs at 2:
+          #   "POST /v1/certificates returned 409: You already have a
+          #    current Distribution certificate or a pending certificate
+          #    request."
+          # Revoking ALL distribution certs before fetch-signing-files
+          # makes this build idempotent. Safe — does NOT affect installed
+          # TestFlight or App Store builds; only blocks NEW signing with
+          # the revoked cert (which we couldn't do anyway, no private key).
+          set +e
+          CERT_IDS=$(app-store-connect certificates list \
+            --type IOS_DISTRIBUTION \
+            --json 2>/dev/null \
+            | python3 -c "import json,sys; data=json.load(sys.stdin); [print(c['id']) for c in (data if isinstance(data, list) else data.get('data', []))]" 2>/dev/null || true)
+          set -e
+          if [ -n "$CERT_IDS" ]; then
+            echo "Revoking stale distribution certs:"
+            for cid in $CERT_IDS; do
+              echo "  - $cid"
+              app-store-connect certificates delete "$cid" --yes 2>/dev/null || \
+                echo "    (revoke failed for $cid — continuing)"
+            done
+          else
+            echo "No stale distribution certs to revoke."
+          fi
+
       - name: Set up code signing
         script: |
           set -e
           keychain initialize
           # Generate a fresh private key so Codemagic can create a new
           # iOS Distribution certificate it actually has the key for.
-          # Existing certs in ASC (from prior EAS builds) cannot be reused
-          # because Expo retains their private keys on their servers,
-          # producing: "Cannot save Signing Certificates without certificate private key".
+          # The previous step revoked any stale certs, so this --create
+          # won't hit Apple's 2-cert cap (HTTP 409).
           mkdir -p /tmp/codemagic-signing
           openssl genrsa -out /tmp/codemagic-signing/cert_key.pem 2048
           # Codemagic CLI requires the @file: prefix for path-based args
