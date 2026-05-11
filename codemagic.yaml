@@ -76,22 +76,16 @@ workflows:
           # makes this build idempotent. Safe — does NOT affect installed
           # TestFlight or App Store builds; only blocks NEW signing with
           # the revoked cert (which we couldn't do anyway, no private key).
-          set +e
-          CERT_IDS=$(app-store-connect certificates list \
-            --type IOS_DISTRIBUTION \
-            --json 2>/dev/null \
-            | python3 -c "import json,sys; data=json.load(sys.stdin); [print(c['id']) for c in (data if isinstance(data, list) else data.get('data', []))]" 2>/dev/null || true)
-          set -e
-          if [ -n "$CERT_IDS" ]; then
-            echo "Revoking stale distribution certs:"
-            for cid in $CERT_IDS; do
-              echo "  - $cid"
-              app-store-connect certificates delete "$cid" --yes 2>/dev/null || \
-                echo "    (revoke failed for $cid — continuing)"
-            done
-          else
-            echo "No stale distribution certs to revoke."
-          fi
+          #
+          # Uses the ASC REST API directly (with the integration's key
+          # exposed via APP_STORE_CONNECT_* env vars) instead of the
+          # Codemagic CLI subcommand, because the CLI's certificate
+          # delete/list syntax is version-dependent and was unreliable
+          # in our first attempt (the step name didn't even appear in
+          # the build log — silent yaml-version mismatch or missing
+          # subcommand). The Node API call works identically across
+          # CLI versions.
+          node scripts/asc-revoke-distribution-certs-ci.mjs
 
       - name: Set up code signing
         script: |
