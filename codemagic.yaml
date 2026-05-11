@@ -35,13 +35,14 @@ workflows:
           hash -r 2>/dev/null || true
           which pnpm
           pnpm --version
-          # Hard 12-min timeout so the build fails fast instead of stalling
-          # the entire 60-min build budget. Verbose reporter + network
-          # concurrency cap = readable logs and steadier registry behavior.
-          # PNPM_HOME on PATH so the global install is picked up.
+          # Verbose reporter + network concurrency cap + retry caps so logs
+          # stream live and any registry stall self-recovers or fails the
+          # individual fetch (instead of the whole step hanging silently).
+          # No bash `timeout` wrapper -- macOS runners lack GNU coreutils.
+          # The workflow-level max_build_duration: 60 bounds total runtime.
           export PNPM_HOME="$HOME/.local/share/pnpm"
           export PATH="$PNPM_HOME:$PATH"
-          timeout 720 pnpm install \
+          pnpm install \
             --frozen-lockfile \
             --reporter=append-only \
             --network-concurrency=8 \
