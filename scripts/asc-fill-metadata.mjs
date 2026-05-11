@@ -102,14 +102,18 @@ Most social apps want you to scroll forever. Relatably wants thirty seconds of y
 Privacy:
 We collect the bare minimum — an anonymous device ID, your free-text answer, and a hashed IP for rate-limiting. No location, no contacts, no third-party analytics on the iOS client. Full policy at relatably.vercel.app/privacy.
 
-Free to play. Ad-supported. No subscription. No paywall.`,
+Free to play. No subscription. No paywall.`,
   keywords:
-    "daily,question,wordcloud,social,opinion,poll,trivia,bereal,survey,gen z,relatable,viral,friends",
+    // 93 chars / 100. Removed "bereal" (Apple Review Guideline 2.3.7
+    // forbids unauthorized references to third-party apps in metadata).
+    // Replaced with "discussion" — semantically equivalent for the
+    // search vector (people who'd type "bereal" also type "discussion app").
+    "daily,question,wordcloud,social,opinion,poll,trivia,discussion,survey,gen z,relatable,friends",
   whatsNew: `Welcome to Relatably 🌍
 
 The first daily one-question social ritual. We start small with sixty hand-picked questions; user-submitted questions land in v1.1.
 
-Free, ad-supported, no subscription. Sign in with Apple to compete on the leaderboard, or play anonymously.`,
+Free, no subscription. Sign in with Apple to compete on the leaderboard, or play anonymously.`,
   copyright: "© 2026 Levin Schwab",
   reviewContactFirstName: "Levin",
   reviewContactLastName: "Schwab",
