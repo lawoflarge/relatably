@@ -1,4 +1,4 @@
-import { initializeApp, getApps } from "firebase/app";
+import { initializeApp, getApps, type FirebaseApp } from "firebase/app";
 import {
   getFirestore,
   connectFirestoreEmulator,
@@ -25,28 +25,50 @@ const firebaseConfig = {
   appId: "1:460980856315:web:db886b968a140c7dd2975e",
 };
 
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+// Lazy singletons. Initialised on first use, NOT at module import.
+// Doing the init at module-load time was crashing the iOS bundle when
+// any error in initializeApp/initializeAuth bubbled to Hermes before
+// our error boundary could catch it.
+let _app: FirebaseApp | null = null;
+let _auth: Auth | null = null;
+let _firestore: Firestore | null = null;
 
-let _auth: Auth;
-try {
-  _auth = initializeAuth(app, {
-    persistence: getReactNativePersistence(AsyncStorage),
-  });
-} catch {
-  // Already initialized (hot reload).
-  _auth = getAuth(app);
+function getApp(): FirebaseApp {
+  if (_app) return _app;
+  _app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]!;
+  return _app;
 }
 
-const _firestore = getFirestore(app);
+function getAuthInstance(): Auth {
+  if (_auth) return _auth;
+  const app = getApp();
+  try {
+    _auth = initializeAuth(app, {
+      persistence: getReactNativePersistence
+        ? getReactNativePersistence(AsyncStorage)
+        : undefined,
+    });
+  } catch {
+    _auth = getAuth(app);
+  }
+  if (process.env.EXPO_PUBLIC_USE_FIREBASE_EMULATOR === "1") {
+    try { connectAuthEmulator(_auth, "http://localhost:9099"); } catch { /* hot reload */ }
+  }
+  return _auth;
+}
 
-if (process.env.EXPO_PUBLIC_USE_FIREBASE_EMULATOR === "1") {
-  connectFirestoreEmulator(_firestore, "localhost", 8080);
-  connectAuthEmulator(_auth, "http://localhost:9099");
+function getFirestoreInstance(): Firestore {
+  if (_firestore) return _firestore;
+  _firestore = getFirestore(getApp());
+  if (process.env.EXPO_PUBLIC_USE_FIREBASE_EMULATOR === "1") {
+    try { connectFirestoreEmulator(_firestore, "localhost", 8080); } catch { /* hot reload */ }
+  }
+  return _firestore;
 }
 
 // Compatibility shims so callers that imported `firestore` / `auth` as
 // callables (the @react-native-firebase API) keep working without large
 // rewrites. firestore() returns the Firestore instance, auth() returns
 // the Auth instance.
-export const firestore = (() => _firestore) as unknown as () => Firestore;
-export const auth = (() => _auth) as unknown as () => Auth;
+export const firestore: () => Firestore = getFirestoreInstance;
+export const auth: () => Auth = getAuthInstance;
