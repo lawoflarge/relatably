@@ -71,14 +71,17 @@ async function api(method, p, body) {
   }
   console.log(`appStoreVersion: ${version.id}  state=${version.attributes.appStoreState}`);
 
-  // 1. Find or create a reviewSubmission for the app
-  const existing = await api("GET", `/v1/reviewSubmissions?filter[app]=${APP_ID}&filter[platform]=IOS&limit=10`);
-  // Look for a submission that's still "open" (not submitted yet)
+  // 1. Find or create a reviewSubmission for the app.
+  // Apple's API state model: a submission with state="READY_FOR_REVIEW"
+  // and submittedDate=null is actually a DRAFT awaiting items + final submit.
+  // We can/should reuse it. Once submittedDate is non-null OR state is
+  // IN_REVIEW/COMPLETED/etc, treat as committed and don't reuse.
+  const existing = await api("GET", `/v1/reviewSubmissions?filter[app]=${APP_ID}&filter[platform]=IOS&limit=20`);
   const draft = existing.body.data?.find((rs) => {
     const s = rs.attributes?.state;
-    return s === "READY_FOR_REVIEW" || s === "UNRESOLVED_ISSUES" || s === "IN_REVIEW"
-      ? false
-      : s === undefined || s === null || s === "DRAFT" || s === "READY_FOR_SUBMISSION";
+    const submitted = rs.attributes?.submittedDate;
+    if (submitted) return false; // already committed
+    return s === "READY_FOR_REVIEW" || s === "DRAFT" || s === "READY_FOR_SUBMISSION";
   });
 
   let submissionId;
