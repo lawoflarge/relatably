@@ -74,3 +74,5 @@ ui-debug.log
 .secrets/
 
 .vercel
+.asc-playwright-session/
+archive/
