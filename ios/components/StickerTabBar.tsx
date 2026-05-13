@@ -4,7 +4,7 @@ import * as Haptics from "expo-haptics";
 
 import { palette, radii, shadow, sp, typography } from "@/src/theme/tokens";
 
-type RouteName = "index" | "friends" | "leaderboard" | "archive";
+type RouteName = "index" | "friends" | "leaderboard" | "archive" | "settings";
 
 // Whitelist of routes that get a tab pill. Expo-router auto-discovers
 // every file in (tabs)/ including the nested archive/[id] dynamic route,
@@ -17,6 +17,7 @@ const VISIBLE: ReadonlySet<RouteName> = new Set([
   "friends",
   "leaderboard",
   "archive",
+  "settings",
 ]);
 
 // Unicode glyphs instead of react-native-svg icons. The svg package
@@ -29,6 +30,7 @@ const GLYPHS: Record<RouteName, string> = {
   friends: "♥",     // FRIENDS
   leaderboard: "★", // BOARD
   archive: "▦",     // ARCHIVE (grid)
+  settings: "⚙",    // SETTINGS (gear)
 };
 
 const LABELS: Record<RouteName, string> = {
@@ -36,6 +38,7 @@ const LABELS: Record<RouteName, string> = {
   friends: "FRIENDS",
   leaderboard: "BOARD",
   archive: "ARCHIVE",
+  settings: "ME",
 };
 
 interface Props {

@@ -1,18 +1,63 @@
 import React from "react";
-import { Text, View, Pressable, StyleSheet } from "react-native";
+import { Text, View, Pressable, StyleSheet, ActionSheetIOS, Alert, Platform } from "react-native";
 import { palette, radii, shadow, sp, typography } from "@/src/theme/tokens";
 import type { Friendship } from "@/src/types/api";
+import { blockUser, removeFriend } from "@/src/lib/api";
 
 interface Props {
   friendship: Friendship;
   onAccept?: () => void;
+  onBlocked?: (friendship: Friendship) => void;
 }
 
-export function FriendListRow({ friendship, onAccept }: Props) {
+export function FriendListRow({ friendship, onAccept, onBlocked }: Props) {
   const display = friendship.handle ?? `@${friendship.friend_user_id.slice(0, 6)}`;
   const initial = (friendship.handle ?? friendship.friend_user_id)[0]?.toUpperCase() ?? "?";
+
+  const doBlock = async () => {
+    try {
+      await blockUser(friendship.friend_user_id);
+      if (onBlocked) onBlocked(friendship);
+      Alert.alert("Blocked", "We won't show their content again.");
+    } catch (err) {
+      Alert.alert("Couldn't block", err instanceof Error ? err.message : String(err));
+    }
+  };
+
+  const doRemove = async () => {
+    try {
+      await removeFriend(friendship.id);
+      if (onBlocked) onBlocked(friendship);
+    } catch (err) {
+      Alert.alert("Couldn't remove", err instanceof Error ? err.message : String(err));
+    }
+  };
+
+  const openMenu = () => {
+    if (Platform.OS === "ios") {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options: ["Cancel", "Remove from friends", "Block this user"],
+          destructiveButtonIndex: 2,
+          cancelButtonIndex: 0,
+          title: display,
+        },
+        (index) => {
+          if (index === 1) doRemove();
+          if (index === 2) doBlock();
+        },
+      );
+    } else {
+      Alert.alert(display, undefined, [
+        { text: "Cancel", style: "cancel" },
+        { text: "Remove from friends", onPress: doRemove },
+        { text: "Block", style: "destructive", onPress: doBlock },
+      ]);
+    }
+  };
+
   return (
-    <View style={styles.row}>
+    <Pressable onLongPress={openMenu} accessibilityHint="Long-press to remove or block this user" style={styles.row}>
       <View style={styles.avatar}>
         <Text style={styles.avatarInitial}>{initial}</Text>
       </View>
@@ -23,7 +68,7 @@ export function FriendListRow({ friendship, onAccept }: Props) {
           <Text style={styles.acceptLabel}>ACCEPT</Text>
         </Pressable>
       )}
-    </View>
+    </Pressable>
   );
 }
 

@@ -162,5 +162,6 @@ export async function POST(req: Request) {
     cluster_id: cId,
     submission_count: newCount,
     normalized_text: normalizedText,
+    submission_id: submissionRef.id,
   });
 }

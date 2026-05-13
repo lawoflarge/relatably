@@ -1,10 +1,12 @@
 // ios/src/components/ClusterBubble.tsx
 import React from "react";
-import { Text, View, StyleSheet } from "react-native";
+import { Text, View, StyleSheet, Pressable, ActionSheetIOS, Alert, Platform } from "react-native";
 
 import { palette, radii, shadow, sp, typography } from "@/src/theme/tokens";
 import { clusterSizeBucket, clusterSizePx } from "@/src/lib/clusterSizeBucket";
 import { stickerRotation } from "@/src/lib/stickerRotation";
+import { reportContent } from "@/src/lib/api";
+import { getDeviceToken } from "@/src/lib/deviceId";
 
 interface Props {
   id: string;
@@ -30,8 +32,50 @@ export function ClusterBubble({ id, text, count, maxCount, isSelf, colorIndex }:
   const fill = isSelf ? palette.pink : FILL_ROTATION[colorIndex % FILL_ROTATION.length];
   const fg = isSelf ? palette.cream : palette.ink;
 
+  const handleReport = async () => {
+    try {
+      const deviceToken = await getDeviceToken();
+      await reportContent({ target_type: "cluster", target_id: id, device_token: deviceToken });
+      Alert.alert(
+        "Thanks for reporting",
+        "We'll review this answer within 24 hours.",
+      );
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "report failed";
+      Alert.alert("Couldn't report", msg);
+    }
+  };
+
+  const handleLongPress = () => {
+    if (Platform.OS === "ios") {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options: ["Cancel", "Report this answer"],
+          destructiveButtonIndex: 1,
+          cancelButtonIndex: 0,
+          title: `"${text}"`,
+        },
+        (index) => {
+          if (index === 1) handleReport();
+        },
+      );
+    } else {
+      Alert.alert(
+        `"${text}"`,
+        "Report this answer? We'll review it within 24 hours.",
+        [
+          { text: "Cancel", style: "cancel" },
+          { text: "Report", style: "destructive", onPress: handleReport },
+        ],
+      );
+    }
+  };
+
   return (
-    <View
+    <Pressable
+      onLongPress={handleLongPress}
+      accessibilityLabel={`${text}, long-press to report`}
+      accessibilityHint="Long-press to report this answer as objectionable"
       style={[
         styles.wrap,
         {
@@ -65,7 +109,7 @@ export function ClusterBubble({ id, text, count, maxCount, isSelf, colorIndex }:
           <Text style={styles.youText}>YOU</Text>
         </View>
       )}
-    </View>
+    </Pressable>
   );
 }
 

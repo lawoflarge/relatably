@@ -1,4 +1,10 @@
 import { render, fireEvent } from "@testing-library/react-native";
+
+jest.mock("@/src/lib/api", () => ({
+  blockUser: jest.fn(),
+  removeFriend: jest.fn(),
+}));
+
 import { FriendListRow } from "./FriendListRow";
 
 const baseFriendship = {

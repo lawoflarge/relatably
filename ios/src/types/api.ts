@@ -14,6 +14,7 @@ export interface SubmitResponse {
   cluster_id: string;
   submission_count: number;
   normalized_text: string;
+  submission_id: string;
 }
 
 export interface DeviceRegisterPayload {

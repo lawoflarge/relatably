@@ -47,6 +47,7 @@ export default function HomeScreen() {
   const [renderedAt, setRenderedAt] = useState(Date.now());
   const [clusters, setClusters] = useState<Cluster[]>([]);
   const [selfClusterId, setSelfClusterId] = useState<string | null>(null);
+  const [selfSubmissionId, setSelfSubmissionId] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // Best-effort messaging registration on first open.
@@ -167,6 +168,7 @@ export default function HomeScreen() {
         dwell_ms: dwellMs,
       });
       setSelfClusterId(result.cluster_id);
+      setSelfSubmissionId(result.submission_id);
       setPhase("wordcloud");
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "submit failed";
@@ -248,6 +250,14 @@ export default function HomeScreen() {
           questionText={question.text}
           userAnswer={text}
           dateLabel={new Date().toISOString().slice(0, 10)}
+          selfSubmissionId={selfSubmissionId}
+          onDeleted={() => {
+            setSelfClusterId(null);
+            setSelfSubmissionId(null);
+            setPhase("question");
+            setText("");
+            setRenderedAt(Date.now());
+          }}
         />
       )}
     </View>

@@ -9,6 +9,7 @@ import "react-native-reanimated";
 import { useStickerFonts } from "@/src/theme/useStickerFonts";
 import { palette } from "@/src/theme/tokens";
 import { ErrorBoundary } from "@/src/components/ErrorBoundary";
+import { TosGate } from "@/src/components/TosGate";
 
 export const unstable_settings = {
   anchor: "(tabs)",
@@ -53,10 +54,12 @@ export default function RootLayout() {
   return (
     <ErrorBoundary>
       <ThemeProvider value={StickerTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: "modal", title: "Modal" }} />
-        </Stack>
+        <TosGate>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="modal" options={{ presentation: "modal", title: "Modal" }} />
+          </Stack>
+        </TosGate>
         <StatusBar style="dark" />
       </ThemeProvider>
     </ErrorBoundary>

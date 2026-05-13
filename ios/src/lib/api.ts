@@ -138,3 +138,48 @@ export async function fetchArchiveDetail(questionId: string): Promise<ArchiveDet
   if (!res.ok) throw new Error(`fetchArchiveDetail failed: ${res.status}`);
   return (await res.json()) as ArchiveDetail;
 }
+
+export interface ReportPayload {
+  target_type: "cluster" | "submission" | "user";
+  target_id: string;
+  reason?: string;
+  device_token?: string;
+}
+
+export async function reportContent(payload: ReportPayload): Promise<void> {
+  const auth = await authHeaders();
+  const res = await fetch(`${BASE}/api/report`, {
+    method: "POST",
+    headers: { "content-type": "application/json", ...auth },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(`report failed: ${res.status}`);
+}
+
+export async function deleteOwnSubmission(submissionId: string, deviceToken: string): Promise<void> {
+  const auth = await authHeaders();
+  const res = await fetch(`${BASE}/api/submissions/${encodeURIComponent(submissionId)}`, {
+    method: "DELETE",
+    headers: { "content-type": "application/json", ...auth },
+    body: JSON.stringify({ device_token: deviceToken }),
+  });
+  if (!res.ok) throw new Error(`deleteOwnSubmission failed: ${res.status}`);
+}
+
+export async function blockUser(targetUserId: string): Promise<void> {
+  const auth = await authHeaders();
+  const res = await fetch(`${BASE}/api/users/${encodeURIComponent(targetUserId)}/block`, {
+    method: "POST",
+    headers: auth,
+  });
+  if (!res.ok) throw new Error(`blockUser failed: ${res.status}`);
+}
+
+export async function deleteAccount(): Promise<void> {
+  const auth = await authHeaders();
+  const res = await fetch(`${BASE}/api/account/delete`, {
+    method: "POST",
+    headers: auth,
+  });
+  if (!res.ok) throw new Error(`deleteAccount failed: ${res.status}`);
+}

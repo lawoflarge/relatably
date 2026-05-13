@@ -1,12 +1,14 @@
-import React, { useMemo, useRef } from "react";
-import { View, Text, StyleSheet, useWindowDimensions } from "react-native";
+import React, { useMemo, useRef, useState } from "react";
+import { View, Text, StyleSheet, useWindowDimensions, Pressable, Alert } from "react-native";
 
-import { palette, sp, typography } from "@/src/theme/tokens";
+import { palette, radii, shadow, sp, typography } from "@/src/theme/tokens";
 import { PaperTexture } from "@/src/components/sticker/PaperTexture";
 import { ClusterBubble } from "@/src/components/ClusterBubble";
 import { ShareButton } from "@/src/components/ShareButton";
 import { ShareCardTodaysTake } from "@/src/components/ShareCardTodaysTake";
 import { wordcloudLayout } from "@/src/lib/wordcloudLayout";
+import { deleteOwnSubmission } from "@/src/lib/api";
+import { getDeviceToken } from "@/src/lib/deviceId";
 
 export interface Cluster { id: string; canonical_text: string; submission_count: number; }
 
@@ -18,9 +20,13 @@ interface Props {
   questionText?: string;
   userAnswer?: string;
   dateLabel?: string;
+  selfSubmissionId?: string | null;
+  onDeleted?: () => void;
 }
 
-export function WordcloudScreen({ clusters, selfClusterId, totalCount, questionId, questionText, userAnswer, dateLabel }: Props) {
+export function WordcloudScreen({ clusters, selfClusterId, totalCount, questionId, questionText, userAnswer, dateLabel, selfSubmissionId, onDeleted }: Props) {
+  const [deleting, setDeleting] = useState(false);
+  const [deleted, setDeleted] = useState(false);
   const cardRef = useRef<View>(null);
   const { width } = useWindowDimensions();
   const cloudWidth = width - sp.gutter * 2;
@@ -82,6 +88,44 @@ export function WordcloudScreen({ clusters, selfClusterId, totalCount, questionI
           </View>
         </View>
       )}
+      {selfSubmissionId && !deleted && (
+        <View style={styles.deleteRow}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Delete my answer"
+            disabled={deleting}
+            onPress={() => {
+              Alert.alert(
+                "Delete your answer?",
+                "Your answer will be removed from the wordcloud right away. You can't re-submit for today's drop.",
+                [
+                  { text: "Cancel", style: "cancel" },
+                  {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: async () => {
+                      setDeleting(true);
+                      try {
+                        const deviceToken = await getDeviceToken();
+                        await deleteOwnSubmission(selfSubmissionId, deviceToken);
+                        setDeleted(true);
+                        if (onDeleted) onDeleted();
+                      } catch (err) {
+                        Alert.alert("Couldn't delete", err instanceof Error ? err.message : String(err));
+                      } finally {
+                        setDeleting(false);
+                      }
+                    },
+                  },
+                ],
+              );
+            }}
+            style={styles.deleteBtn}
+          >
+            <Text style={styles.deleteText}>{deleting ? "DELETING…" : "DELETE MY ANSWER"}</Text>
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 }
@@ -92,4 +136,19 @@ const styles = StyleSheet.create({
   counter: { fontFamily: typography.label.family, fontSize: 11, letterSpacing: 1.4, color: palette.inkSoft },
   cloud: { alignSelf: "center", position: "relative" },
   offscreen: { position: "absolute", left: -10000, top: -10000, opacity: 0 },
+  deleteRow: { alignItems: "center", marginTop: sp[3] },
+  deleteBtn: {
+    paddingHorizontal: sp[3],
+    paddingVertical: sp[1] + 2,
+    borderRadius: radii.s,
+    borderColor: palette.ink,
+    borderWidth: 2,
+    backgroundColor: "rgba(255,255,255,0.7)",
+    shadowColor: shadow.s.color,
+    shadowOffset: shadow.s.offset,
+    shadowRadius: shadow.s.radius,
+    shadowOpacity: shadow.s.opacity,
+    elevation: shadow.s.elevation,
+  },
+  deleteText: { fontFamily: typography.micro.family, fontSize: 10, letterSpacing: 1.4, color: palette.red },
 });
