@@ -158,20 +158,28 @@ Support: https://relatably.vercel.app/support`,
 (async () => {
   console.log(`ASC metadata fill — App ${APP_ID}\n`);
 
-  // 1. Resolve appInfo + version + their localization IDs
+  // 1. Resolve appInfo + version + their localization IDs.
+  // Editable states for ASC metadata: PREPARE_FOR_SUBMISSION, REJECTED,
+  // METADATA_REJECTED, DEVELOPER_REJECTED. Plus their "Apple-side" variants.
+  const EDITABLE_STATES = new Set([
+    "PREPARE_FOR_SUBMISSION",
+    "REJECTED",
+    "METADATA_REJECTED",
+    "DEVELOPER_REJECTED",
+  ]);
   const infos = await api("GET", `/v1/apps/${APP_ID}/appInfos`);
   const info = infos.body.data?.find(
-    (i) => i.attributes?.appStoreState === "PREPARE_FOR_SUBMISSION" || i.attributes?.state === "PREPARE_FOR_SUBMISSION"
+    (i) => EDITABLE_STATES.has(i.attributes?.appStoreState) || EDITABLE_STATES.has(i.attributes?.state)
   );
   if (!info) throw new Error("No editable appInfo found.");
   console.log(`appInfo: ${info.id}`);
 
   const versions = await api("GET", `/v1/apps/${APP_ID}/appStoreVersions?limit=10`);
   const version = versions.body.data?.find(
-    (v) => v.attributes?.versionString === "1.0" && v.attributes?.appStoreState === "PREPARE_FOR_SUBMISSION"
+    (v) => v.attributes?.versionString === "1.0" && EDITABLE_STATES.has(v.attributes?.appStoreState)
   );
   if (!version) throw new Error("No editable v1.0 appStoreVersion found.");
-  console.log(`appStoreVersion: ${version.id}`);
+  console.log(`appStoreVersion: ${version.id} (state=${version.attributes?.appStoreState})`);
 
   const infoLocs = await api("GET", `/v1/appInfos/${info.id}/appInfoLocalizations`);
   const infoLoc = infoLocs.body.data?.find((l) => l.attributes?.locale === "en-US");
