@@ -27,7 +27,15 @@ export async function runOnce<T>(
     return true;
   });
   if (!proceed) return null;
-  const value = await fn();
-  await ref.update({ completed_at: FieldValue.serverTimestamp() });
-  return value;
+  try {
+    const value = await fn();
+    await ref.update({ completed_at: FieldValue.serverTimestamp() });
+    return value;
+  } catch (err) {
+    // Roll back the guard doc so the next retry (cron or workflow_dispatch)
+    // can re-claim the same bucket instead of being stuck on a stale
+    // `started_at`-only record.
+    await ref.delete().catch(() => {});
+    throw err;
+  }
 }

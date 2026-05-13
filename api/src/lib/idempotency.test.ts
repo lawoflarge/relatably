@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { runOnce } from "./idempotency";
 
-const { fakeFirestore, fakeRef, txn, txnGet, txnSet, refUpdate } = vi.hoisted(() => {
+const { fakeFirestore, fakeRef, txn, txnGet, txnSet, refUpdate, refDelete } = vi.hoisted(() => {
   const txnGet = vi.fn();
   const txnSet = vi.fn();
   const refUpdate = vi.fn();
-  const fakeRef = { update: refUpdate };
+  const refDelete = vi.fn(async () => undefined);
+  const fakeRef = { update: refUpdate, delete: refDelete };
   const collectionDoc = vi.fn(() => fakeRef);
   const collection = vi.fn(() => ({ doc: collectionDoc }));
   const txn = vi.fn(async (cb: (t: { get: typeof txnGet; set: typeof txnSet }) => Promise<unknown>) => {
@@ -18,6 +19,7 @@ const { fakeFirestore, fakeRef, txn, txnGet, txnSet, refUpdate } = vi.hoisted(()
     txnGet,
     txnSet,
     refUpdate,
+    refDelete,
   };
 });
 
@@ -56,6 +58,14 @@ describe("runOnce (api/)", () => {
     const inner = vi.fn(async () => { throw new Error("boom"); });
     await expect(runOnce("test:abc", inner)).rejects.toThrow("boom");
     expect(refUpdate).not.toHaveBeenCalled();
+  });
+
+  it("rolls back the guard doc when inner fn throws so retries can re-claim", async () => {
+    txnGet.mockResolvedValue({ exists: false });
+    refDelete.mockClear();
+    const inner = vi.fn(async () => { throw new Error("boom"); });
+    await expect(runOnce("test:abc", inner)).rejects.toThrow("boom");
+    expect(refDelete).toHaveBeenCalledTimes(1);
   });
 
   it("uses the key as the doc id under function_runs", async () => {

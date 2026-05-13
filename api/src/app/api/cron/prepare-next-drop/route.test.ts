@@ -96,4 +96,12 @@ describe("POST /api/cron/prepare-next-drop", () => {
     const expected = Math.floor(Date.now() / (24 * 60 * 60 * 1000));
     expect(Math.abs(bucketNum - expected)).toBeLessThanOrEqual(1);
   });
+
+  it("500 with the thrown error message when runOnce rejects", async () => {
+    runOnceMock.mockRejectedValue(new Error("the query requires an index"));
+    const res = await POST(makeReq("Bearer test-secret"));
+    expect(res.status).toBe(500);
+    const body = await res.json();
+    expect(body).toEqual({ error: "the query requires an index" });
+  });
 });

@@ -17,15 +17,19 @@ export async function POST(req: Request): Promise<NextResponse> {
   if (auth) return auth;
 
   const now = new Date();
-  // 1-day idempotency window: each UTC day gets exactly one assignment
-  // even if the cron fires twice or workflow_dispatch is clicked manually.
   const dayBucket = `prepareNextDrop:${Math.floor(now.getTime() / (24 * 60 * 60 * 1000))}`;
-  const result = await runOnce(dayBucket, async () =>
-    runPrepareNextDrop(adminFirestore, now),
-  );
-
-  if (result === null) {
-    return NextResponse.json({ skipped: "already-ran-today" }, { status: 200 });
+  try {
+    const result = await runOnce(dayBucket, async () =>
+      runPrepareNextDrop(adminFirestore, now),
+    );
+    if (result === null) {
+      return NextResponse.json({ skipped: "already-ran-today" }, { status: 200 });
+    }
+    return NextResponse.json({ ok: true, ...result }, { status: 200 });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    const stack = err instanceof Error ? err.stack : undefined;
+    console.error("prepareNextDrop failed", { message, stack });
+    return NextResponse.json({ error: message }, { status: 500 });
   }
-  return NextResponse.json({ ok: true, ...result }, { status: 200 });
 }
