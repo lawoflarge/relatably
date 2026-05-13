@@ -75,10 +75,10 @@ const META = {
   marketingUrl: "https://relatably.vercel.app",
   supportUrl: "https://relatably.vercel.app/support",
   promotionalText:
-    "One controversial-but-lighthearted question, dropped at the same random moment for everyone on Earth. Type your answer. See the world's. Daily.",
+    "One question, dropped at the same random moment for everyone on Earth. Type your answer. See the world's. Daily.",
   description: `One question. One global drop. Once a day.
 
-Relatably picks one controversial-but-lighthearted question and asks the entire world at the same random moment. You have one shot to type your answer in plain text. Then watch every other answer on Earth cluster into a live wordcloud — the world's collective opinion, in real time.
+Relatably picks one question and asks the entire world at the same random moment. You have one shot to type your answer in plain text. Then watch every other answer on Earth cluster into a live wordcloud — the world's collective opinion, in real time.
 
 To see yesterday's verdict, you have to answer today. No streaks to grind. No XP. No infinite scroll. Just a single daily ritual that takes thirty seconds.
 
@@ -119,14 +119,39 @@ Free, no subscription. Sign in with Apple to compete on the leaderboard, or play
   reviewContactLastName: "Schwab",
   reviewContactPhone: "+49 157 379 65607",
   reviewContactEmail: "levin.schwab@gmx.de",
-  reviewNotes: `Relatably is anonymous-by-default. Reviewers can fully test the app without signing in by tapping through the daily question.
+  reviewNotes: `RESPONSE TO PRIOR REJECTION (Submission ID 245a9f1f-e626-4232-9908-81e290f7afa4):
 
-If the reviewer is testing during a window when no question is live, they will see "no live question yet". To force-trigger a question for review, please contact levin.schwab@gmx.de and we will trigger one within 5 minutes.
+We have addressed every issue raised in the prior review. The resubmitted build (28+) includes all of the following:
 
-Sign in with Apple is optional and only unlocks the leaderboard + friend graph. We do not require any user account, contact info, or demographic data.
+GUIDELINE 1.2 — User Generated Content safeguards:
+1. On first launch the user must tap "I AGREE" on a Terms-of-Service modal that explicitly forbids hate, harassment, sexual content involving minors, personal information about other people, and spam. Acceptance is recorded on-device.
+2. Server-side two-tier content filter on every submission: a regex blocklist for slurs + Google Perspective API toxicity scoring (threshold 0.85). Blocked submissions are removed from the wordcloud and the user is shown "that won't fly. try again."
+3. Every answer in the live wordcloud can be flagged: long-press the answer bubble → "Report this answer". Reports land in content_reports/ for triage.
+4. After submitting, the user can immediately remove their answer from the wordcloud via "DELETE MY ANSWER" on the Today tab.
+5. Blocked users: Settings → "Sign out" + the new POST /api/users/:id/block endpoint mute another user's content and remove the friendship.
+6. We commit in our Terms of Service and in this submission to act on every report within 24 hours by removing the content and ejecting the offending account.
+7. In-app contact: every screen reaches the new Settings tab ("ME") which exposes "Contact support" (mailto: levin.schwab@gmx.de) and "Report inappropriate content" (pre-filled email).
+8. Age rating has been pushed to the most-restrictive profile available in App Store Connect (mature/suggestive themes + UGC = 17+). The iOS App Store does not currently expose an explicit "18+" tier via the API; 17+ is the highest selectable category. If a higher tier is required, please advise and we will update.
 
+GUIDELINE 1.1 — Marketing copy scrubbed:
+- The prior description contained the phrase "controversial-but-lighthearted question". This has been removed everywhere (description, promotional text, what's-new). The new copy describes only the daily-ritual gameplay; no objectionable references.
+
+GUIDELINE 5.1.1(v) — Account deletion:
+- Settings tab → "Delete account" calls the new POST /api/account/delete endpoint. The flow:
+  a) confirmation alert "Delete your account?" with clear copy of what's removed
+  b) on confirm: revokes Firebase Auth (Sign in with Apple unlink), deletes the user profile, leaderboard entries, friend graph, and anonymises past submissions in-place (raw_text → "[deleted]", user_id → null)
+  c) signs out and shows success alert
+- Screen recording on a physical device is available on request to levin.schwab@gmx.de.
+
+HOW TO TEST AS A REVIEWER:
+- Anonymous: tap I AGREE on first launch → wait for the daily question → type any answer → submit → wordcloud → optionally tap DELETE MY ANSWER or long-press any bubble → Report.
+- Signed-in: tap "ME" (Settings tab) → in Friends or via the leaderboard, you can use Sign in with Apple. Once signed in, "ME" → "Delete account" exercises the new endpoint.
+- If no question is live at review time, please email levin.schwab@gmx.de and we will trigger one within 5 minutes.
+
+LINKS:
 Backend: https://relatably.vercel.app
 Privacy: https://relatably.vercel.app/privacy
+Terms of Service: https://relatably.vercel.app/tos
 Support: https://relatably.vercel.app/support`,
 };
 
@@ -299,8 +324,14 @@ Support: https://relatably.vercel.app/support`,
   // ENUMs accept NONE / INFREQUENT_OR_MILD / FREQUENT_OR_INTENSE.
   // BOOLs: gambling, unrestrictedWebAccess, lootBox, messagingAndChat,
   //        userGeneratedContent, parentalControls.
+  // Apple App Review rejected v1.0 (sub 245a9f1f) under Guideline 1.2 with
+  // "Age rating must reflect 18+". The iOS App Store does not currently
+  // surface an 18+ tier via the API; 17+ is the highest selectable category.
+  // To force 17+, we set the two strongest UGC-relevant axes to
+  // FREQUENT_OR_INTENSE (mature/suggestive + profanity). Combined with
+  // userGeneratedContent: true this yields a 17+ rating.
   logResult(
-    "PATCH ageRatingDeclaration (12+ profile)",
+    "PATCH ageRatingDeclaration (17+ — UGC max)",
     await api("PATCH", `/v1/ageRatingDeclarations/${info.id}`, {
       data: {
         type: "ageRatingDeclarations",
@@ -309,11 +340,11 @@ Support: https://relatably.vercel.app/support`,
           violenceCartoonOrFantasy: "NONE",
           violenceRealistic: "NONE",
           violenceRealisticProlongedGraphicOrSadistic: "NONE",
-          profanityOrCrudeHumor: "INFREQUENT_OR_MILD",
+          profanityOrCrudeHumor: "FREQUENT_OR_INTENSE",
           sexualContentOrNudity: "NONE",
           sexualContentGraphicAndNudity: "NONE",
           horrorOrFearThemes: "NONE",
-          matureOrSuggestiveThemes: "INFREQUENT_OR_MILD",
+          matureOrSuggestiveThemes: "FREQUENT_OR_INTENSE",
           medicalOrTreatmentInformation: "NONE",
           alcoholTobaccoOrDrugUseOrReferences: "NONE",
           gamblingSimulated: "NONE",
