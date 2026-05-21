@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { View, Text, StyleSheet, useWindowDimensions, Pressable, Alert } from "react-native";
 
 import { palette, radii, shadow, sp, typography } from "@/src/theme/tokens";
@@ -9,6 +9,7 @@ import { ShareCardTodaysTake } from "@/src/components/ShareCardTodaysTake";
 import { wordcloudLayout } from "@/src/lib/wordcloudLayout";
 import { deleteOwnSubmission } from "@/src/lib/api";
 import { getDeviceToken } from "@/src/lib/deviceId";
+import { getHiddenClusterIds } from "@/src/lib/hiddenContentStore";
 
 export interface Cluster { id: string; canonical_text: string; submission_count: number; }
 
@@ -27,20 +28,42 @@ interface Props {
 export function WordcloudScreen({ clusters, selfClusterId, totalCount, questionId, questionText, userAnswer, dateLabel, selfSubmissionId, onDeleted }: Props) {
   const [deleting, setDeleting] = useState(false);
   const [deleted, setDeleted] = useState(false);
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
   const cardRef = useRef<View>(null);
   const { width } = useWindowDimensions();
   const cloudWidth = width - sp.gutter * 2;
   const cloudHeight = 560;
 
+  useEffect(() => {
+    let cancelled = false;
+    getHiddenClusterIds().then((ids) => {
+      if (!cancelled) setHiddenIds(ids);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  const visibleClusters = useMemo(
+    () => clusters.filter((c) => !hiddenIds.has(c.id)),
+    [clusters, hiddenIds],
+  );
+
   const placements = useMemo(() => {
     return wordcloudLayout(
-      clusters.map((c) => ({ id: c.id, text: c.canonical_text, count: c.submission_count })),
+      visibleClusters.map((c) => ({ id: c.id, text: c.canonical_text, count: c.submission_count })),
       { width: cloudWidth, height: cloudHeight },
     );
-  }, [clusters, cloudWidth]);
+  }, [visibleClusters, cloudWidth]);
 
   const placementById = useMemo(() => new Map(placements.map((p) => [p.id, p])), [placements]);
-  const maxCount = useMemo(() => Math.max(0, ...clusters.map((c) => c.submission_count)), [clusters]);
+  const maxCount = useMemo(() => Math.max(0, ...visibleClusters.map((c) => c.submission_count)), [visibleClusters]);
+
+  const handleHide = (id: string) => {
+    setHiddenIds((prev) => {
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+  };
 
   const shareEnabled = !!(questionId && questionText && userAnswer && dateLabel);
 
@@ -60,7 +83,7 @@ export function WordcloudScreen({ clusters, selfClusterId, totalCount, questionI
         )}
       </View>
       <View style={[styles.cloud, { width: cloudWidth, height: cloudHeight }]}>
-        {clusters.map((c, i) => {
+        {visibleClusters.map((c, i) => {
           const p = placementById.get(c.id);
           if (!p) return null;
           return (
@@ -72,6 +95,7 @@ export function WordcloudScreen({ clusters, selfClusterId, totalCount, questionI
                 maxCount={maxCount}
                 isSelf={c.id === selfClusterId}
                 colorIndex={i}
+                onHide={handleHide}
               />
             </View>
           );

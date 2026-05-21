@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { View, Text, FlatList, ActivityIndicator, StyleSheet } from "react-native";
 import { fetchArchiveDetail } from "@/src/lib/api";
 import { PaperTexture } from "@/src/components/sticker/PaperTexture";
 import { ShareButton } from "@/src/components/ShareButton";
 import { ShareCardVerdict } from "@/src/components/ShareCardVerdict";
+import { getHiddenClusterIds } from "@/src/lib/hiddenContentStore";
 import { palette, radii, shadow, sp, typography } from "@/src/theme/tokens";
 import type { ArchiveDetail } from "@/src/types/api";
 
@@ -22,6 +23,7 @@ function formatDate(iso: string): string {
 
 export function ArchiveDetailScreen({ questionId }: Props) {
   const [state, setState] = useState<State>({ kind: "loading" });
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
   const shareCardRef = useRef<View>(null);
 
   useEffect(() => {
@@ -38,6 +40,22 @@ export function ArchiveDetailScreen({ questionId }: Props) {
       cancelled = true;
     };
   }, [questionId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    getHiddenClusterIds().then((ids) => {
+      if (!cancelled) setHiddenIds(ids);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  // Hooks must run in the same order on every render — keep this useMemo
+  // ABOVE the loading/error early returns. Falls back to [] when detail isn't
+  // ready yet.
+  const visibleClusters = useMemo(
+    () => (state.kind === "ready" ? state.detail.top_clusters.filter((c) => !hiddenIds.has(c.id)) : []),
+    [state, hiddenIds],
+  );
 
   if (state.kind === "loading") {
     return (
@@ -57,7 +75,7 @@ export function ArchiveDetailScreen({ questionId }: Props) {
   }
 
   const { detail } = state;
-  const verdict = detail.top_clusters[0]?.canonical_text ?? "";
+  const verdict = visibleClusters[0]?.canonical_text ?? "";
   return (
     <View style={styles.root}>
       <PaperTexture />
@@ -78,7 +96,7 @@ export function ArchiveDetailScreen({ questionId }: Props) {
         />
       </View>
       <FlatList
-        data={detail.top_clusters}
+        data={visibleClusters}
         keyExtractor={(c) => c.id}
         renderItem={({ item }) => (
           <View style={styles.row}>
@@ -94,7 +112,7 @@ export function ArchiveDetailScreen({ questionId }: Props) {
       <View ref={shareCardRef} collapsable={false} style={styles.shareCardOffscreen} pointerEvents="none">
         <ShareCardVerdict
           verdictText={verdict}
-          topClusters={detail.top_clusters.map((c) => ({ canonical_text: c.canonical_text, final_rank: c.final_rank }))}
+          topClusters={visibleClusters.map((c) => ({ canonical_text: c.canonical_text, final_rank: c.final_rank }))}
           userRank={null}
           percentile={null}
           date={formatDate(detail.created_at)}

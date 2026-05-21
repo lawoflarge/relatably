@@ -1,4 +1,12 @@
 import { render } from "@testing-library/react-native";
+
+// Short-circuit the firebase/auth ESM chain pulled in via @/src/lib/api.
+jest.mock("@/src/lib/api", () => ({
+  blockUser: jest.fn(),
+  reportContent: jest.fn(),
+}));
+jest.mock("@/src/lib/deviceId", () => ({ getDeviceToken: jest.fn(async () => "dev") }));
+
 import { LeaderboardRow } from "./LeaderboardRow";
 
 describe("LeaderboardRow", () => {

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Pressable, Text, StyleSheet } from "react-native";
-import { palette, radii, shadow, sp, typography } from "@/src/theme/tokens";
+import { Platform, View, StyleSheet } from "react-native";
+import * as AppleAuthentication from "expo-apple-authentication";
 import { signInWithApple } from "@/src/lib/auth";
 
 interface Props {
@@ -8,6 +8,14 @@ interface Props {
   onError?: (err: unknown) => void;
 }
 
+// Apple's HIG (Guideline 4) requires Sign in with Apple to render the
+// official Apple-logo button. expo-apple-authentication's
+// AppleAuthenticationButton wraps the native ASAuthorizationAppleIDButton
+// (iOS) which draws the logo, label, and padding to Apple's exact spec.
+//
+// Width/height: HIG minimum is 140x30, maximum width is the parent's. We use
+// a generous 240x48 to match the surrounding Sticker Pop pill scale.
+// Per Expo docs, style MUST NOT include backgroundColor or borderRadius.
 export function SignInWithApple({ onSignedIn, onError }: Props) {
   const [busy, setBusy] = useState(false);
 
@@ -24,20 +32,26 @@ export function SignInWithApple({ onSignedIn, onError }: Props) {
     }
   };
 
-  return (
-    <Pressable role="button" onPress={handlePress} style={[styles.btn, busy && styles.busy]}>
-      <Text style={styles.label}>{busy ? "signing in…" : "SIGN IN WITH APPLE"}</Text>
-    </Pressable>
-  );
+  // Native button only exists on iOS. On other platforms (Android, web in dev
+  // mode, jest) render a tappable fallback so tests/dev still work.
+  if (Platform.OS === "ios") {
+    return (
+      <View accessibilityRole="button" style={styles.wrap}>
+        <AppleAuthentication.AppleAuthenticationButton
+          buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+          buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+          cornerRadius={12}
+          style={styles.button}
+          onPress={handlePress}
+        />
+      </View>
+    );
+  }
+
+  return <View accessibilityRole="button" testID="siwa-fallback" style={styles.wrap} />;
 }
 
 const styles = StyleSheet.create({
-  btn: {
-    backgroundColor: palette.ink, borderColor: palette.ink, borderWidth: 3, borderRadius: radii.l,
-    paddingHorizontal: sp[5], paddingVertical: sp[3] + 2,
-    shadowColor: shadow.m.color, shadowOffset: shadow.m.offset, shadowRadius: shadow.m.radius, shadowOpacity: shadow.m.opacity, elevation: shadow.m.elevation,
-    alignItems: "center", alignSelf: "center",
-  },
-  busy: { opacity: 0.4 },
-  label: { fontFamily: typography.h3.family, fontSize: 16, color: palette.cream, letterSpacing: 1 },
+  wrap: { alignSelf: "center" },
+  button: { width: 240, height: 48 },
 });

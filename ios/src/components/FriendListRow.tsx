@@ -3,6 +3,7 @@ import { Text, View, Pressable, StyleSheet, ActionSheetIOS, Alert, Platform } fr
 import { palette, radii, shadow, sp, typography } from "@/src/theme/tokens";
 import type { Friendship } from "@/src/types/api";
 import { blockUser, removeFriend } from "@/src/lib/api";
+import { addBlockedUser } from "@/src/lib/hiddenContentStore";
 
 interface Props {
   friendship: Friendship;
@@ -17,6 +18,7 @@ export function FriendListRow({ friendship, onAccept, onBlocked }: Props) {
   const doBlock = async () => {
     try {
       await blockUser(friendship.friend_user_id);
+      await addBlockedUser({ user_id: friendship.friend_user_id, handle: friendship.handle ?? null });
       if (onBlocked) onBlocked(friendship);
       Alert.alert("Blocked", "We won't show their content again.");
     } catch (err) {

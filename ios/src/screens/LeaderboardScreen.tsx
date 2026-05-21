@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, FlatList, Pressable, StyleSheet, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -8,6 +8,7 @@ import { LeaderboardRow } from "@/src/components/LeaderboardRow";
 import { BannerAdSlot } from "@/src/components/BannerAdSlot";
 import { SignInWithApple } from "@/src/components/SignInWithApple";
 import { fetchLeaderboard } from "@/src/lib/api";
+import { getBlockedUserIds } from "@/src/lib/hiddenContentStore";
 import type { LeaderboardEntry, LeaderboardPeriod, LeaderboardScope } from "@/src/types/api";
 
 interface Props {
@@ -42,6 +43,7 @@ export function LeaderboardScreen({ isSignedIn, currentUserId }: Props) {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [authBump, setAuthBump] = useState(0);
+  const [blockedIds, setBlockedIds] = useState<Set<string>>(new Set());
   const effectiveSignedIn = isSignedIn || authBump > 0;
 
   useEffect(() => {
@@ -54,7 +56,28 @@ export function LeaderboardScreen({ isSignedIn, currentUserId }: Props) {
     return () => { cancelled = true; };
   }, [period, scope]);
 
-  const rows = interleaveAd(entries);
+  useEffect(() => {
+    let cancelled = false;
+    getBlockedUserIds().then((ids) => {
+      if (!cancelled) setBlockedIds(ids);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  const visibleEntries = useMemo(
+    () => entries.filter((e) => !blockedIds.has(e.user_id)),
+    [entries, blockedIds],
+  );
+
+  const handleBlocked = (userId: string) => {
+    setBlockedIds((prev) => {
+      const next = new Set(prev);
+      next.add(userId);
+      return next;
+    });
+  };
+
+  const rows = interleaveAd(visibleEntries);
 
   return (
     <View style={[styles.root, { paddingTop: insets.top + sp[6] }]}>
@@ -102,11 +125,13 @@ export function LeaderboardScreen({ isSignedIn, currentUserId }: Props) {
             return (
               <LeaderboardRow
                 rank={item.rank}
+                userId={item.entry.user_id}
                 handle={item.entry.handle}
                 score={item.entry.score}
                 streakDays={(item.entry as LeaderboardEntry & { streak_days?: number }).streak_days ?? 0}
                 isSelf={!!currentUserId && item.entry.user_id === currentUserId}
                 crown={item.rank === 1}
+                onBlocked={handleBlocked}
               />
             );
           }}

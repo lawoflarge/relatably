@@ -1,20 +1,30 @@
 // ios/src/components/LeaderboardRow.tsx
 import React from "react";
-import { Text, View, StyleSheet } from "react-native";
+import { Text, View, StyleSheet, Pressable, ActionSheetIOS, Alert, Platform } from "react-native";
 
 import { palette, radii, shadow, sp, typography } from "@/src/theme/tokens";
 import { IconFlame } from "@/src/components/icons";
+import { blockUser, reportContent } from "@/src/lib/api";
+import { addBlockedUser } from "@/src/lib/hiddenContentStore";
+import { getDeviceToken } from "@/src/lib/deviceId";
 
 interface Props {
   rank: number;
+  userId?: string;
   handle: string | null;
   score: number;
   streakDays: number;
   isSelf: boolean;
   crown: boolean;
+  /**
+   * Called after the user picks "Block this user". Parent should remove the
+   * row from view immediately (App Review Guideline 1.2 requires a way to
+   * block abusive users wherever their content appears).
+   */
+  onBlocked?: (userId: string) => void;
 }
 
-export function LeaderboardRow({ rank, handle, score, streakDays, isSelf, crown }: Props) {
+export function LeaderboardRow({ rank, userId, handle, score, streakDays, isSelf, crown, onBlocked }: Props) {
   const displayHandle = handle ?? "anon";
   const initial = (displayHandle[0] ?? "?").toUpperCase();
 
@@ -23,8 +33,67 @@ export function LeaderboardRow({ rank, handle, score, streakDays, isSelf, crown 
   const borderWidth = isSelf || crown ? 3 : 2;
   const shadowSpec = isSelf || crown ? shadow.m : shadow.s;
 
+  const canModerate = !!userId && !isSelf;
+
+  const doBlock = async () => {
+    if (!userId) return;
+    try {
+      // Always record locally (works even when signed-out). Best-effort hit
+      // the server endpoint — 401 for anonymous users is expected and ignored.
+      await addBlockedUser({ user_id: userId, handle });
+      try {
+        await blockUser(userId);
+      } catch {
+        /* anonymous / network — local block still applies */
+      }
+      onBlocked?.(userId);
+      Alert.alert("Blocked", "We won't show this user's content again.");
+    } catch (err) {
+      Alert.alert("Couldn't block", err instanceof Error ? err.message : String(err));
+    }
+  };
+
+  const doReport = async () => {
+    if (!userId) return;
+    try {
+      const deviceToken = await getDeviceToken();
+      await reportContent({ target_type: "user", target_id: userId, device_token: deviceToken });
+      Alert.alert("Thanks for reporting", "We'll review this account within 24 hours.");
+    } catch (err) {
+      Alert.alert("Couldn't report", err instanceof Error ? err.message : String(err));
+    }
+  };
+
+  const handleLongPress = () => {
+    if (!canModerate) return;
+    if (Platform.OS === "ios") {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options: ["Cancel", "Block this user", "Report this user"],
+          destructiveButtonIndex: 1,
+          cancelButtonIndex: 0,
+          title: displayHandle,
+        },
+        (index) => {
+          if (index === 1) doBlock();
+          if (index === 2) doReport();
+        },
+      );
+    } else {
+      Alert.alert(displayHandle, undefined, [
+        { text: "Cancel", style: "cancel" },
+        { text: "Block this user", style: "destructive", onPress: doBlock },
+        { text: "Report this user", onPress: doReport },
+      ]);
+    }
+  };
+
   return (
-    <View style={styles.outer}>
+    <Pressable
+      onLongPress={canModerate ? handleLongPress : undefined}
+      accessibilityHint={canModerate ? "Long-press to block or report this user" : undefined}
+      style={styles.outer}
+    >
       <View
         style={[
           styles.row,
@@ -59,7 +128,7 @@ export function LeaderboardRow({ rank, handle, score, streakDays, isSelf, crown 
       {isSelf && (
         <View style={styles.youTab}><Text style={styles.youText}>YOU</Text></View>
       )}
-    </View>
+    </Pressable>
   );
 }
 

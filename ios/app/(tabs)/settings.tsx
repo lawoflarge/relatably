@@ -18,6 +18,14 @@ import { PaperTexture } from "@/src/components/sticker/PaperTexture";
 import { deleteAccount } from "@/src/lib/api";
 import { signOut } from "@/src/lib/auth";
 import { auth } from "@/src/lib/firebase";
+import {
+  getHiddenClusters,
+  getBlockedUsers,
+  unhideCluster,
+  removeBlockedUser,
+  type HiddenCluster,
+  type BlockedUser,
+} from "@/src/lib/hiddenContentStore";
 
 const BASE = process.env.EXPO_PUBLIC_API_URL ?? "https://relatably.vercel.app";
 const SUPPORT_EMAIL = "levin.schwab@gmx.de";
@@ -33,10 +41,32 @@ export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const [uid, setUid] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [hidden, setHidden] = useState<HiddenCluster[]>([]);
+  const [blocked, setBlocked] = useState<BlockedUser[]>([]);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth(), (u) => setUid(u?.uid ?? null));
     return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([getHiddenClusters(), getBlockedUsers()]).then(([h, b]) => {
+      if (cancelled) return;
+      setHidden(h);
+      setBlocked(b);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  const handleUnhide = useCallback(async (id: string) => {
+    await unhideCluster(id);
+    setHidden((prev) => prev.filter((h) => h.id !== id));
+  }, []);
+
+  const handleUnblock = useCallback(async (userId: string) => {
+    await removeBlockedUser(userId);
+    setBlocked((prev) => prev.filter((b) => b.user_id !== userId));
   }, []);
 
   const open = (url: string) => () => {
@@ -144,6 +174,55 @@ export default function SettingsScreen() {
             </Pressable>
           ))}
         </View>
+
+        {hidden.length > 0 && (
+          <>
+            <Text style={styles.sectionLabel}>HIDDEN ANSWERS</Text>
+            <View style={styles.card}>
+              {hidden.map((h, i) => (
+                <Pressable
+                  key={h.id}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Unhide "${h.text}"`}
+                  onPress={() => handleUnhide(h.id)}
+                  style={[styles.row, i < hidden.length - 1 && styles.rowDivider]}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.rowLabel} numberOfLines={1}>&ldquo;{h.text}&rdquo;</Text>
+                    <Text style={styles.rowHint}>Tap to unhide</Text>
+                  </View>
+                  <Text style={styles.chevron}>×</Text>
+                </Pressable>
+              ))}
+            </View>
+          </>
+        )}
+
+        {blocked.length > 0 && (
+          <>
+            <Text style={styles.sectionLabel}>BLOCKED USERS</Text>
+            <View style={styles.card}>
+              {blocked.map((b, i) => {
+                const display = b.handle ?? `@${b.user_id.slice(0, 6)}`;
+                return (
+                  <Pressable
+                    key={b.user_id}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Unblock ${display}`}
+                    onPress={() => handleUnblock(b.user_id)}
+                    style={[styles.row, i < blocked.length - 1 && styles.rowDivider]}
+                  >
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.rowLabel}>{display}</Text>
+                      <Text style={styles.rowHint}>Tap to unblock</Text>
+                    </View>
+                    <Text style={styles.chevron}>×</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </>
+        )}
 
         {uid ? (
           <>

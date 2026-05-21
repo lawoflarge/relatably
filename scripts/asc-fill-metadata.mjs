@@ -119,34 +119,49 @@ Free, no subscription. Sign in with Apple to compete on the leaderboard, or play
   reviewContactLastName: "Schwab",
   reviewContactPhone: "+49 157 379 65607",
   reviewContactEmail: "levin.schwab@gmx.de",
-  reviewNotes: `RESPONSE TO PRIOR REJECTION (Submission ID 245a9f1f-e626-4232-9908-81e290f7afa4):
+  reviewNotes: `RESPONSE TO PRIOR REJECTION (Submission ID 4679c135-9e81-49cf-8d67-01320dc67988, reviewed 2026-05-21):
 
-We have addressed every issue raised in the prior review. The resubmitted build (28+) includes all of the following:
+Both findings from the prior review are addressed in the new build. Each is mapped to the specific in-app surface below.
 
 GUIDELINE 1.2 — User Generated Content safeguards:
-1. On first launch the user must tap "I AGREE" on a Terms-of-Service modal that explicitly forbids hate, harassment, sexual content involving minors, personal information about other people, and spam. Acceptance is recorded on-device.
-2. Server-side two-tier content filter on every submission: a regex blocklist for slurs + Google Perspective API toxicity scoring (threshold 0.85). Blocked submissions are removed from the wordcloud and the user is shown "that won't fly. try again."
-3. Every answer in the live wordcloud can be flagged: long-press the answer bubble → "Report this answer". Reports land in content_reports/ for triage.
-4. After submitting, the user can immediately remove their answer from the wordcloud via "DELETE MY ANSWER" on the Today tab.
-5. Blocked users: Settings → "Sign out" + the new POST /api/users/:id/block endpoint mute another user's content and remove the friendship.
-6. We commit in our Terms of Service and in this submission to act on every report within 24 hours by removing the content and ejecting the offending account.
-7. In-app contact: every screen reaches the new Settings tab ("ME") which exposes "Contact support" (mailto: levin.schwab@gmx.de) and "Report inappropriate content" (pre-filled email).
-8. Age rating has been pushed to the most-restrictive profile available in App Store Connect (mature/suggestive themes + UGC = 17+). The iOS App Store does not currently expose an explicit "18+" tier via the API; 17+ is the highest selectable category. If a higher tier is required, please advise and we will update.
 
-GUIDELINE 1.1 — Marketing copy scrubbed:
-- The prior description contained the phrase "controversial-but-lighthearted question". This has been removed everywhere (description, promotional text, what's-new). The new copy describes only the daily-ritual gameplay; no objectionable references.
+(a) Age rating now reflects 18+.
+   The age rating declaration sets ageRatingOverrideV2 = EIGHTEEN_PLUS (the new 2025 ASC questionnaire field) AND legacy ageRatingOverride = SEVENTEEN_PLUS (for storefronts still on the previous tier system). Combined with our honest answers — frequent profanity, frequent mature/suggestive themes, userGeneratedContent = true — this yields 18+ in the current system.
 
-GUIDELINE 5.1.1(v) — Account deletion:
-- Settings tab → "Delete account" calls the new POST /api/account/delete endpoint. The flow:
-  a) confirmation alert "Delete your account?" with clear copy of what's removed
-  b) on confirm: revokes Firebase Auth (Sign in with Apple unlink), deletes the user profile, leaderboard entries, friend graph, and anonymises past submissions in-place (raw_text → "[deleted]", user_id → null)
-  c) signs out and shows success alert
-- Screen recording on a physical device is available on request to levin.schwab@gmx.de.
+(b) Block-abusive-users mechanism.
+   - LEADERBOARD: long-press any row → "Block this user" (or "Report this user"). The action sheet appears on every row except the user's own.
+   - FRIENDS LIST: long-press any row → "Block" (existing). Block also tears down the friendship.
+   - The block is persisted locally (AsyncStorage, key "ugc_blocked_users_v1") AND posted to the existing server endpoint POST /api/users/{id}/block, which writes /users/{me}/blocked/{them} and deletes any friendship in either direction. After blocking, the blocked user's content is filtered out of the local leaderboard view instantly.
+   - Users can review and reverse blocks from the ME (Settings) tab → BLOCKED USERS section → tap any row to unblock.
+
+(c) Immediately-remove-posts-from-feed mechanism.
+   - WORDCLOUD: long-press any answer bubble → "Hide this answer" (or "Report this answer"). The bubble disappears from the wordcloud on the next render — no server roundtrip required.
+   - ARCHIVE: the same hidden set filters past archive detail views too.
+   - "Hide" is persisted locally (AsyncStorage, key "ugc_hidden_clusters_v1"). The user's OWN answer cannot be hidden via this path; it has the dedicated "DELETE MY ANSWER" pill on the Today tab (server-side delete via DELETE /api/submissions/{id}).
+   - Users can review and reverse hides from the ME (Settings) tab → HIDDEN ANSWERS section → tap any row to unhide.
+   - "Report" also auto-hides the cluster locally and posts to /api/report for moderator triage within 24 hours.
+
+GUIDELINE 4 — Sign in with Apple design:
+
+The Sign in with Apple button now renders Apple's official ASAuthorizationAppleIDButton via expo-apple-authentication's AppleAuthenticationButton component. The Apple logo, label, and proportions are drawn natively by AuthenticationServices.framework — they are not re-implemented in JS. The button uses buttonType=SIGN_IN, buttonStyle=BLACK, cornerRadius=12, sized 240x48 (within HIG min/max). It appears on the Friends tab CTA and the Leaderboard friends-scope CTA.
 
 HOW TO TEST AS A REVIEWER:
-- Anonymous: tap I AGREE on first launch → wait for the daily question → type any answer → submit → wordcloud → optionally tap DELETE MY ANSWER or long-press any bubble → Report.
-- Signed-in: tap "ME" (Settings tab) → in Friends or via the leaderboard, you can use Sign in with Apple. Once signed in, "ME" → "Delete account" exercises the new endpoint.
-- If no question is live at review time, please email levin.schwab@gmx.de and we will trigger one within 5 minutes.
+
+1. Launch the app and accept the Terms of Service modal on first launch.
+2. ANONYMOUS UGC controls:
+   - Wait for or trigger the daily question (email levin.schwab@gmx.de and we trigger within 5 minutes if no question is live at review time).
+   - Submit any answer.
+   - On the wordcloud, long-press any bubble that is NOT your own → "Hide this answer" → bubble disappears immediately. Pick another → "Report this answer" → bubble also disappears + Alert confirms the report.
+   - Tap "DELETE MY ANSWER" pill → your own bubble disappears, server confirms.
+3. SIGN-IN-WITH-APPLE flow:
+   - Tap the Friends tab → tap the Sign in with Apple button (notice the Apple logo + native rendering).
+   - Complete the Apple flow → return to Friends.
+4. BLOCKED-USERS controls:
+   - Tap the Leaderboard tab.
+   - Long-press any row that is NOT your own → "Block this user" → row disappears + Alert confirms.
+   - Tap the ME (Settings) tab → BLOCKED USERS section appears at the top → tap any row to unblock.
+5. ACCOUNT DELETION:
+   - ME (Settings) tab → "Delete account" → confirm → server revokes Firebase Auth, deletes profile + leaderboard entries + friend graph, anonymises submissions, signs out.
 
 LINKS:
 Backend: https://relatably.vercel.app
@@ -326,20 +341,26 @@ Support: https://relatably.vercel.app/support`,
   }
 
   // 5. PATCH Age Rating Declaration on appInfo (Apple moved this off appStoreVersion).
-  // The declaration's ID equals the appInfo's ID. Profanity infrequent/mild +
-  // suggestive infrequent/mild + UGC + no web access → 12+.
-  // Attribute names + types from /v1/appInfos/{id}/ageRatingDeclaration probe.
-  // ENUMs accept NONE / INFREQUENT_OR_MILD / FREQUENT_OR_INTENSE.
-  // BOOLs: gambling, unrestrictedWebAccess, lootBox, messagingAndChat,
-  //        userGeneratedContent, parentalControls.
-  // Apple App Review rejected v1.0 (sub 245a9f1f) under Guideline 1.2 with
-  // "Age rating must reflect 18+". The iOS App Store does not currently
-  // surface an 18+ tier via the API; 17+ is the highest selectable category.
-  // To force 17+, we set the two strongest UGC-relevant axes to
-  // FREQUENT_OR_INTENSE (mature/suggestive + profanity). Combined with
-  // userGeneratedContent: true this yields a 17+ rating.
+  // The declaration's ID equals the appInfo's ID.
+  //
+  // Apple App Review rejected v1.0 (build 28, sub 4679c135) under Guideline
+  // 1.2 with: "Age rating must reflect 18+". Apple's January 2025
+  // questionnaire rework introduced the new tiers 13+, 16+, 18+ alongside
+  // the legacy 4+/9+/12+/17+ system. The API exposes:
+  //   - ageRatingOverrideV2 (NEW) — accepts NONE / NINE_PLUS / THIRTEEN_PLUS
+  //     / SIXTEEN_PLUS / EIGHTEEN_PLUS / UNRATED
+  //   - ageRatingOverride   (LEGACY) — NONE / NINE_PLUS / THIRTEEN_PLUS
+  //     / SIXTEEN_PLUS / SEVENTEEN_PLUS / UNRATED
+  // Enum values confirmed by probing /v1/ageRatingDeclarations/{id} with an
+  // invalid value: Apple returns the allowed enum in ENTITY_ERROR.ATTRIBUTE.TYPE.
+  //
+  // We set BOTH overrides so the rating is correct in stores on either
+  // questionnaire version (Apple is mid-rollout). The questionnaire answers
+  // remain honest: frequent profanity + frequent mature/suggestive themes +
+  // user-generated content = the highest tier our content actually warrants.
+  // The override sits on top of those answers.
   logResult(
-    "PATCH ageRatingDeclaration (17+ — UGC max)",
+    "PATCH ageRatingDeclaration (18+ via ageRatingOverrideV2 + legacy 17+)",
     await api("PATCH", `/v1/ageRatingDeclarations/${info.id}`, {
       data: {
         type: "ageRatingDeclarations",
@@ -368,6 +389,8 @@ Support: https://relatably.vercel.app/support`,
           parentalControls: false,
           kidsAgeBand: null,
           ageAssurance: false,
+          ageRatingOverrideV2: "EIGHTEEN_PLUS",
+          ageRatingOverride: "SEVENTEEN_PLUS",
         },
       },
     })
