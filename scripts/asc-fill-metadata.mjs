@@ -119,51 +119,49 @@ Free, no subscription. Sign in with Apple to compete on the leaderboard, or play
   reviewContactLastName: "Schwab",
   reviewContactPhone: "+49 157 379 65607",
   reviewContactEmail: "levin.schwab@gmx.de",
-  reviewNotes: `RESPONSE TO PRIOR REJECTION (Submission ID 4679c135-9e81-49cf-8d67-01320dc67988, reviewed 2026-05-21):
+  reviewNotes: `RESPONSE TO PRIOR REJECTION (sub 4679c135, reviewed 2026-05-21).
+Both findings are addressed in the new build.
 
-Both findings from the prior review are addressed in the new build. Each is mapped to the specific in-app surface below.
-
-GUIDELINE 1.2 — User Generated Content safeguards:
+GUIDELINE 1.2 — UGC safeguards
 
 (a) Age rating now reflects 18+.
-   The age rating declaration sets ageRatingOverrideV2 = EIGHTEEN_PLUS (the new 2025 ASC questionnaire field) AND legacy ageRatingOverride = SEVENTEEN_PLUS (for storefronts still on the previous tier system). Combined with our honest answers — frequent profanity, frequent mature/suggestive themes, userGeneratedContent = true — this yields 18+ in the current system.
+ageRatingOverrideV2 = EIGHTEEN_PLUS (Jan-2025 tier system). Honest answers: frequent profanity, frequent mature/suggestive themes, userGeneratedContent = true.
 
-(b) Block-abusive-users mechanism.
-   - LEADERBOARD: long-press any row → "Block this user" (or "Report this user"). The action sheet appears on every row except the user's own.
-   - FRIENDS LIST: long-press any row → "Block" (existing). Block also tears down the friendship.
-   - The block is persisted locally (AsyncStorage, key "ugc_blocked_users_v1") AND posted to the existing server endpoint POST /api/users/{id}/block, which writes /users/{me}/blocked/{them} and deletes any friendship in either direction. After blocking, the blocked user's content is filtered out of the local leaderboard view instantly.
-   - Users can review and reverse blocks from the ME (Settings) tab → BLOCKED USERS section → tap any row to unblock.
+(b) Block abusive users.
+- Leaderboard: long-press any row that isn't yours → action sheet → "Block this user" or "Report this user". Blocked rows disappear immediately.
+- Friends: long-press any row → "Block" (also tears down the friendship).
+- Block is persisted both locally (AsyncStorage "ugc_blocked_users_v1") and on the server (POST /api/users/{id}/block writes /users/{me}/blocked/{them}).
+- Users review and reverse blocks from ME (Settings) tab → BLOCKED USERS → tap to unblock.
 
-(c) Immediately-remove-posts-from-feed mechanism.
-   - WORDCLOUD: long-press any answer bubble → "Hide this answer" (or "Report this answer"). The bubble disappears from the wordcloud on the next render — no server roundtrip required.
-   - ARCHIVE: the same hidden set filters past archive detail views too.
-   - "Hide" is persisted locally (AsyncStorage, key "ugc_hidden_clusters_v1"). The user's OWN answer cannot be hidden via this path; it has the dedicated "DELETE MY ANSWER" pill on the Today tab (server-side delete via DELETE /api/submissions/{id}).
-   - Users can review and reverse hides from the ME (Settings) tab → HIDDEN ANSWERS section → tap any row to unhide.
-   - "Report" also auto-hides the cluster locally and posts to /api/report for moderator triage within 24 hours.
+(c) Immediately remove posts from feed.
+- Wordcloud: long-press any answer bubble that isn't yours → action sheet → "Hide this answer" or "Report this answer". The bubble disappears on the next render with no server roundtrip.
+- Archive: the same hidden set filters historical detail views.
+- Hide is persisted locally (AsyncStorage "ugc_hidden_clusters_v1").
+- "Report" auto-hides the cluster locally AND posts to /api/report for triage within 24h.
+- The user's own answer is excluded from "Hide" because it has a dedicated "DELETE MY ANSWER" pill (server-side delete via DELETE /api/submissions/{id}).
+- Users review and reverse hides from ME (Settings) tab → HIDDEN ANSWERS → tap to unhide.
 
-GUIDELINE 4 — Sign in with Apple design:
+GUIDELINE 4 — Sign in with Apple
 
-The Sign in with Apple button now renders Apple's official ASAuthorizationAppleIDButton via expo-apple-authentication's AppleAuthenticationButton component. The Apple logo, label, and proportions are drawn natively by AuthenticationServices.framework — they are not re-implemented in JS. The button uses buttonType=SIGN_IN, buttonStyle=BLACK, cornerRadius=12, sized 240x48 (within HIG min/max). It appears on the Friends tab CTA and the Leaderboard friends-scope CTA.
+The button now renders Apple's official ASAuthorizationAppleIDButton via expo-apple-authentication's AppleAuthenticationButton (buttonType=SIGN_IN, buttonStyle=BLACK, cornerRadius=12, 240x48). Apple's logo, label, and proportions are drawn natively by AuthenticationServices.framework. Appears on the Friends tab CTA and Leaderboard friends-scope CTA.
 
-HOW TO TEST AS A REVIEWER:
+HOW TO TEST
 
-1. Launch the app and accept the Terms of Service modal on first launch.
-2. ANONYMOUS UGC controls:
-   - Wait for or trigger the daily question (email levin.schwab@gmx.de and we trigger within 5 minutes if no question is live at review time).
-   - Submit any answer.
-   - On the wordcloud, long-press any bubble that is NOT your own → "Hide this answer" → bubble disappears immediately. Pick another → "Report this answer" → bubble also disappears + Alert confirms the report.
-   - Tap "DELETE MY ANSWER" pill → your own bubble disappears, server confirms.
-3. SIGN-IN-WITH-APPLE flow:
-   - Tap the Friends tab → tap the Sign in with Apple button (notice the Apple logo + native rendering).
-   - Complete the Apple flow → return to Friends.
-4. BLOCKED-USERS controls:
-   - Tap the Leaderboard tab.
-   - Long-press any row that is NOT your own → "Block this user" → row disappears + Alert confirms.
-   - Tap the ME (Settings) tab → BLOCKED USERS section appears at the top → tap any row to unblock.
-5. ACCOUNT DELETION:
-   - ME (Settings) tab → "Delete account" → confirm → server revokes Firebase Auth, deletes profile + leaderboard entries + friend graph, anonymises submissions, signs out.
+1. Launch → tap "I AGREE" on the Terms modal.
+2. UGC controls (anonymous):
+   - If no question is live, email levin.schwab@gmx.de and we trigger one within 5 minutes.
+   - Submit any answer → wordcloud appears.
+   - Long-press a bubble that isn't yours → "Hide" → it disappears. Another → "Report" → same + alert confirms report.
+   - Tap "DELETE MY ANSWER" → your bubble disappears.
+3. Sign in with Apple:
+   - Friends tab → tap the SIWA button (note the Apple logo + native rendering) → complete the flow.
+4. Block users:
+   - Leaderboard tab → long-press a row that isn't yours → "Block this user" → row disappears.
+   - ME (Settings) tab → BLOCKED USERS section → tap a row to unblock.
+5. Account deletion (signed in):
+   - ME (Settings) tab → "Delete account" → confirms → server revokes Firebase Auth, deletes profile, leaderboard entries, friend graph, anonymises submissions, signs out.
 
-LINKS:
+LINKS
 Backend: https://relatably.vercel.app
 Privacy: https://relatably.vercel.app/privacy
 Terms of Service: https://relatably.vercel.app/tos
@@ -389,8 +387,11 @@ Support: https://relatably.vercel.app/support`,
           parentalControls: false,
           kidsAgeBand: null,
           ageAssurance: false,
+          // Apple's API errors with STATE_ERROR.AGE_RATING_OVERRIDE_V1_AND_V2_NOT_ALLOWED
+          // when ageRatingOverride appears in the body alongside V2 — even
+          // when set to "NONE". Submit V2 only; legacy field retains its
+          // current value (NONE by default).
           ageRatingOverrideV2: "EIGHTEEN_PLUS",
-          ageRatingOverride: "SEVENTEEN_PLUS",
         },
       },
     })
