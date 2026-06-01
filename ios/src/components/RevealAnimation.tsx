@@ -139,7 +139,7 @@ export function RevealAnimation({
               onPress={onShareCalledIt}
               style={[styles.shareBtn, styles.crownBtn]}
             >
-              <Text style={styles.shareLabel}>👑 SHARE — YOU CALLED IT</Text>
+              <Text style={styles.shareLabel}>★ SHARE — YOU CALLED IT</Text>
             </Pressable>
           )}
           <Pressable role="button" onPress={onComplete} style={styles.continueBtn}>
@@ -192,6 +192,7 @@ const styles = StyleSheet.create({
   question: {
     color: palette.ink,
     fontSize: typography.h2.size,
+    lineHeight: typography.h2.line,
     fontFamily: typography.h2.family,
     textAlign: "center",
     marginBottom: sp[5],
@@ -217,6 +218,7 @@ const styles = StyleSheet.create({
   verdict: {
     color: palette.pink,
     fontSize: typography.h1.size,
+    lineHeight: typography.h1.line,
     fontFamily: typography.h1.family,
     marginVertical: sp[5],
     textAlign: "center",

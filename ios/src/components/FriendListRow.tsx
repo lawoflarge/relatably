@@ -86,8 +86,9 @@ const styles = StyleSheet.create({
   avatarInitial: { fontFamily: typography.h3.family, fontSize: 12, color: palette.ink },
   handle: { flex: 1, fontFamily: "HankenGrotesk_700", fontSize: 15, color: palette.ink },
   accept: {
+    minHeight: 44, justifyContent: "center",
     backgroundColor: palette.pink, borderColor: palette.ink, borderWidth: 2, borderRadius: radii.pill,
-    paddingHorizontal: sp[3], paddingVertical: sp[1] + 2,
+    paddingHorizontal: sp[4], paddingVertical: sp[2],
     shadowColor: shadow.s.color, shadowOffset: shadow.s.offset, shadowRadius: shadow.s.radius, shadowOpacity: shadow.s.opacity, elevation: shadow.s.elevation,
   },
   acceptLabel: { fontFamily: typography.body.family, fontSize: 12, color: palette.cream, letterSpacing: 1 },

@@ -62,8 +62,8 @@ export function SubmitButton({ hasText, onPress, startedAt }: Props) {
         style={[
           styles.btn,
           {
-            backgroundColor: enabled ? palette.pink : palette.cream,
-            opacity: enabled ? 1 : 0.55,
+            backgroundColor: enabled ? palette.pink : palette.cream2,
+            opacity: enabled ? 1 : 0.92,
             shadowColor: shadowSpec.color,
             shadowOffset: shadowSpec.offset,
             shadowRadius: shadowSpec.radius,

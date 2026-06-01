@@ -15,11 +15,23 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       },
-      "buildNumber": "24"
+      "buildNumber": "30"
     },
     "plugins": [
       "expo-apple-authentication",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "react-native-google-mobile-ads",
+        {
+          "iosAppId": "ca-app-pub-6563643868702361~4571132569"
+        }
+      ],
+      [
+        "expo-tracking-transparency",
+        {
+          "userTrackingPermission": "Relatably uses this to show ads that are more relevant to you. If you decline, you'll still see ads, just less tailored."
+        }
+      ]
     ],
     "extra": {
       "eas": {

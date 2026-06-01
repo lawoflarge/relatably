@@ -120,7 +120,8 @@ export function ClusterBubble({ id, text, count, maxCount, isSelf, colorIndex, o
         style={{
           fontFamily: typography.h3.family,
           fontSize,
-          lineHeight: fontSize,
+          // BagelFatOne clips its top at lineHeight == fontSize; give headroom.
+          lineHeight: Math.round(fontSize * 1.2),
           color: fg,
         }}
       >

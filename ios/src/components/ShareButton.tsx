@@ -31,9 +31,10 @@ export function ShareButton({ viewRef, banner_type, question_id, share_target = 
 
 const styles = StyleSheet.create({
   btn: {
-    flexDirection: "row", alignItems: "center", gap: sp[2],
+    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: sp[2],
+    minHeight: 44,
     backgroundColor: palette.mint, borderColor: palette.ink, borderWidth: 2, borderRadius: radii.pill,
-    paddingHorizontal: sp[3], paddingVertical: sp[2],
+    paddingHorizontal: sp[4], paddingVertical: sp[2],
     shadowColor: shadow.s.color, shadowOffset: shadow.s.offset, shadowRadius: shadow.s.radius, shadowOpacity: shadow.s.opacity, elevation: shadow.s.elevation,
   },
   label: { fontFamily: typography.body.family, fontSize: 13, letterSpacing: 0.5, color: palette.ink },

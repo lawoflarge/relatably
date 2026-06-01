@@ -33,9 +33,14 @@ export function FriendsScreen({ isSignedIn }: Props) {
   }, [effectiveSignedIn]);
 
   const onAccept = async (id: string) => {
-    await acceptFriend(id);
-    const next = await fetchFriends();
-    setFriendships(next.friendships);
+    try {
+      await acceptFriend(id);
+      const next = await fetchFriends();
+      setFriendships(next.friendships);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "could not accept request";
+      Alert.alert("couldn't accept", msg);
+    }
   };
 
   if (!effectiveSignedIn) {

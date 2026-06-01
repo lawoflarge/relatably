@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { View, StyleSheet, Text, Pressable } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -32,7 +32,7 @@ import {
   hasShownInterstitialFor,
   markInterstitialShownFor,
 } from "@/src/lib/interstitialGate";
-import { loadInterstitialOnce } from "@/src/lib/ads";
+import { initAdsAndAtt, loadInterstitialOnce } from "@/src/lib/ads";
 import { palette, radii, shadow, sp, typography } from "@/src/theme/tokens";
 import type { TodayQuestion, Yesterday } from "@/src/types/api";
 
@@ -49,6 +49,12 @@ export default function HomeScreen() {
   const [selfClusterId, setSelfClusterId] = useState<string | null>(null);
   const [selfSubmissionId, setSelfSubmissionId] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const questionInFlight = useRef(false);
+
+  // Ask for tracking permission and spin up the Mobile Ads SDK once on launch.
+  useEffect(() => {
+    initAdsAndAtt();
+  }, []);
 
   // Best-effort messaging registration on first open.
   useEffect(() => {
@@ -67,6 +73,10 @@ export default function HomeScreen() {
   }, []);
 
   const loadQuestion = useCallback(() => {
+    // Guard against a second concurrent fetch (e.g. a fast "CHECK AGAIN" tap
+    // while the boot fetch is still in flight) racing the phase state.
+    if (questionInFlight.current) return;
+    questionInFlight.current = true;
     setErrorMsg(null);
     setPhase("loading");
     fetchTodayQuestion()
@@ -84,6 +94,9 @@ export default function HomeScreen() {
           setErrorMsg(msg);
           setPhase("error");
         }
+      })
+      .finally(() => {
+        questionInFlight.current = false;
       });
   }, []);
 
