@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { View, Text, StyleSheet, useWindowDimensions, Pressable, Alert } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { palette, radii, shadow, sp, typography } from "@/src/theme/tokens";
 import { PaperTexture } from "@/src/components/sticker/PaperTexture";
@@ -30,9 +31,12 @@ export function WordcloudScreen({ clusters, selfClusterId, totalCount, questionI
   const [deleted, setDeleted] = useState(false);
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
   const cardRef = useRef<View>(null);
-  const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  const { width, height } = useWindowDimensions();
   const cloudWidth = width - sp.gutter * 2;
-  const cloudHeight = 560;
+  // Cap the cloud to the space left after the header, delete row and floating
+  // tab bar so content never overflows behind the tab pill on smaller devices.
+  const cloudHeight = Math.min(560, height - insets.top - insets.bottom - 220);
 
   useEffect(() => {
     let cancelled = false;
@@ -68,7 +72,7 @@ export function WordcloudScreen({ clusters, selfClusterId, totalCount, questionI
   const shareEnabled = !!(questionId && questionText && userAnswer && dateLabel);
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { paddingTop: insets.top + sp[5], paddingBottom: insets.bottom + 96 }]}>
       <PaperTexture />
       <View style={styles.headerRow}>
         <Text style={styles.counter}>{totalCount.toLocaleString()} VOTES · THE WORLD IS VOTING</Text>
@@ -155,15 +159,17 @@ export function WordcloudScreen({ clusters, selfClusterId, totalCount, questionI
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: palette.cream, paddingTop: sp[7], paddingHorizontal: sp.gutter },
+  root: { flex: 1, backgroundColor: palette.cream, paddingHorizontal: sp.gutter },
   headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: sp[4] },
   counter: { fontFamily: typography.label.family, fontSize: 11, letterSpacing: 1.4, color: palette.inkSoft },
   cloud: { alignSelf: "center", position: "relative" },
   offscreen: { position: "absolute", left: -10000, top: -10000, opacity: 0 },
   deleteRow: { alignItems: "center", marginTop: sp[3] },
   deleteBtn: {
-    paddingHorizontal: sp[3],
-    paddingVertical: sp[1] + 2,
+    minHeight: 44,
+    justifyContent: "center",
+    paddingHorizontal: sp[4],
+    paddingVertical: sp[2],
     borderRadius: radii.s,
     borderColor: palette.ink,
     borderWidth: 2,

@@ -15,10 +15,14 @@ export const palette = {
 } as const;
 
 export const typography = {
-  hero:   { size: 52, line: 50, family: "BagelFatOne" },
-  h1:     { size: 40, line: 38, family: "BagelFatOne" },
-  h2:     { size: 36, line: 34, family: "BagelFatOne" },
-  h3:     { size: 22, line: 22, family: "BagelFatOne" },
+  // BagelFatOne is a tall, heavy-ascender display face. On iOS the line box is
+  // clamped to lineHeight, so a lineHeight <= fontSize clips the top of the
+  // glyphs. Display tokens therefore need headroom (~1.2x size); the web
+  // mockups' tighter ratios do not translate to RN/iOS.
+  hero:   { size: 52, line: 62, family: "BagelFatOne" },
+  h1:     { size: 40, line: 48, family: "BagelFatOne" },
+  h2:     { size: 36, line: 44, family: "BagelFatOne" },
+  h3:     { size: 22, line: 28, family: "BagelFatOne" },
   bodyL:  { size: 17, line: 24, family: "HankenGrotesk_700" },
   body:   { size: 15, line: 20, family: "HankenGrotesk_700" },
   bodyS:  { size: 13, line: 18, family: "HankenGrotesk_700" },
