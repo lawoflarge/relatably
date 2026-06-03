@@ -1,13 +1,11 @@
 // ios/src/components/ClusterBubble.tsx
 import React from "react";
-import { Text, View, StyleSheet, Pressable, ActionSheetIOS, Alert, Platform } from "react-native";
+import { Text, View, StyleSheet, Pressable } from "react-native";
 
 import { palette, radii, shadow, sp, typography } from "@/src/theme/tokens";
 import { clusterSizeBucket, clusterSizePx } from "@/src/lib/clusterSizeBucket";
 import { stickerRotation } from "@/src/lib/stickerRotation";
-import { reportContent } from "@/src/lib/api";
-import { getDeviceToken } from "@/src/lib/deviceId";
-import { hideCluster } from "@/src/lib/hiddenContentStore";
+import { openClusterModerationSheet } from "@/src/lib/clusterModeration";
 
 interface Props {
   id: string;
@@ -39,65 +37,21 @@ export function ClusterBubble({ id, text, count, maxCount, isSelf, colorIndex, o
   const fill = isSelf ? palette.pink : FILL_ROTATION[colorIndex % FILL_ROTATION.length];
   const fg = isSelf ? palette.cream : palette.ink;
 
-  const handleHide = async () => {
-    try {
-      await hideCluster({ id, text });
-      onHide?.(id, text);
-    } catch (err) {
-      Alert.alert("Couldn't hide", err instanceof Error ? err.message : String(err));
-    }
-  };
-
-  const handleReport = async () => {
-    try {
-      const deviceToken = await getDeviceToken();
-      await reportContent({ target_type: "cluster", target_id: id, device_token: deviceToken });
-      // Also hide locally so the reporter doesn't have to keep seeing it
-      // while the report is reviewed.
-      await hideCluster({ id, text });
-      onHide?.(id, text);
-      Alert.alert("Thanks for reporting", "We removed it from your feed and will review within 24 hours.");
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "report failed";
-      Alert.alert("Couldn't report", msg);
-    }
-  };
-
-  const handleLongPress = () => {
-    // Don't let the user hide their own answer here — they have a dedicated
-    // "DELETE MY ANSWER" affordance on the wordcloud (server-side delete).
+  // Tap OR long-press opens the moderation sheet so the control is easy to
+  // find (App Review Guideline 1.2 — a hidden long-press is not discoverable).
+  // The user's own answer is excluded because it has a dedicated
+  // "DELETE MY ANSWER" affordance on the wordcloud (server-side delete).
+  const openModeration = () => {
     if (isSelf) return;
-    if (Platform.OS === "ios") {
-      ActionSheetIOS.showActionSheetWithOptions(
-        {
-          options: ["Cancel", "Hide this answer", "Report this answer"],
-          destructiveButtonIndex: 2,
-          cancelButtonIndex: 0,
-          title: `"${text}"`,
-        },
-        (index) => {
-          if (index === 1) handleHide();
-          if (index === 2) handleReport();
-        },
-      );
-    } else {
-      Alert.alert(
-        `"${text}"`,
-        "Remove from your feed or report it? Reports are reviewed within 24 hours.",
-        [
-          { text: "Cancel", style: "cancel" },
-          { text: "Hide", onPress: handleHide },
-          { text: "Report", style: "destructive", onPress: handleReport },
-        ],
-      );
-    }
+    openClusterModerationSheet(id, text, onHide);
   };
 
   return (
     <Pressable
-      onLongPress={handleLongPress}
-      accessibilityLabel={`${text}, long-press to hide or report`}
-      accessibilityHint="Long-press to hide this answer from your feed or report it"
+      onPress={openModeration}
+      onLongPress={openModeration}
+      accessibilityLabel={isSelf ? text : `${text}, tap to hide or report`}
+      accessibilityHint={isSelf ? undefined : "Tap or long-press to hide this answer from your feed or report it"}
       style={[
         styles.wrap,
         {

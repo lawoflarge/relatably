@@ -2,7 +2,7 @@
 
 Daily synchronized opinion ritual for Gen Z. One question per day at a globally-random moment, free-text answers aggregate into a live wordcloud, and the first person to call the eventual #1 answer is crowned "most relatable on Earth."
 
-**Status:** Phases 1–6 shipped to production at <https://relatably.vercel.app>. Sticker Pop UI v1.0 design language landed on `main` 2026-05-11 (PR #1 + PR #2). Phase 7 — App Store submission — is the next ship. iOS build #20 is on internal TestFlight; build #21 with the new UI needs a Mac (`eas build`) before App Review.
+**Status:** Phases 1–6 live in production at <https://relatably.vercel.app>. iOS **v1.0 (build 32) is in App Review** as of 2026-06-03 — resubmitted after a Guideline 1.2 (User-Generated Content) rejection with visible report/block/hide controls everywhere, a no-drop Home fallback, an 18+ rating, and deterministic reviewer notes. See `docs/superpowers/plans/` for phase history.
 
 ## Design + plans
 
@@ -103,14 +103,34 @@ All third-party SDKs default off. To enable in production:
 | `EXPO_PUBLIC_BRANCH_KEY` | EAS env | Branch.io SDK init. When unset, share fallback URL is `https://relatably.app/?r=<code>`. |
 | `EXPO_PUBLIC_ADMOB_ENABLED` | EAS env | Set to `"true"` to enable AdMob. When false (default), all 3 ad slots render the disabled placeholder. |
 | `EXPO_PUBLIC_ADMOB_LEADERBOARD_BANNER_ID` / `*_ARCHIVE_BANNER_ID` / `*_INTERSTITIAL_ID` | EAS env | Per-slot ad-unit ids. Default to AdMob's published iOS test ad units when unset. |
+| `EXPO_PUBLIC_API_URL` | **build-time env (xcodebuild / EAS)** | Backend base URL the iOS client calls. **MUST be exported as `https://relatably.vercel.app` at build time** — `ios/src/lib/api.ts` falls back to `http://localhost:3000`, so a release build without it cannot reach the backend (App Review sees "no signal" → instant reject). |
 
-iOS build (Mac only):
+## Building & submitting to the App Store (local Mac)
+
+Local Xcode pipeline (replaces EAS/Codemagic). The native project lives in `ios/ios/`. From `ios/ios/`:
 
 ```bash
-cd ios
-npx expo prebuild --platform ios
-npx expo run:ios
+# 1. bump ios/app.json buildNumber, then mirror it into the native Info.plist:
+/usr/libexec/PlistBuddy -c "Set :CFBundleVersion <N>" Relatably/Info.plist
+rm -rf "$TMPDIR"/metro-*                                    # avoid a stale JS bundle
+export EXPO_PUBLIC_API_URL=https://relatably.vercel.app     # CRITICAL — see env table above
+# 2. archive (manual signing, App Store profile):
+xcodebuild -workspace Relatably.xcworkspace -scheme Relatably -configuration Release -sdk iphoneos \
+  -archivePath ../build/Relatably.xcarchive -destination 'generic/platform=iOS' \
+  DEVELOPMENT_TEAM=R95M36AU2X CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="Apple Distribution" \
+  PROVISIONING_PROFILE_SPECIFIER="Relatably Local AppStore 2026-06-01" archive
+# 3. export IPA + upload:
+xcodebuild -exportArchive -archivePath ../build/Relatably.xcarchive \
+  -exportPath ../build/export -exportOptionsPlist ../build/export/ExportOptions.plist
+xcrun altool --upload-app -f ../build/export/*.ipa -t ios \
+  --apiKey 8XWLD2B2RQ --apiIssuer 538cb0d4-b8c6-4bc7-8b59-75da5d2b9411
 ```
+
+Then `node scripts/asc-fill-metadata.mjs` attaches the latest VALID build + sets review notes + the 18+ rating.
+
+**Gotchas (learned the hard way):**
+- **Export `EXPO_PUBLIC_API_URL` at build time** or the app points at localhost = instant App Review reject. Verify by running the build on a Simulator and confirming it reaches the backend — the Hermes bundle is bytecode, so `grep main.jsbundle` is unreliable; use `strings -n5 | grep`.
+- **A REJECTED version cannot be resubmitted via REST** (it stays bound to the old reviewSubmission → `409 ITEM_PART_OF_ANOTHER_SUBMISSION`). Do the final step in the ASC web UI: version page → "Update Review" → submission page → "Resubmit to App Review".
 
 ## Owner
 

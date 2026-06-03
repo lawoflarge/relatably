@@ -119,52 +119,27 @@ Free, no subscription. Sign in with Apple to compete on the leaderboard, or play
   reviewContactLastName: "Schwab",
   reviewContactPhone: "+49 157 379 65607",
   reviewContactEmail: "levin.schwab@gmx.de",
-  reviewNotes: `RESPONSE TO PRIOR REJECTION (sub 4679c135, reviewed 2026-05-21).
-Both findings are addressed in the new build.
+  reviewNotes: `Relatably is an anonymous daily-question app with user-generated answers. This build makes every Guideline 1.2 safeguard an easy-to-find, one-tap control and removes the previous "no drop" dead-end, so a reviewer can exercise all of them in under a minute with NO sign-in and NO waiting.
 
-GUIDELINE 1.2 — UGC safeguards
+HOW TO TEST (about 60 seconds, fully anonymous)
+1. Launch the app. A full-screen Terms gate appears on first launch. It states our ZERO-TOLERANCE policy for objectionable content and abusive users, and that you must be 18+. Tap "I AGREE".
+2. On the Today tab, type any answer and tap DROP IT. You then see the live wordcloud of everyone's answers. (If today's global drop has not unlocked yet, the app automatically shows the most recent drop, so content is always present.)
+3. REPORT or REMOVE someone else's content: a hint reads "Tap any answer to hide or report it." Tap any answer bubble that is not your own, then choose "Report this answer" (files a report to our 24h queue and removes it from your feed immediately) or "Hide this answer". The very same control is on every past wordcloud under the Archive tab.
+4. POST and DELETE your own content: type an answer and submit. On the wordcloud your answer is tagged "YOU" and a visible "DELETE MY ANSWER" button removes it from the feed instantly (server-side delete).
+5. BLOCK a user: open the Board tab. Each row has a visible "..." (more) button. Tap it, then "Block this user" (the row disappears and their content is hidden) or "Report this user".
+6. The Archive tab is always available and shows past drops; tap the "..." on any answer there to hide or report it too.
+7. CONTACT and manage: the ME tab (gear icon, far right of the tab bar) has a visible "Contact support" email, a "Report inappropriate content" button, Terms of Service, Privacy Policy, and sections to review and undo your hidden answers and blocked users.
 
-(a) Age rating now reflects 18+.
-ageRatingOverrideV2 = EIGHTEEN_PLUS (Jan-2025 tier system). Honest answers: frequent profanity, frequent mature/suggestive themes, userGeneratedContent = true.
+ADDITIONAL SAFEGUARDS
+- Age rating is set to 18+ (ageRatingOverrideV2 = EIGHTEEN_PLUS).
+- Two-tier filtering on every submission: an immediate slur/violence block, plus a Google Perspective toxicity check that removes toxic answers server-side.
+- We act on every report within 24 hours by removing the content and ejecting repeat offenders, as stated in the Terms.
+- Sign in with Apple (optional, only for the leaderboard) uses Apple's native ASAuthorizationAppleIDButton; account deletion is in the Settings tab.
 
-(b) Block abusive users.
-- Leaderboard: long-press any row that isn't yours → action sheet → "Block this user" or "Report this user". Blocked rows disappear immediately.
-- Friends: long-press any row → "Block" (also tears down the friendship).
-- Block is persisted both locally (AsyncStorage "ugc_blocked_users_v1") and on the server (POST /api/users/{id}/block writes /users/{me}/blocked/{them}).
-- Users review and reverse blocks from ME (Settings) tab → BLOCKED USERS → tap to unblock.
-
-(c) Immediately remove posts from feed.
-- Wordcloud: long-press any answer bubble that isn't yours → action sheet → "Hide this answer" or "Report this answer". The bubble disappears on the next render with no server roundtrip.
-- Archive: the same hidden set filters historical detail views.
-- Hide is persisted locally (AsyncStorage "ugc_hidden_clusters_v1").
-- "Report" auto-hides the cluster locally AND posts to /api/report for triage within 24h.
-- The user's own answer is excluded from "Hide" because it has a dedicated "DELETE MY ANSWER" pill (server-side delete via DELETE /api/submissions/{id}).
-- Users review and reverse hides from ME (Settings) tab → HIDDEN ANSWERS → tap to unhide.
-
-GUIDELINE 4 — Sign in with Apple
-
-The button now renders Apple's official ASAuthorizationAppleIDButton via expo-apple-authentication's AppleAuthenticationButton (buttonType=SIGN_IN, buttonStyle=BLACK, cornerRadius=12, 240x48). Apple's logo, label, and proportions are drawn natively by AuthenticationServices.framework. Appears on the Friends tab CTA and Leaderboard friends-scope CTA.
-
-HOW TO TEST
-
-1. Launch → tap "I AGREE" on the Terms modal.
-2. UGC controls (anonymous):
-   - If no question is live, email levin.schwab@gmx.de and we trigger one within 5 minutes.
-   - Submit any answer → wordcloud appears.
-   - Long-press a bubble that isn't yours → "Hide" → it disappears. Another → "Report" → same + alert confirms report.
-   - Tap "DELETE MY ANSWER" → your bubble disappears.
-3. Sign in with Apple:
-   - Friends tab → tap the SIWA button (note the Apple logo + native rendering) → complete the flow.
-4. Block users:
-   - Leaderboard tab → long-press a row that isn't yours → "Block this user" → row disappears.
-   - ME (Settings) tab → BLOCKED USERS section → tap a row to unblock.
-5. Account deletion (signed in):
-   - ME (Settings) tab → "Delete account" → confirms → server revokes Firebase Auth, deletes profile, leaderboard entries, friend graph, anonymises submissions, signs out.
-
-LINKS
-Backend: https://relatably.vercel.app
+CONTACT
+Levin Schwab, levin.schwab@gmx.de, +49 157 379 65607
+Terms: https://relatably.vercel.app/tos
 Privacy: https://relatably.vercel.app/privacy
-Terms of Service: https://relatably.vercel.app/tos
 Support: https://relatably.vercel.app/support`,
 };
 
