@@ -11,6 +11,7 @@ import { AnswerInput } from "@/src/components/AnswerInput";
 import { LiveCounter } from "@/src/components/LiveCounter";
 import { RevealAnimation } from "@/src/components/RevealAnimation";
 import {
+  fetchArchive,
   fetchTodayQuestion,
   fetchYesterday,
   registerDevice,
@@ -49,6 +50,7 @@ export default function HomeScreen() {
   const [selfClusterId, setSelfClusterId] = useState<string | null>(null);
   const [selfSubmissionId, setSelfSubmissionId] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [exploringPast, setExploringPast] = useState(false);
   const questionInFlight = useRef(false);
 
   // Ask for tracking permission and spin up the Mobile Ads SDK once on launch.
@@ -82,14 +84,32 @@ export default function HomeScreen() {
     fetchTodayQuestion()
       .then((q) => {
         setQuestion(q);
+        setExploringPast(false);
         setRenderedAt(Date.now());
         setPhase("question");
       })
       .catch((e: unknown) => {
         const msg = e instanceof Error ? e.message : "fetch failed";
-        // 404 = no live question right now. That's an expected state between drops.
+        // 404 = no live question right now. Instead of dead-ending on a "no
+        // drop" screen (which left App Review unable to reach ANY user content
+        // or moderation control), fall back to the most recent revealed drop so
+        // the app is always interactive: the reviewer — and real users between
+        // drops — can answer it, see the live wordcloud, delete their own
+        // answer, and hide/report others.
         if (/\b404\b/.test(msg)) {
-          setPhase("no_drop");
+          fetchArchive()
+            .then((page) => {
+              const latest = page.tiles[0];
+              if (latest) {
+                setQuestion({ id: latest.question_id, text: latest.question_text });
+                setExploringPast(true);
+                setRenderedAt(Date.now());
+                setPhase("question");
+              } else {
+                setPhase("no_drop");
+              }
+            })
+            .catch(() => setPhase("no_drop"));
         } else {
           setErrorMsg(msg);
           setPhase("error");
@@ -242,6 +262,11 @@ export default function HomeScreen() {
 
       {phase === "question" && question && (
         <View style={[styles.container, { paddingTop: topPad }]}>
+          {exploringPast && (
+            <Text style={styles.replayHint}>
+              Today&apos;s drop hasn&apos;t unlocked yet. Here&apos;s the most recent one — answer it to explore the live wordcloud.
+            </Text>
+          )}
           <QuestionText text={question.text} />
           <AnswerInput value={text} onChangeText={setText} />
           <LiveCounter count={totalCount} />
@@ -282,6 +307,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, paddingHorizontal: sp.gutter },
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
   muted: { fontFamily: typography.bodyL.family, fontSize: 16, color: palette.inkSoft },
+  replayHint: { fontFamily: typography.bodyS.family, fontSize: typography.bodyS.size, lineHeight: typography.bodyS.line, color: palette.inkSoft, textAlign: "center", marginBottom: sp[3] },
   card: {
     backgroundColor: "#FFFFFF",
     borderColor: palette.ink,

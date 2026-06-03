@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, FlatList, ActivityIndicator, StyleSheet } from "react-native";
+import { View, Text, FlatList, ActivityIndicator, StyleSheet, Pressable } from "react-native";
 import { fetchArchiveDetail } from "@/src/lib/api";
 import { PaperTexture } from "@/src/components/sticker/PaperTexture";
 import { ShareButton } from "@/src/components/ShareButton";
 import { ShareCardVerdict } from "@/src/components/ShareCardVerdict";
 import { getHiddenClusterIds } from "@/src/lib/hiddenContentStore";
+import { openClusterModerationSheet } from "@/src/lib/clusterModeration";
 import { palette, radii, shadow, sp, typography } from "@/src/theme/tokens";
 import type { ArchiveDetail } from "@/src/types/api";
 
@@ -57,6 +58,14 @@ export function ArchiveDetailScreen({ questionId }: Props) {
     [state, hiddenIds],
   );
 
+  const handleHidden = (id: string) => {
+    setHiddenIds((prev) => {
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+  };
+
   if (state.kind === "loading") {
     return (
       <View style={styles.center}>
@@ -95,6 +104,7 @@ export function ArchiveDetailScreen({ questionId }: Props) {
           label="SHARE"
         />
       </View>
+      <Text style={styles.modHint}>Tap ⋯ on any answer to hide or report it</Text>
       <FlatList
         data={visibleClusters}
         keyExtractor={(c) => c.id}
@@ -105,6 +115,15 @@ export function ArchiveDetailScreen({ questionId }: Props) {
             </View>
             <Text style={styles.canonical} numberOfLines={2}>{item.canonical_text}</Text>
             <Text style={styles.pct}>{(item.final_pct_of_total * 100).toFixed(1)}%</Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Hide or report "${item.canonical_text}"`}
+              hitSlop={8}
+              onPress={() => openClusterModerationSheet(item.id, item.canonical_text, handleHidden)}
+              style={styles.modBtn}
+            >
+              <Text style={styles.modDots}>⋯</Text>
+            </Pressable>
           </View>
         )}
         contentContainerStyle={{ paddingBottom: 120 }}
@@ -170,5 +189,8 @@ const styles = StyleSheet.create({
   rankText: { fontFamily: typography.label.family, fontSize: 11, color: palette.ink, letterSpacing: 1.1 },
   canonical: { fontFamily: typography.body.family, fontSize: 15, color: palette.ink, flex: 1 },
   pct: { fontFamily: typography.bodyS.family, fontSize: 13, color: palette.inkSoft },
+  modBtn: { minWidth: 36, minHeight: 36, alignItems: "center", justifyContent: "center" },
+  modDots: { fontFamily: typography.h3.family, fontSize: 22, lineHeight: 24, color: palette.inkSoft },
+  modHint: { fontFamily: typography.bodyS.family, fontSize: typography.bodyS.size, color: palette.inkSoft, textAlign: "center", paddingVertical: sp[2] },
   shareCardOffscreen: { position: "absolute", left: -10000, top: -10000, opacity: 0 },
 });

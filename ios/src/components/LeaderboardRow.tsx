@@ -121,6 +121,17 @@ export function LeaderboardRow({ rank, userId, handle, score, streakDays, isSelf
           )}
         </View>
         <Text style={[styles.score, { color: fg }]}>{score}</Text>
+        {canModerate && (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Block or report ${displayHandle}`}
+            hitSlop={8}
+            onPress={handleLongPress}
+            style={styles.modBtn}
+          >
+            <Text style={[styles.modDots, { color: fg }]}>⋯</Text>
+          </Pressable>
+        )}
       </View>
       {crown && (
         <View style={styles.crown}><Text style={styles.crownText}>★ #1</Text></View>
@@ -154,6 +165,8 @@ const styles = StyleSheet.create({
   streakRow: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 2 },
   streak: { fontFamily: typography.micro.family, fontSize: 10, letterSpacing: 1.2 },
   score: { fontFamily: typography.h3.family, fontSize: 20 },
+  modBtn: { minWidth: 36, minHeight: 36, alignItems: "center", justifyContent: "center", marginLeft: sp[1] },
+  modDots: { fontFamily: typography.h3.family, fontSize: 22, lineHeight: 24 },
   crown: {
     position: "absolute", top: -10, left: -14,
     backgroundColor: palette.pink, borderColor: palette.ink, borderWidth: 2, borderRadius: radii.s,

@@ -86,6 +86,9 @@ export function WordcloudScreen({ clusters, selfClusterId, totalCount, questionI
           />
         )}
       </View>
+      {visibleClusters.some((c) => c.id !== selfClusterId) && (
+        <Text style={styles.modHint}>Tap any answer to hide or report it</Text>
+      )}
       <View style={[styles.cloud, { width: cloudWidth, height: cloudHeight }]}>
         {visibleClusters.map((c, i) => {
           const p = placementById.get(c.id);
@@ -162,6 +165,7 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: palette.cream, paddingHorizontal: sp.gutter },
   headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: sp[4] },
   counter: { fontFamily: typography.label.family, fontSize: 11, letterSpacing: 1.4, color: palette.inkSoft },
+  modHint: { fontFamily: typography.bodyS.family, fontSize: typography.bodyS.size, color: palette.inkSoft, textAlign: "center", marginBottom: sp[3] },
   cloud: { alignSelf: "center", position: "relative" },
   offscreen: { position: "absolute", left: -10000, top: -10000, opacity: 0 },
   deleteRow: { alignItems: "center", marginTop: sp[3] },
