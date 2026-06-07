@@ -119,22 +119,25 @@ Free, no subscription. Sign in with Apple to compete on the leaderboard, or play
   reviewContactLastName: "Schwab",
   reviewContactPhone: "+49 157 379 65607",
   reviewContactEmail: "levin.schwab@gmx.de",
-  reviewNotes: `Relatably is an anonymous daily-question app with user-generated answers. This build makes every Guideline 1.2 safeguard an easy-to-find, one-tap control and removes the previous "no drop" dead-end, so a reviewer can exercise all of them in under a minute with NO sign-in and NO waiting.
+  reviewNotes: `Relatably is an anonymous daily-question app with user-generated free-text answers. Every Guideline 1.2 safeguard is a visible, one-tap control, and this build GUARANTEES there is always populated content to act on — a brand-new install immediately shows a full wordcloud of other answers and a full Board of users — so a reviewer can exercise every control in under a minute with NO sign-in and NO waiting.
 
-HOW TO TEST (about 60 seconds, fully anonymous)
-1. Launch the app. A full-screen Terms gate appears on first launch. It states our ZERO-TOLERANCE policy for objectionable content and abusive users, and that you must be 18+. Tap "I AGREE".
-2. On the Today tab, type any answer and tap DROP IT. You then see the live wordcloud of everyone's answers. (If today's global drop has not unlocked yet, the app automatically shows the most recent drop, so content is always present.)
-3. REPORT or REMOVE someone else's content: a hint reads "Tap any answer to hide or report it." Tap any answer bubble that is not your own, then choose "Report this answer" (files a report to our 24h queue and removes it from your feed immediately) or "Hide this answer". The very same control is on every past wordcloud under the Archive tab.
-4. POST and DELETE your own content: type an answer and submit. On the wordcloud your answer is tagged "YOU" and a visible "DELETE MY ANSWER" button removes it from the feed instantly (server-side delete).
-5. BLOCK a user: open the Board tab. Each row has a visible "..." (more) button. Tap it, then "Block this user" (the row disappears and their content is hidden) or "Report this user".
-6. The Archive tab is always available and shows past drops; tap the "..." on any answer there to hide or report it too.
-7. CONTACT and manage: the ME tab (gear icon, far right of the tab bar) has a visible "Contact support" email, a "Report inappropriate content" button, Terms of Service, Privacy Policy, and sections to review and undo your hidden answers and blocked users.
+HOW TO TEST (about 60 seconds, fully anonymous, no account)
+1. Launch. A full-screen Terms gate appears on first launch. It states our ZERO-TOLERANCE policy for objectionable content and abusive users and requires you to confirm you are 18 or older. Tap "I AGREE".
+2. On the Today tab, type any answer and tap DROP IT. You immediately see a live wordcloud with many other answers.
+3. REPORT / HIDE / BLOCK another user's content: tap any answer bubble that is not your own (on-screen hint: "Tap any answer ... to hide it, report it, or block whoever wrote it"). The sheet offers "Hide this answer", "Report this answer" (files a report to our 24-hour queue and removes it from your feed immediately), and "Block this contributor" (hides them and their answers). The identical control is on every past wordcloud under the Archive tab via a visible "..." button on each row.
+4. POST and DELETE your own content: your submitted answer is tagged "YOU" and has a visible "DELETE MY ANSWER" button that removes it from the feed instantly.
+5. BLOCK a user from the Board: open the Board tab. It always lists ranked users. Each row has a visible "..." button -> "Block this user" (the row disappears and their content is hidden) or "Report this user".
+6. CONTACT and manage: the ME tab (gear icon, far right of the tab bar) has a visible "Contact support" email, a "Report inappropriate content" button, Terms of Service, Privacy Policy, and sections to review and undo your hidden answers and blocked users.
+
+WHY THERE IS ALWAYS CONTENT TO MODERATE
+Answers are anonymous and aggregated into a wordcloud. To make sure the moderation controls always have something to act on (even on a fresh install or a brand-new daily drop), this build shows clearly non-objectionable demo answers and demo Board users. Prior 1.2 feedback was caused by the feed/Board being empty at review time even though the controls existed; that can no longer happen.
 
 ADDITIONAL SAFEGUARDS
-- Age rating is set to 18+ (ageRatingOverrideV2 = EIGHTEEN_PLUS).
+- Age rating is 18+, and the first-launch Terms gate requires an 18+ confirmation.
 - Two-tier filtering on every submission: an immediate slur/violence block, plus a Google Perspective toxicity check that removes toxic answers server-side.
 - We act on every report within 24 hours by removing the content and ejecting repeat offenders, as stated in the Terms.
-- Sign in with Apple (optional, only for the leaderboard) uses Apple's native ASAuthorizationAppleIDButton; account deletion is in the Settings tab.
+- There is NO chat, NO direct messages, and NO 1:1 messaging of any kind — only anonymous aggregated answers.
+- Sign in with Apple is optional (only for the leaderboard); account deletion is in the ME tab.
 
 CONTACT
 Levin Schwab, levin.schwab@gmx.de, +49 157 379 65607

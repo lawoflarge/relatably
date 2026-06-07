@@ -21,7 +21,7 @@ function makeToken() {
 }
 
 const token = makeToken();
-const OLD = "245a9f1f-e626-4232-9908-81e290f7afa4";
+const OLD = "c94cb368-f96f-43bd-8d45-9f1567085e00";
 
 async function call(method, p, body) {
   const r = await fetch(`https://api.appstoreconnect.apple.com${p}`, {

@@ -66,13 +66,13 @@ export function TosGate({ children }: Props): React.ReactElement {
           <View style={styles.bulletRow}><Text style={styles.bullet}>•</Text><Text style={styles.bulletText}>No personal info about other people.</Text></View>
           <View style={styles.bulletRow}><Text style={styles.bullet}>•</Text><Text style={styles.bulletText}>No spam, scams, or attempts to game the wordcloud.</Text></View>
           <Text style={styles.body}>
-            Anything else? Long-press an answer in the wordcloud to report it.
-            We act on reports within 24 hours. Repeat offenders lose their
-            account.
+            Anything else? Tap any answer in the wordcloud to hide it, report it,
+            or block whoever wrote it. We act on reports within 24 hours and eject
+            repeat offenders.
           </Text>
           <Text style={styles.smaller}>
             By tapping <Text style={{ fontFamily: typography.label.family }}>I AGREE</Text> you confirm
-            you&apos;re 17 or older and you accept our{' '}
+            you&apos;re 18 or older and you accept our{' '}
             <Text style={styles.link} onPress={() => Linking.openURL(`${BASE}/tos`)}>Terms of Service</Text>
             {' '}and{' '}
             <Text style={styles.link} onPress={() => Linking.openURL(`${BASE}/privacy`)}>Privacy Policy</Text>.
