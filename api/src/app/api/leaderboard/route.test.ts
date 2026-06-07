@@ -178,7 +178,7 @@ describe("GET /api/leaderboard", () => {
     expect(body.entries.map((e: any) => e.user_id).sort()).toEqual(["u1", "u2"]);
   });
 
-  it("returns empty when no revealed question exists yet", async () => {
+  it("daily/global with no revealed question serves the demo fallback (never empty for App Review)", async () => {
     const questionsCollection: any = {
       where: vi.fn(() => ({
         orderBy: vi.fn(() => ({
@@ -194,6 +194,61 @@ describe("GET /api/leaderboard", () => {
     });
 
     const res = await GET(buildReq("?period=daily&scope=global"));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    // Guideline 1.2: the global Board must never be empty, or block/report have
+    // no user to act on. Empty real data → permanent demo users.
+    expect(body.entries.length).toBeGreaterThanOrEqual(6);
+    expect(body.entries[0]).toMatchObject({ user_id: "demo-maya", handle: "maya" });
+    // daily_rank present so the row renders a rank + visible block/report control.
+    expect(body.entries[0].daily_rank).toBe(1);
+  });
+
+  it("alltime/global with empty user_aggregates serves the demo fallback", async () => {
+    const aggCollection: any = {
+      orderBy: vi.fn(() => ({ limit: vi.fn(() => ({ get: vi.fn().mockResolvedValue({ docs: [] }) })) })),
+    };
+    (adminFirestore.collection as any).mockImplementation((name: string) => {
+      if (name === "user_aggregates") return aggCollection;
+      throw new Error(`unexpected ${name}`);
+    });
+
+    const res = await GET(buildReq("?period=alltime&scope=global"));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.entries.length).toBeGreaterThanOrEqual(6);
+    expect(body.entries.map((e: any) => e.user_id)).toContain("demo-maya");
+  });
+
+  it("scope=friends with no entries stays empty (never faked with demo users)", async () => {
+    (adminAuth.verifyIdToken as any).mockResolvedValueOnce({ uid: "lonely" });
+    const friendshipsCollection: any = {
+      where: vi.fn(() => ({
+        where: vi.fn(() => ({ get: vi.fn().mockResolvedValue({ docs: [] }) })),
+      })),
+    };
+    const questionsCollection: any = {
+      where: vi.fn(() => ({
+        orderBy: vi.fn(() => ({
+          limit: vi.fn(() => ({ get: vi.fn().mockResolvedValue({ empty: false, docs: [{ id: "q-latest" }] }) })),
+        })),
+      })),
+    };
+    const entriesCollection: any = {
+      where: vi.fn(() => ({
+        where: vi.fn(() => ({
+          orderBy: vi.fn(() => ({ orderBy: vi.fn(() => ({ limit: vi.fn(() => ({ get: vi.fn().mockResolvedValue({ docs: [] }) })) })) })),
+        })),
+      })),
+    };
+    (adminFirestore.collection as any).mockImplementation((name: string) => {
+      if (name === "friendships") return friendshipsCollection;
+      if (name === "questions") return questionsCollection;
+      if (name === "leaderboard_entries") return entriesCollection;
+      throw new Error(`unexpected ${name}`);
+    });
+
+    const res = await GET(buildReq("?period=daily&scope=friends", "tok"));
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.entries).toHaveLength(0);

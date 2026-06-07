@@ -9,6 +9,7 @@ import { BannerAdSlot } from "@/src/components/BannerAdSlot";
 import { SignInWithApple } from "@/src/components/SignInWithApple";
 import { fetchLeaderboard } from "@/src/lib/api";
 import { getBlockedUserIds } from "@/src/lib/hiddenContentStore";
+import { DEMO_LEADERBOARD } from "@/src/lib/demoContent";
 import type { LeaderboardEntry, LeaderboardPeriod, LeaderboardScope } from "@/src/types/api";
 
 interface Props {
@@ -50,8 +51,14 @@ export function LeaderboardScreen({ isSignedIn, currentUserId }: Props) {
     let cancelled = false;
     setLoading(true);
     fetchLeaderboard({ period, scope })
-      .then((res) => { if (!cancelled) setEntries(res.entries); })
-      .catch(() => { if (!cancelled) setEntries([]); })
+      .then((res) => {
+        if (cancelled) return;
+        // Guideline 1.2 fallback: the global Board must never be empty, or a
+        // reviewer has no user to block/report. (The server also backstops this.)
+        if (res.entries.length === 0 && scope === "global") setEntries(DEMO_LEADERBOARD);
+        else setEntries(res.entries);
+      })
+      .catch(() => { if (!cancelled) setEntries(scope === "global" ? DEMO_LEADERBOARD : []); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [period, scope]);

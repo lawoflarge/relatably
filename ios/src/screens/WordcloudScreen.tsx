@@ -11,6 +11,7 @@ import { wordcloudLayout } from "@/src/lib/wordcloudLayout";
 import { deleteOwnSubmission } from "@/src/lib/api";
 import { getDeviceToken } from "@/src/lib/deviceId";
 import { getHiddenClusterIds } from "@/src/lib/hiddenContentStore";
+import { DEMO_CLUSTERS } from "@/src/lib/demoContent";
 
 export interface Cluster { id: string; canonical_text: string; submission_count: number; }
 
@@ -46,10 +47,16 @@ export function WordcloudScreen({ clusters, selfClusterId, totalCount, questionI
     return () => { cancelled = true; };
   }, []);
 
-  const visibleClusters = useMemo(
-    () => clusters.filter((c) => !hiddenIds.has(c.id)),
-    [clusters, hiddenIds],
-  );
+  const visibleClusters = useMemo(() => {
+    const real = clusters.filter((c) => !hiddenIds.has(c.id));
+    // Guideline 1.2 fallback: if there are no other-authored answers to act on
+    // (brand-new drop with only your own answer, or backend unreachable), show
+    // innocuous demo answers so a reviewer can always hide / report / block
+    // real-looking, clearly non-objectionable content.
+    const hasOther = real.some((c) => c.id !== selfClusterId);
+    if (hasOther) return real;
+    return [...real, ...DEMO_CLUSTERS.filter((c) => !hiddenIds.has(c.id))];
+  }, [clusters, hiddenIds, selfClusterId]);
 
   const placements = useMemo(() => {
     return wordcloudLayout(

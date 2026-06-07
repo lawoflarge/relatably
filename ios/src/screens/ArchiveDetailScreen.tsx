@@ -6,6 +6,7 @@ import { ShareButton } from "@/src/components/ShareButton";
 import { ShareCardVerdict } from "@/src/components/ShareCardVerdict";
 import { getHiddenClusterIds } from "@/src/lib/hiddenContentStore";
 import { openClusterModerationSheet } from "@/src/lib/clusterModeration";
+import { DEMO_ARCHIVE_CLUSTERS } from "@/src/lib/demoContent";
 import { palette, radii, shadow, sp, typography } from "@/src/theme/tokens";
 import type { ArchiveDetail } from "@/src/types/api";
 
@@ -53,10 +54,14 @@ export function ArchiveDetailScreen({ questionId }: Props) {
   // Hooks must run in the same order on every render — keep this useMemo
   // ABOVE the loading/error early returns. Falls back to [] when detail isn't
   // ready yet.
-  const visibleClusters = useMemo(
-    () => (state.kind === "ready" ? state.detail.top_clusters.filter((c) => !hiddenIds.has(c.id)) : []),
-    [state, hiddenIds],
-  );
+  const visibleClusters = useMemo(() => {
+    if (state.kind !== "ready") return [];
+    const real = state.detail.top_clusters.filter((c) => !hiddenIds.has(c.id));
+    // Guideline 1.2 fallback: a revealed drop with no surviving answers still
+    // shows innocuous demo answers so report / hide / block is always exercisable.
+    if (real.length > 0) return real;
+    return DEMO_ARCHIVE_CLUSTERS.filter((c) => !hiddenIds.has(c.id));
+  }, [state, hiddenIds]);
 
   const handleHidden = (id: string) => {
     setHiddenIds((prev) => {

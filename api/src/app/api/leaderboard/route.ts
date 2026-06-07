@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { adminFirestore } from "@/lib/firebase";
 import { requireAuth } from "@/lib/auth";
+import { DEMO_LEADERBOARD } from "@/lib/demoContent";
 
 export const dynamic = "force-dynamic";
 
@@ -80,6 +81,23 @@ async function joinUsersAndFilterShadowbanned(
   return out;
 }
 
+// App Review Guideline 1.2 guard. The global Board must never be empty at review
+// time, or the block/report controls have no user to act on (the recurring cause
+// of Relatably's repeated 1.2 rejections). When there is genuinely no data, serve
+// permanent demo users for GLOBAL scope only. Friends scope stays user-specific
+// and is never faked.
+function demoFallback(limit: number) {
+  return NextResponse.json({
+    entries: DEMO_LEADERBOARD.slice(0, limit).map((e) => ({
+      user_id: e.user_id,
+      handle: e.handle,
+      score: e.score,
+      daily_rank: e.daily_rank,
+      locale: e.locale,
+    })),
+  });
+}
+
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const period = (url.searchParams.get("period") ?? "daily") as "daily" | "weekly" | "alltime";
@@ -101,9 +119,12 @@ export async function GET(req: Request) {
 
   if (period === "daily") {
     const qid = await findLatestRevealedId();
-    if (!qid) return NextResponse.json({ entries: [] });
-
-    if (friendUids) {
+    if (!qid) {
+      // No revealed question yet: friends scope has nothing to show; global
+      // scope falls through to the demo fallback below so the Board is never
+      // empty for App Review.
+      if (scope === "friends") return NextResponse.json({ entries: [] });
+    } else if (friendUids) {
       const chunks = chunk(friendUids, FIRESTORE_IN_CAP);
       const results = await Promise.all(
         chunks.map(async (c) => {
@@ -174,5 +195,11 @@ export async function GET(req: Request) {
   }
 
   const entries = await joinUsersAndFilterShadowbanned(rows);
+
+  // When the real Board is empty, never hand App Review an empty global list.
+  if (entries.length === 0 && scope === "global") {
+    return demoFallback(limit);
+  }
+
   return NextResponse.json({ entries });
 }
