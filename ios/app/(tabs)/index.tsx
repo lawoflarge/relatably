@@ -33,7 +33,7 @@ import {
   hasShownInterstitialFor,
   markInterstitialShownFor,
 } from "@/src/lib/interstitialGate";
-import { initAdsAndAtt, loadInterstitialOnce } from "@/src/lib/ads";
+import { initAds, loadInterstitialOnce } from "@/src/lib/ads";
 import { palette, radii, shadow, sp, typography } from "@/src/theme/tokens";
 import type { TodayQuestion, Yesterday } from "@/src/types/api";
 
@@ -53,9 +53,10 @@ export default function HomeScreen() {
   const [exploringPast, setExploringPast] = useState(false);
   const questionInFlight = useRef(false);
 
-  // Ask for tracking permission and spin up the Mobile Ads SDK once on launch.
+  // Spin up the Mobile Ads SDK once on launch. The app does not track users and
+  // shows no ATT prompt; every ad is served non-personalized.
   useEffect(() => {
-    initAdsAndAtt();
+    initAds();
   }, []);
 
   // Best-effort messaging registration on first open.

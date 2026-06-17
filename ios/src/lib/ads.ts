@@ -7,12 +7,16 @@ const PROD_INTERSTITIAL = "ca-app-pub-6563643868702361/2000809540";
 
 let cachedEnabled: boolean | undefined;
 let initStarted = false;
-let nonPersonalized = false;
+// Relatably does not track users in the App Tracking Transparency sense: it
+// never links data with third-party data for advertising and never calls the
+// ATT framework. AdMob is therefore always requested non-personalized, so no
+// IDFA-based cross-app tracking occurs. App Privacy in App Store Connect
+// declares "Data Not Used to Track You" to match — there is no ATT prompt.
+const nonPersonalized = true;
 
 export function __resetAdsForTest(): void {
   cachedEnabled = undefined;
   initStarted = false;
-  nonPersonalized = false;
 }
 
 export function isAdsEnabled(): boolean {
@@ -38,24 +42,12 @@ export function getAdUnitId(slot: Slot): string {
   }
 }
 
-// Requests App Tracking Transparency (falling back to non-personalized ads when
-// declined) and initializes the Mobile Ads SDK exactly once. Safe to call on
-// every app launch; it no-ops after the first run and when ads are disabled.
-export async function initAdsAndAtt(): Promise<void> {
+// Initializes the Mobile Ads SDK exactly once. Safe to call on every app
+// launch; it no-ops after the first run and when ads are disabled. The app
+// never requests App Tracking Transparency — every ad is non-personalized.
+export async function initAds(): Promise<void> {
   if (!isAdsEnabled() || initStarted) return;
   initStarted = true;
-
-  try {
-    const tt = await import("expo-tracking-transparency");
-    let status = (await tt.getTrackingPermissionsAsync()).status;
-    if (status === "undetermined") {
-      status = (await tt.requestTrackingPermissionsAsync()).status;
-    }
-    nonPersonalized = status !== "granted";
-  } catch {
-    // No ATT module / web: serve non-personalized ads to be safe.
-    nonPersonalized = true;
-  }
 
   try {
     const { default: mobileAds, MaxAdContentRating } = await import(
