@@ -9,6 +9,15 @@ vi.mock("@/lib/firebase", () => {
   };
 });
 
+const { ipCheckMock, dailyCheckMock } = vi.hoisted(() => ({
+  ipCheckMock: vi.fn(),
+  dailyCheckMock: vi.fn(),
+}));
+vi.mock("@/lib/ratelimit", () => ({
+  getRateLimiter: () => ({ check: ipCheckMock }),
+  getDailyRateLimiter: () => ({ check: dailyCheckMock }),
+}));
+
 import { POST } from "./route";
 import { adminFirestore } from "@/lib/firebase";
 
@@ -22,6 +31,8 @@ const buildRequest = (body: unknown) =>
 describe("POST /api/devices/register", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    ipCheckMock.mockResolvedValue({ ok: true, retryAfterMs: 0 });
+    dailyCheckMock.mockResolvedValue({ ok: true, retryAfterMs: 0 });
   });
 
   it("rejects missing fields", async () => {
@@ -62,5 +73,31 @@ describe("POST /api/devices/register", () => {
       }),
       { merge: true },
     );
+  });
+
+  it("429 when the per-IP limiter blocks (no Firestore write)", async () => {
+    ipCheckMock.mockResolvedValue({ ok: false, retryAfterMs: 30000 });
+    const docMock = vi.fn();
+    (adminFirestore.collection as any).mockReturnValue({ doc: docMock });
+
+    const res = await POST(
+      buildRequest({ device_token: "dev1", fcm_token: "fcm-1" }),
+    );
+    expect(res.status).toBe(429);
+    expect(res.headers.get("retry-after")).toBe("30");
+    expect(docMock).not.toHaveBeenCalled();
+  });
+
+  it("429 when the per-device daily cap is exceeded", async () => {
+    dailyCheckMock.mockResolvedValue({ ok: false, retryAfterMs: 3600000 });
+    const docMock = vi.fn();
+    (adminFirestore.collection as any).mockReturnValue({ doc: docMock });
+
+    const res = await POST(
+      buildRequest({ device_token: "dev1", fcm_token: "fcm-1" }),
+    );
+    expect(res.status).toBe(429);
+    expect(dailyCheckMock).toHaveBeenCalled();
+    expect(docMock).not.toHaveBeenCalled();
   });
 });

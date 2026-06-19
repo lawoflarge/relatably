@@ -5,6 +5,7 @@ import { adminFirestore } from "@/lib/firebase";
 import { requireAuth } from "@/lib/auth";
 import { hashIp } from "@/lib/hash";
 import { signReferralCode } from "@/lib/branch";
+import { getRateLimiter } from "@/lib/ratelimit";
 
 const TrackSchema = z.object({
   banner_type: z.enum(["todays_take", "verdict", "called_it"]),
@@ -20,9 +21,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "invalid request" }, { status: 400 });
   }
 
+  const ipHash = hashIp(req);
+
+  const ipRl = await getRateLimiter().check(ipHash);
+  if (!ipRl.ok) {
+    return NextResponse.json(
+      { error: "rate limit exceeded", retryAfter: Math.ceil(ipRl.retryAfterMs / 1000) },
+      { status: 429, headers: { "retry-after": String(Math.ceil(ipRl.retryAfterMs / 1000)) } },
+    );
+  }
+
   const decoded = await requireAuth(req);
   const userId = decoded?.uid ?? null;
-  const ipHash = hashIp(req);
 
   const referralCode = signReferralCode({
     user_id: userId,

@@ -4,8 +4,16 @@ import { FieldValue } from "firebase-admin/firestore";
 import { adminFirestore } from "@/lib/firebase";
 import { requireAuth } from "@/lib/auth";
 import { hashDeviceToken, hashIp } from "@/lib/hash";
+import { getRateLimiter, getDailyRateLimiter } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
+
+function tooMany(retryAfterMs: number) {
+  return NextResponse.json(
+    { error: "rate limit exceeded", retryAfter: Math.ceil(retryAfterMs / 1000) },
+    { status: 429, headers: { "retry-after": String(Math.ceil(retryAfterMs / 1000)) } },
+  );
+}
 
 const ReportSchema = z.object({
   target_type: z.enum(["cluster", "submission", "user"]),
@@ -39,6 +47,15 @@ export async function POST(req: Request) {
       { error: "must include auth header or device_token" },
       { status: 400 },
     );
+  }
+
+  const ipRl = await getRateLimiter().check(hashIp(req));
+  if (!ipRl.ok) return tooMany(ipRl.retryAfterMs);
+  if (deviceUserId) {
+    const devRl = await getRateLimiter().check(deviceUserId);
+    if (!devRl.ok) return tooMany(devRl.retryAfterMs);
+    const dailyRl = await getDailyRateLimiter().check(deviceUserId);
+    if (!dailyRl.ok) return tooMany(dailyRl.retryAfterMs);
   }
 
   await adminFirestore.collection("content_reports").add({

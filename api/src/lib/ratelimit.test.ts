@@ -1,5 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { MemoryRateLimiter, getRateLimiter, __resetRateLimiterForTest } from "./ratelimit";
+import {
+  MemoryRateLimiter,
+  getRateLimiter,
+  getDailyRateLimiter,
+  __resetRateLimiterForTest,
+} from "./ratelimit";
 
 const { getKillSwitch } = vi.hoisted(() => ({ getKillSwitch: vi.fn() }));
 
@@ -60,6 +65,54 @@ describe("getRateLimiter()", () => {
     const a = getRateLimiter();
     const b = getRateLimiter();
     expect(a).toBe(b);
+  });
+
+  it("logs a LOUD console.error naming the missing Upstash env when falling back in production", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      getRateLimiter();
+      expect(spy).toHaveBeenCalledTimes(1);
+      const msg = spy.mock.calls[0].join(" ");
+      expect(msg).toMatch(/UPSTASH_REDIS_REST_URL/);
+      expect(msg).toMatch(/UPSTASH_REDIS_REST_TOKEN/);
+    } finally {
+      spy.mockRestore();
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("does NOT log the fallback warning outside production", () => {
+    vi.stubEnv("NODE_ENV", "test");
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      getRateLimiter();
+      expect(spy).not.toHaveBeenCalled();
+    } finally {
+      spy.mockRestore();
+      vi.unstubAllEnvs();
+    }
+  });
+});
+
+describe("getDailyRateLimiter()", () => {
+  beforeEach(() => {
+    delete process.env.UPSTASH_REDIS_REST_URL;
+    delete process.env.UPSTASH_REDIS_REST_TOKEN;
+    __resetRateLimiterForTest();
+  });
+  afterEach(() => {
+    __resetRateLimiterForTest();
+  });
+
+  it("returns a MemoryRateLimiter when Upstash env vars not set", () => {
+    expect(getDailyRateLimiter()).toBeInstanceOf(MemoryRateLimiter);
+  });
+
+  it("memoizes the daily instance separately from the per-minute one", () => {
+    const daily = getDailyRateLimiter();
+    expect(getDailyRateLimiter()).toBe(daily);
+    expect(getRateLimiter()).not.toBe(daily);
   });
 });
 

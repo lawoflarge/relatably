@@ -7,6 +7,11 @@ vi.mock("@/lib/firebase", () => ({
   adminAuth: { verifyIdToken: vi.fn() },
 }));
 
+const { ipCheckMock } = vi.hoisted(() => ({ ipCheckMock: vi.fn() }));
+vi.mock("@/lib/ratelimit", () => ({
+  getRateLimiter: () => ({ check: ipCheckMock }),
+}));
+
 import { POST } from "./route";
 import { adminFirestore, adminAuth } from "@/lib/firebase";
 
@@ -25,6 +30,7 @@ describe("POST /api/share/track", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.env.BRANCH_REFERRAL_SECRET = "test-secret-32-chars-long-enough";
+    ipCheckMock.mockResolvedValue({ ok: true, retryAfterMs: 0 });
   });
 
   it("rejects malformed body", async () => {
@@ -94,5 +100,20 @@ describe("POST /api/share/track", () => {
     const writtenDoc = setMock.mock.calls[0][0];
     expect(writtenDoc.ip_hash).toMatch(/^[a-f0-9]{64}$/);
     expect(writtenDoc.ip_hash).not.toBe("1.2.3.4");
+  });
+
+  it("429 when the per-IP limiter blocks (no share_event write)", async () => {
+    ipCheckMock.mockResolvedValue({ ok: false, retryAfterMs: 30000 });
+    const setMock = vi.fn().mockResolvedValue({});
+    (adminFirestore.collection as any).mockReturnValue({
+      doc: vi.fn(() => ({ id: "share-x", set: setMock })),
+    });
+
+    const res = await POST(
+      buildRequest({ banner_type: "todays_take", question_id: "q1", share_target: "ig_story" }),
+    );
+    expect(res.status).toBe(429);
+    expect(res.headers.get("retry-after")).toBe("30");
+    expect(setMock).not.toHaveBeenCalled();
   });
 });

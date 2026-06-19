@@ -9,6 +9,15 @@ vi.mock("firebase-admin/firestore", () => ({
   FieldValue: { serverTimestamp: () => "__ts__" },
 }));
 
+const { ipCheckMock, dailyCheckMock } = vi.hoisted(() => ({
+  ipCheckMock: vi.fn(),
+  dailyCheckMock: vi.fn(),
+}));
+vi.mock("@/lib/ratelimit", () => ({
+  getRateLimiter: () => ({ check: ipCheckMock }),
+  getDailyRateLimiter: () => ({ check: dailyCheckMock }),
+}));
+
 import { POST } from "./route";
 import { adminAuth } from "@/lib/firebase";
 
@@ -27,6 +36,10 @@ describe("POST /api/report", () => {
     addMock.mockReset();
     addMock.mockResolvedValue({ id: "rep_1" });
     (adminAuth.verifyIdToken as ReturnType<typeof vi.fn>).mockReset();
+    ipCheckMock.mockReset();
+    dailyCheckMock.mockReset();
+    ipCheckMock.mockResolvedValue({ ok: true, retryAfterMs: 0 });
+    dailyCheckMock.mockResolvedValue({ ok: true, retryAfterMs: 0 });
   });
 
   it("400 when body fails validation", async () => {
@@ -63,5 +76,24 @@ describe("POST /api/report", () => {
     const doc = addMock.mock.calls[0][0];
     expect(doc.reporter_user_id).toBe("u-42");
     expect(doc.reason).toBe("slur");
+  });
+
+  it("429 when the per-IP limiter blocks (no Firestore write)", async () => {
+    (adminAuth.verifyIdToken as ReturnType<typeof vi.fn>).mockResolvedValue({ uid: "u-42" });
+    ipCheckMock.mockResolvedValue({ ok: false, retryAfterMs: 30000 });
+    const res = await POST(buildReq({ target_type: "cluster", target_id: "c1" }, "tok"));
+    expect(res.status).toBe(429);
+    expect(res.headers.get("retry-after")).toBe("30");
+    expect(addMock).not.toHaveBeenCalled();
+  });
+
+  it("429 when the per-device daily cap is exceeded", async () => {
+    dailyCheckMock.mockResolvedValue({ ok: false, retryAfterMs: 3600000 });
+    const res = await POST(
+      buildReq({ target_type: "cluster", target_id: "c1", device_token: "dev-1" }),
+    );
+    expect(res.status).toBe(429);
+    expect(dailyCheckMock).toHaveBeenCalled();
+    expect(addMock).not.toHaveBeenCalled();
   });
 });

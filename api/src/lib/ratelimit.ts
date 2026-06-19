@@ -70,24 +70,49 @@ class UpstashRateLimiter implements RateLimiter {
   }
 }
 
-let cached: RateLimiter | null = null;
+const DAILY_LIMIT = 50;
+const DAILY_WINDOW_MS = 86_400_000;
 
-export function getRateLimiter(): RateLimiter {
-  if (cached) return cached;
+let cached: RateLimiter | null = null;
+let cachedDaily: RateLimiter | null = null;
+
+function buildLimiter(cfg: RateLimitConfig): RateLimiter {
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
   if (url && token) {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { Redis } = require("@upstash/redis");
     const redis = new Redis({ url, token });
-    cached = new UpstashRateLimiter(redis, { limit: DEFAULT_LIMIT, windowMs: DEFAULT_WINDOW_MS });
-  } else {
-    cached = new MemoryRateLimiter({ limit: DEFAULT_LIMIT, windowMs: DEFAULT_WINDOW_MS });
+    return new UpstashRateLimiter(redis, cfg);
   }
+  // Fail loudly in production: an in-memory limiter is per-instance and useless
+  // on serverless, so it silently leaves the endpoint unthrottled.
+  if (process.env.NODE_ENV === "production") {
+    console.error(
+      "[ratelimit] FALLING BACK TO IN-MEMORY RATE LIMITER IN PRODUCTION — " +
+        "UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN are unset. " +
+        "Rate limiting is INEFFECTIVE across serverless instances. " +
+        "Set both env vars in the Vercel production environment.",
+    );
+  }
+  return new MemoryRateLimiter(cfg);
+}
+
+export function getRateLimiter(): RateLimiter {
+  if (cached) return cached;
+  cached = buildLimiter({ limit: DEFAULT_LIMIT, windowMs: DEFAULT_WINDOW_MS });
   return cached;
+}
+
+/** Per-device daily-window limiter (24h) for anonymous Firestore-write endpoints. */
+export function getDailyRateLimiter(): RateLimiter {
+  if (cachedDaily) return cachedDaily;
+  cachedDaily = buildLimiter({ limit: DAILY_LIMIT, windowMs: DAILY_WINDOW_MS });
+  return cachedDaily;
 }
 
 /** Test-only escape hatch to reset the memoized limiter between cases. */
 export function __resetRateLimiterForTest(): void {
   cached = null;
+  cachedDaily = null;
 }
