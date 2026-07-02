@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0A04179A00285B2C0335ADED /* Fonts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F00185DDC0E9B1D9373632B /* Fonts.swift */; };
+		0A7FAEFD57F74C7D70104647 /* EulaStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33FA05F1BF92386BF1DA103C /* EulaStore.swift */; };
 		153A074B0CE16A6E4D8DA53B /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = F4F93B360DE931037B71F83C /* GoogleMobileAds */; };
 		1AB128D7A5F23422F0E85515 /* HankenGrotesk-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 69C0B4CE433241382AEB9D34 /* HankenGrotesk-Bold.ttf */; };
 		2826336B4C2583FF4F5F3DA3 /* HardShadow.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC44687B1C48863A4D2B465C /* HardShadow.swift */; };
@@ -16,12 +17,17 @@
 		7A898DDF12ABFD8F4ED07528 /* BagelFatOne-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C455B4CB54D86AE237C9D255 /* BagelFatOne-Regular.ttf */; };
 		9396293C96933FC50C9AE2BB /* PaperTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6AB6665D603F59FC58544E5 /* PaperTexture.swift */; };
 		95289AA37B961F546D1C70EA /* Tokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FF4048C77E0FC0E018E8029 /* Tokens.swift */; };
+		9A42A6DA12C097BABBB62F18 /* OneShotGates.swift in Sources */ = {isa = PBXBuildFile; fileRef = B28B3A14BDD8286A1E4A89DB /* OneShotGates.swift */; };
+		9C4958AADB791DA94ADFDA3E /* HiddenContentStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0C47A838C0EC250B8C256C /* HiddenContentStore.swift */; };
 		A3A79C1A53A36B899FDC0A0F /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 163AB5FDF8CCC9199190AA92 /* Models.swift */; };
 		B258164AA57E37375FA6BAC7 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 0B83A4F46882ED9A40DC6FE6 /* GoogleService-Info.plist */; };
 		B2AB317D78B1F2FACA5720FF /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 5319BF5E722D43A76EAC7783 /* FirebaseFirestore */; };
+		BB6DE8B186FFEE9973ED78CF /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03AF4D846DB8C3275ED7F64F /* KeychainStore.swift */; };
 		C3F9580112B6D4259E88D374 /* RelatablyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17EEE842ADABF9C422042318 /* RelatablyApp.swift */; };
 		D0B62AD5CC14110BBD7205CB /* TokensTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A15E047E0082BCA7521107D /* TokensTests.swift */; };
+		D25CEDA2508C9A71A4FAEE94 /* DeviceToken.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3728079A5C880622326A3C2 /* DeviceToken.swift */; };
 		DF3F09DDBB7E7A221AFAC5CC /* HankenGrotesk-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6A6B19EEDEBFBD90F8510D80 /* HankenGrotesk-ExtraBold.ttf */; };
+		EAF47E229FF6C54BDA5B8F81 /* StoresTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E32D899C2F1DD7CACA7FCED0 /* StoresTests.swift */; };
 		ECA2883923F35F7644C10ABD /* SpaceGrotesk-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7542A0AD76EE2AD5ED973F4F /* SpaceGrotesk-SemiBold.ttf */; };
 		EFD8B56CFC7AA82B1E63C1C2 /* SpaceGrotesk-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 126F97A25B8965F95764851A /* SpaceGrotesk-Bold.ttf */; };
 		F1D2540E04532AD2C03D6DB8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C735B610A0D73BF3756002F1 /* Assets.xcassets */; };
@@ -39,12 +45,14 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		03AF4D846DB8C3275ED7F64F /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
 		070931831D8B278B40061C62 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		0B83A4F46882ED9A40DC6FE6 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		126F97A25B8965F95764851A /* SpaceGrotesk-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SpaceGrotesk-Bold.ttf"; sourceTree = "<group>"; };
 		163AB5FDF8CCC9199190AA92 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		17EEE842ADABF9C422042318 /* RelatablyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelatablyApp.swift; sourceTree = "<group>"; };
 		2FF4048C77E0FC0E018E8029 /* Tokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tokens.swift; sourceTree = "<group>"; };
+		33FA05F1BF92386BF1DA103C /* EulaStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EulaStore.swift; sourceTree = "<group>"; };
 		40A187DC106F9FAB319D98FB /* APIClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClientTests.swift; sourceTree = "<group>"; };
 		5556570E54B240E49E4C9C87 /* Relatably.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Relatably.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		69C0B4CE433241382AEB9D34 /* HankenGrotesk-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "HankenGrotesk-Bold.ttf"; sourceTree = "<group>"; };
@@ -56,9 +64,13 @@
 		8F00185DDC0E9B1D9373632B /* Fonts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fonts.swift; sourceTree = "<group>"; };
 		9F3F38242A2B69E3538501E8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		AC44687B1C48863A4D2B465C /* HardShadow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardShadow.swift; sourceTree = "<group>"; };
+		B28B3A14BDD8286A1E4A89DB /* OneShotGates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OneShotGates.swift; sourceTree = "<group>"; };
+		B3728079A5C880622326A3C2 /* DeviceToken.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceToken.swift; sourceTree = "<group>"; };
 		B6AB6665D603F59FC58544E5 /* PaperTexture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperTexture.swift; sourceTree = "<group>"; };
 		C455B4CB54D86AE237C9D255 /* BagelFatOne-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "BagelFatOne-Regular.ttf"; sourceTree = "<group>"; };
 		C735B610A0D73BF3756002F1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		DB0C47A838C0EC250B8C256C /* HiddenContentStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HiddenContentStore.swift; sourceTree = "<group>"; };
+		E32D899C2F1DD7CACA7FCED0 /* StoresTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoresTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -88,7 +100,12 @@
 			isa = PBXGroup;
 			children = (
 				070931831D8B278B40061C62 /* APIClient.swift */,
+				B3728079A5C880622326A3C2 /* DeviceToken.swift */,
+				33FA05F1BF92386BF1DA103C /* EulaStore.swift */,
+				DB0C47A838C0EC250B8C256C /* HiddenContentStore.swift */,
+				03AF4D846DB8C3275ED7F64F /* KeychainStore.swift */,
 				163AB5FDF8CCC9199190AA92 /* Models.swift */,
+				B28B3A14BDD8286A1E4A89DB /* OneShotGates.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -140,6 +157,7 @@
 			isa = PBXGroup;
 			children = (
 				40A187DC106F9FAB319D98FB /* APIClientTests.swift */,
+				E32D899C2F1DD7CACA7FCED0 /* StoresTests.swift */,
 				7A15E047E0082BCA7521107D /* TokensTests.swift */,
 			);
 			path = RelatablyTests;
@@ -273,9 +291,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				30BBB34E284199B888953F29 /* APIClient.swift in Sources */,
+				D25CEDA2508C9A71A4FAEE94 /* DeviceToken.swift in Sources */,
+				0A7FAEFD57F74C7D70104647 /* EulaStore.swift in Sources */,
 				0A04179A00285B2C0335ADED /* Fonts.swift in Sources */,
 				2826336B4C2583FF4F5F3DA3 /* HardShadow.swift in Sources */,
+				9C4958AADB791DA94ADFDA3E /* HiddenContentStore.swift in Sources */,
+				BB6DE8B186FFEE9973ED78CF /* KeychainStore.swift in Sources */,
 				A3A79C1A53A36B899FDC0A0F /* Models.swift in Sources */,
+				9A42A6DA12C097BABBB62F18 /* OneShotGates.swift in Sources */,
 				9396293C96933FC50C9AE2BB /* PaperTexture.swift in Sources */,
 				C3F9580112B6D4259E88D374 /* RelatablyApp.swift in Sources */,
 				95289AA37B961F546D1C70EA /* Tokens.swift in Sources */,
@@ -287,6 +310,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2B5D2495C4E66E6C0C5772FB /* APIClientTests.swift in Sources */,
+				EAF47E229FF6C54BDA5B8F81 /* StoresTests.swift in Sources */,
 				D0B62AD5CC14110BBD7205CB /* TokensTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
