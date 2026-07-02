@@ -11,9 +11,12 @@
 		153A074B0CE16A6E4D8DA53B /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = F4F93B360DE931037B71F83C /* GoogleMobileAds */; };
 		1AB128D7A5F23422F0E85515 /* HankenGrotesk-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 69C0B4CE433241382AEB9D34 /* HankenGrotesk-Bold.ttf */; };
 		2826336B4C2583FF4F5F3DA3 /* HardShadow.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC44687B1C48863A4D2B465C /* HardShadow.swift */; };
+		2B5D2495C4E66E6C0C5772FB /* APIClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A187DC106F9FAB319D98FB /* APIClientTests.swift */; };
+		30BBB34E284199B888953F29 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 070931831D8B278B40061C62 /* APIClient.swift */; };
 		7A898DDF12ABFD8F4ED07528 /* BagelFatOne-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C455B4CB54D86AE237C9D255 /* BagelFatOne-Regular.ttf */; };
 		9396293C96933FC50C9AE2BB /* PaperTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6AB6665D603F59FC58544E5 /* PaperTexture.swift */; };
 		95289AA37B961F546D1C70EA /* Tokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FF4048C77E0FC0E018E8029 /* Tokens.swift */; };
+		A3A79C1A53A36B899FDC0A0F /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 163AB5FDF8CCC9199190AA92 /* Models.swift */; };
 		B258164AA57E37375FA6BAC7 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 0B83A4F46882ED9A40DC6FE6 /* GoogleService-Info.plist */; };
 		B2AB317D78B1F2FACA5720FF /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 5319BF5E722D43A76EAC7783 /* FirebaseFirestore */; };
 		C3F9580112B6D4259E88D374 /* RelatablyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17EEE842ADABF9C422042318 /* RelatablyApp.swift */; };
@@ -36,10 +39,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		070931831D8B278B40061C62 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		0B83A4F46882ED9A40DC6FE6 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		126F97A25B8965F95764851A /* SpaceGrotesk-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SpaceGrotesk-Bold.ttf"; sourceTree = "<group>"; };
+		163AB5FDF8CCC9199190AA92 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		17EEE842ADABF9C422042318 /* RelatablyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelatablyApp.swift; sourceTree = "<group>"; };
 		2FF4048C77E0FC0E018E8029 /* Tokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tokens.swift; sourceTree = "<group>"; };
+		40A187DC106F9FAB319D98FB /* APIClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClientTests.swift; sourceTree = "<group>"; };
 		5556570E54B240E49E4C9C87 /* Relatably.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Relatably.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		69C0B4CE433241382AEB9D34 /* HankenGrotesk-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "HankenGrotesk-Bold.ttf"; sourceTree = "<group>"; };
 		6A6B19EEDEBFBD90F8510D80 /* HankenGrotesk-ExtraBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "HankenGrotesk-ExtraBold.ttf"; sourceTree = "<group>"; };
@@ -78,6 +84,15 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		3E3306A3548C7FC698BB1F9D /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				070931831D8B278B40061C62 /* APIClient.swift */,
+				163AB5FDF8CCC9199190AA92 /* Models.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
 		523806D25786A52156AFC0D4 /* App */ = {
 			isa = PBXGroup;
 			children = (
@@ -114,6 +129,7 @@
 			isa = PBXGroup;
 			children = (
 				523806D25786A52156AFC0D4 /* App */,
+				3E3306A3548C7FC698BB1F9D /* Core */,
 				E8A03317605938FD087F0E58 /* DesignSystem */,
 				529477E656A1D87F82FB8BEC /* Resources */,
 			);
@@ -123,6 +139,7 @@
 		D79EE30AF62BC2C29DF62DDD /* RelatablyTests */ = {
 			isa = PBXGroup;
 			children = (
+				40A187DC106F9FAB319D98FB /* APIClientTests.swift */,
 				7A15E047E0082BCA7521107D /* TokensTests.swift */,
 			);
 			path = RelatablyTests;
@@ -255,8 +272,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				30BBB34E284199B888953F29 /* APIClient.swift in Sources */,
 				0A04179A00285B2C0335ADED /* Fonts.swift in Sources */,
 				2826336B4C2583FF4F5F3DA3 /* HardShadow.swift in Sources */,
+				A3A79C1A53A36B899FDC0A0F /* Models.swift in Sources */,
 				9396293C96933FC50C9AE2BB /* PaperTexture.swift in Sources */,
 				C3F9580112B6D4259E88D374 /* RelatablyApp.swift in Sources */,
 				95289AA37B961F546D1C70EA /* Tokens.swift in Sources */,
@@ -267,6 +286,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2B5D2495C4E66E6C0C5772FB /* APIClientTests.swift in Sources */,
 				D0B62AD5CC14110BBD7205CB /* TokensTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
