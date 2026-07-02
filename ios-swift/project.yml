@@ -1,0 +1,102 @@
+name: Relatably
+options:
+  bundleIdPrefix: co.relatably
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+  developmentLanguage: en
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "35"
+    DEVELOPMENT_TEAM: "R95M36AU2X"
+packages:
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk
+    from: "12.0.0"
+  GoogleMobileAds:
+    url: https://github.com/googleads/swift-package-manager-google-mobile-ads
+    from: "12.0.0"
+targets:
+  Relatably:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Relatably
+        excludes:
+          - "**/*.md"
+    dependencies:
+      - package: Firebase
+        product: FirebaseAuth
+      - package: Firebase
+        product: FirebaseFirestore
+      - package: GoogleMobileAds
+        product: GoogleMobileAds
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: co.relatably.app
+        PRODUCT_NAME: Relatably
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        TARGETED_DEVICE_FAMILY: "1"
+        ENABLE_USER_SCRIPT_SANDBOXING: YES
+        GENERATE_INFOPLIST_FILE: NO
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "Apple Distribution"
+        PROVISIONING_PROFILE_SPECIFIER: "Relatably Local AppStore 2026-06-01"
+        CODE_SIGN_ENTITLEMENTS: Relatably/Resources/Relatably.entitlements
+      configs:
+        debug:
+          CODE_SIGN_STYLE: Automatic
+          CODE_SIGN_IDENTITY: "Apple Development"
+          PROVISIONING_PROFILE_SPECIFIER: ""
+    info:
+      path: Relatably/Resources/Info.plist
+      properties:
+        CFBundleDisplayName: Relatably
+        CFBundleShortVersionString: "1.0.0"
+        CFBundleVersion: "35"
+        LSRequiresIPhoneOS: true
+        UILaunchScreen:
+          UIColorName: Cream
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UIUserInterfaceStyle: Light
+        ITSAppUsesNonExemptEncryption: false
+        CFBundleDevelopmentRegion: en
+        GADApplicationIdentifier: "ca-app-pub-6563643868702361~4571132569"
+        UIAppFonts:
+          - BagelFatOne-Regular.ttf
+          - HankenGrotesk-Bold.ttf
+          - HankenGrotesk-ExtraBold.ttf
+          - SpaceGrotesk-SemiBold.ttf
+          - SpaceGrotesk-Bold.ttf
+  RelatablyTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: RelatablyTests
+    dependencies:
+      - target: Relatably
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: co.relatably.app.tests
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_STYLE: Automatic
+schemes:
+  Relatably:
+    build:
+      targets:
+        Relatably: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - RelatablyTests
+    archive:
+      config: Release
