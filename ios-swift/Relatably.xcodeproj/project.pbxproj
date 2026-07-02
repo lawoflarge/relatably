@@ -14,6 +14,7 @@
 		2826336B4C2583FF4F5F3DA3 /* HardShadow.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC44687B1C48863A4D2B465C /* HardShadow.swift */; };
 		2B5D2495C4E66E6C0C5772FB /* APIClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A187DC106F9FAB319D98FB /* APIClientTests.swift */; };
 		30BBB34E284199B888953F29 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 070931831D8B278B40061C62 /* APIClient.swift */; };
+		4560E655D3A7C8992B6C9DD4 /* DemoContentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459077A1536C9BF5784AF681 /* DemoContentTests.swift */; };
 		7A898DDF12ABFD8F4ED07528 /* BagelFatOne-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C455B4CB54D86AE237C9D255 /* BagelFatOne-Regular.ttf */; };
 		9396293C96933FC50C9AE2BB /* PaperTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6AB6665D603F59FC58544E5 /* PaperTexture.swift */; };
 		95289AA37B961F546D1C70EA /* Tokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FF4048C77E0FC0E018E8029 /* Tokens.swift */; };
@@ -28,6 +29,7 @@
 		D25CEDA2508C9A71A4FAEE94 /* DeviceToken.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3728079A5C880622326A3C2 /* DeviceToken.swift */; };
 		DF3F09DDBB7E7A221AFAC5CC /* HankenGrotesk-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6A6B19EEDEBFBD90F8510D80 /* HankenGrotesk-ExtraBold.ttf */; };
 		EAF47E229FF6C54BDA5B8F81 /* StoresTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E32D899C2F1DD7CACA7FCED0 /* StoresTests.swift */; };
+		EC7C6F4162EB56AE6C67BB2B /* DemoContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1903E203EA3EB801D3E7362B /* DemoContent.swift */; };
 		ECA2883923F35F7644C10ABD /* SpaceGrotesk-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7542A0AD76EE2AD5ED973F4F /* SpaceGrotesk-SemiBold.ttf */; };
 		EFD8B56CFC7AA82B1E63C1C2 /* SpaceGrotesk-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 126F97A25B8965F95764851A /* SpaceGrotesk-Bold.ttf */; };
 		F1D2540E04532AD2C03D6DB8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C735B610A0D73BF3756002F1 /* Assets.xcassets */; };
@@ -51,9 +53,11 @@
 		126F97A25B8965F95764851A /* SpaceGrotesk-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SpaceGrotesk-Bold.ttf"; sourceTree = "<group>"; };
 		163AB5FDF8CCC9199190AA92 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		17EEE842ADABF9C422042318 /* RelatablyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelatablyApp.swift; sourceTree = "<group>"; };
+		1903E203EA3EB801D3E7362B /* DemoContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoContent.swift; sourceTree = "<group>"; };
 		2FF4048C77E0FC0E018E8029 /* Tokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tokens.swift; sourceTree = "<group>"; };
 		33FA05F1BF92386BF1DA103C /* EulaStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EulaStore.swift; sourceTree = "<group>"; };
 		40A187DC106F9FAB319D98FB /* APIClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClientTests.swift; sourceTree = "<group>"; };
+		459077A1536C9BF5784AF681 /* DemoContentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoContentTests.swift; sourceTree = "<group>"; };
 		5556570E54B240E49E4C9C87 /* Relatably.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Relatably.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		69C0B4CE433241382AEB9D34 /* HankenGrotesk-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "HankenGrotesk-Bold.ttf"; sourceTree = "<group>"; };
 		6A6B19EEDEBFBD90F8510D80 /* HankenGrotesk-ExtraBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "HankenGrotesk-ExtraBold.ttf"; sourceTree = "<group>"; };
@@ -100,6 +104,7 @@
 			isa = PBXGroup;
 			children = (
 				070931831D8B278B40061C62 /* APIClient.swift */,
+				1903E203EA3EB801D3E7362B /* DemoContent.swift */,
 				B3728079A5C880622326A3C2 /* DeviceToken.swift */,
 				33FA05F1BF92386BF1DA103C /* EulaStore.swift */,
 				DB0C47A838C0EC250B8C256C /* HiddenContentStore.swift */,
@@ -157,6 +162,7 @@
 			isa = PBXGroup;
 			children = (
 				40A187DC106F9FAB319D98FB /* APIClientTests.swift */,
+				459077A1536C9BF5784AF681 /* DemoContentTests.swift */,
 				E32D899C2F1DD7CACA7FCED0 /* StoresTests.swift */,
 				7A15E047E0082BCA7521107D /* TokensTests.swift */,
 			);
@@ -291,6 +297,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				30BBB34E284199B888953F29 /* APIClient.swift in Sources */,
+				EC7C6F4162EB56AE6C67BB2B /* DemoContent.swift in Sources */,
 				D25CEDA2508C9A71A4FAEE94 /* DeviceToken.swift in Sources */,
 				0A7FAEFD57F74C7D70104647 /* EulaStore.swift in Sources */,
 				0A04179A00285B2C0335ADED /* Fonts.swift in Sources */,
@@ -310,6 +317,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2B5D2495C4E66E6C0C5772FB /* APIClientTests.swift in Sources */,
+				4560E655D3A7C8992B6C9DD4 /* DemoContentTests.swift in Sources */,
 				EAF47E229FF6C54BDA5B8F81 /* StoresTests.swift in Sources */,
 				D0B62AD5CC14110BBD7205CB /* TokensTests.swift in Sources */,
 			);
