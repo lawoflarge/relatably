@@ -21,7 +21,7 @@ function makeToken() {
 }
 
 const token = makeToken();
-const OLD = "c94cb368-f96f-43bd-8d45-9f1567085e00";
+const OLD = "1b1cbb00-b663-4bef-a75d-739fcb59d34b"; // build-34 rejection (2.1a), canceled for the build-35 resubmit
 
 async function call(method, p, body) {
   const r = await fetch(`https://api.appstoreconnect.apple.com${p}`, {
