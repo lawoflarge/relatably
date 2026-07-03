@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0290A7BD7AC82BB8E9FD6BD6 /* ArchiveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8765701EBCBB23DC71121CA3 /* ArchiveView.swift */; };
+		06B972D10F617C8F1B8BC1BE /* MeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF86FC1BA8AC8009D2921CAA /* MeView.swift */; };
 		085AB5831624485256433405 /* FriendsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF2B21365DC73FF0A91E9474 /* FriendsView.swift */; };
 		09B4D3CF022613504AAC7CC3 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 869ECF557383906B191737E3 /* HomeView.swift */; };
 		0A04179A00285B2C0335ADED /* Fonts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F00185DDC0E9B1D9373632B /* Fonts.swift */; };
@@ -38,6 +39,7 @@
 		7832E3AEBEF961888FBC1176 /* StickerTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16ADEBD943DB0A59D0AE5624 /* StickerTabBar.swift */; };
 		7A898DDF12ABFD8F4ED07528 /* BagelFatOne-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C455B4CB54D86AE237C9D255 /* BagelFatOne-Regular.ttf */; };
 		84B412BAB4DB0A70227DB016 /* WordcloudView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E6C7541A581A53BD1C2E65 /* WordcloudView.swift */; };
+		86F4CEEBD898054CE712D9DF /* MeViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB9EDF1B939359CEB95101E9 /* MeViewModelTests.swift */; };
 		8FBB84258F62B522E867C617 /* TosGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3823E0AA4A90C8D94842DEC /* TosGate.swift */; };
 		9090A4E1450878BD02CFCA54 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 978880FEFF7A4210A5CA0526 /* AuthService.swift */; };
 		9396293C96933FC50C9AE2BB /* PaperTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6AB6665D603F59FC58544E5 /* PaperTexture.swift */; };
@@ -68,6 +70,7 @@
 		ECA2883923F35F7644C10ABD /* SpaceGrotesk-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7542A0AD76EE2AD5ED973F4F /* SpaceGrotesk-SemiBold.ttf */; };
 		EFD8B56CFC7AA82B1E63C1C2 /* SpaceGrotesk-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 126F97A25B8965F95764851A /* SpaceGrotesk-Bold.ttf */; };
 		F1D2540E04532AD2C03D6DB8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C735B610A0D73BF3756002F1 /* Assets.xcassets */; };
+		F4331927170357549598712B /* MeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A74974B678FB325C28368276 /* MeViewModel.swift */; };
 		F7ECA2EE56F66B0745B3C1DC /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = C39B8C507C81E08A457F4078 /* FirebaseAuth */; };
 /* End PBXBuildFile section */
 
@@ -126,11 +129,14 @@
 		96E95CC9F131ACE2B2931032 /* BoardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardViewModel.swift; sourceTree = "<group>"; };
 		978880FEFF7A4210A5CA0526 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		9F3F38242A2B69E3538501E8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		A74974B678FB325C28368276 /* MeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeViewModel.swift; sourceTree = "<group>"; };
 		AC44687B1C48863A4D2B465C /* HardShadow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardShadow.swift; sourceTree = "<group>"; };
 		B28B3A14BDD8286A1E4A89DB /* OneShotGates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OneShotGates.swift; sourceTree = "<group>"; };
 		B3728079A5C880622326A3C2 /* DeviceToken.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceToken.swift; sourceTree = "<group>"; };
 		B6AB6665D603F59FC58544E5 /* PaperTexture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperTexture.swift; sourceTree = "<group>"; };
+		BB9EDF1B939359CEB95101E9 /* MeViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeViewModelTests.swift; sourceTree = "<group>"; };
 		BF2B21365DC73FF0A91E9474 /* FriendsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsView.swift; sourceTree = "<group>"; };
+		BF86FC1BA8AC8009D2921CAA /* MeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeView.swift; sourceTree = "<group>"; };
 		C455B4CB54D86AE237C9D255 /* BagelFatOne-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "BagelFatOne-Regular.ttf"; sourceTree = "<group>"; };
 		C735B610A0D73BF3756002F1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CCD4D10577B73CAC2615F857 /* WordcloudMath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordcloudMath.swift; sourceTree = "<group>"; };
@@ -234,6 +240,15 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
+		590C93A5DF8D1598E02E6443 /* Me */ = {
+			isa = PBXGroup;
+			children = (
+				BF86FC1BA8AC8009D2921CAA /* MeView.swift */,
+				A74974B678FB325C28368276 /* MeViewModel.swift */,
+			);
+			path = Me;
+			sourceTree = "<group>";
+		};
 		76436B66207CB2F2B58992B5 /* Fonts */ = {
 			isa = PBXGroup;
 			children = (
@@ -286,6 +301,7 @@
 				459077A1536C9BF5784AF681 /* DemoContentTests.swift */,
 				544D6333C557995A7F19A782 /* FriendsViewModelTests.swift */,
 				00A05332DEDBF5090CF35421 /* HomeViewModelTests.swift */,
+				BB9EDF1B939359CEB95101E9 /* MeViewModelTests.swift */,
 				E32D899C2F1DD7CACA7FCED0 /* StoresTests.swift */,
 				7A15E047E0082BCA7521107D /* TokensTests.swift */,
 				DB7806642A975257C6D0C72C /* WordcloudMathTests.swift */,
@@ -309,6 +325,7 @@
 				D8E541DFEE0504897E156CFA /* Archive */,
 				422CD348FFEC3872FD1D9386 /* Board */,
 				12AAB26FCE68C62779305227 /* Friends */,
+				590C93A5DF8D1598E02E6443 /* Me */,
 				BAE457F5293119F04FA96C72 /* Today */,
 			);
 			path = Features;
@@ -467,6 +484,8 @@
 				BB6DE8B186FFEE9973ED78CF /* KeychainStore.swift in Sources */,
 				648743A2DAC668F914CCEBDB /* LeaderboardRow.swift in Sources */,
 				530EFF25E078587DAFC4211F /* LiveCounter.swift in Sources */,
+				06B972D10F617C8F1B8BC1BE /* MeView.swift in Sources */,
+				F4331927170357549598712B /* MeViewModel.swift in Sources */,
 				A3A79C1A53A36B899FDC0A0F /* Models.swift in Sources */,
 				9A42A6DA12C097BABBB62F18 /* OneShotGates.swift in Sources */,
 				9396293C96933FC50C9AE2BB /* PaperTexture.swift in Sources */,
@@ -497,6 +516,7 @@
 				4560E655D3A7C8992B6C9DD4 /* DemoContentTests.swift in Sources */,
 				E7E9090DA4D78B12357135AD /* FriendsViewModelTests.swift in Sources */,
 				A1494B0CDA30BDB836997431 /* HomeViewModelTests.swift in Sources */,
+				86F4CEEBD898054CE712D9DF /* MeViewModelTests.swift in Sources */,
 				EAF47E229FF6C54BDA5B8F81 /* StoresTests.swift in Sources */,
 				D0B62AD5CC14110BBD7205CB /* TokensTests.swift in Sources */,
 				0D6E5EED5B7F0924067696A5 /* WordcloudMathTests.swift in Sources */,

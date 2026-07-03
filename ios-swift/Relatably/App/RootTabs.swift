@@ -3,8 +3,7 @@
 //
 // All five tab views stay ALIVE across switches (ZStack + opacity /
 // allowsHitTesting) so their ViewModels never re-boot on tab switch —
-// RN parity: expo-router keeps mounted screens mounted. Placeholder Text
-// per remaining tab until Tasks 10–15 land the real feature screens.
+// RN parity: expo-router keeps mounted screens mounted.
 
 import SwiftUI
 
@@ -45,7 +44,10 @@ struct RootTabs: View {
                     tabView(.friends) { FriendsView() }
                     tabView(.board) { BoardView() }
                     tabView(.archive) { ArchiveView(popToRootTrigger: archiveTabSelects) }
-                    tabView(.me) { Text("ME") }
+                    // isActive is the focus signal: the kept-alive MeView
+                    // re-reads the undo lists on every switch into ME (the
+                    // keep-alive equivalent of RN's lazy first-focus mount).
+                    tabView(.me) { MeView(isActive: selection == .me) }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 StickerTabBar(selection: tabSelection, onReselect: { tab in
