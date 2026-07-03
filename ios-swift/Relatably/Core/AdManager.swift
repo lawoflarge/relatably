@@ -1,0 +1,199 @@
+import Foundation
+import GoogleMobileAds
+import os
+
+// AdMob integration — 1:1 port of ios/src/lib/ads.ts per
+// docs/superpowers/plans/rn-extraction/core-libs.md §4.
+//
+// ATT policy (§4.2, load-bearing for App Review): Relatably does not track
+// users in the App Tracking Transparency sense — it never links data with
+// third-party data for advertising and NEVER calls the ATT framework. AdMob
+// is therefore always requested non-personalized ("npa": "1" extras on EVERY
+// request), so no IDFA-based cross-app tracking occurs. App Privacy in App
+// Store Connect declares "Data Not Used to Track You" to match — there is no
+// ATT prompt anywhere in this codebase.
+
+/// Minimal surface of a loaded interstitial (RN's InterstitialController,
+/// minus its no-op dispose()).
+protocol InterstitialController: Sendable {
+    /// Resolves when the ad is dismissed — or immediately if presenting
+    /// fails, so the post-reveal flow can never hang on an ad (§4.6).
+    func show() async
+}
+
+enum AdManager {
+
+    private static let logger = Logger(subsystem: "co.relatably.app", category: "AdManager")
+
+    // MARK: - Constants (§4.1)
+
+    /// Real production interstitial unit (Relatably AdMob app
+    /// ca-app-pub-6563643868702361~4571132569 — the GADApplicationIdentifier
+    /// in Info.plist).
+    static let prodInterstitialUnitId = "ca-app-pub-6563643868702361/2000809540"
+    /// Google's official iOS test interstitial (video) unit — Debug fallback.
+    static let testInterstitialUnitId = "ca-app-pub-3940256099942544/4411468910"
+    /// First-event-wins load timeout (ms): LOADED → controller,
+    /// error/timeout → nil.
+    static let loadTimeoutMs = 8000
+    /// Launch arg / UserDefaults override `-admobInterstitialId <unit>` —
+    /// native replacement for EXPO_PUBLIC_ADMOB_INTERSTITIAL_ID.
+    static let unitIdOverrideKey = "admobInterstitialId"
+    /// Launch arg `-adsEnabled YES` — native replacement for
+    /// EXPO_PUBLIC_ADMOB_ENABLED (RN required the exact string "true").
+    static let adsEnabledKey = "adsEnabled"
+
+    /// Compile-time build flavor; injectable in tests (RN __DEV__).
+    static var isDebugBuild: Bool {
+        #if DEBUG
+        true
+        #else
+        false
+        #endif
+    }
+
+    // MARK: - Enable gate (§4.3)
+
+    /// Ads ship enabled in Release builds. In Debug they stay opt-in via the
+    /// `-adsEnabled YES` launch arg so the simulator and the test suite are
+    /// ad-free unless explicitly turned on. (RN memoized the env read; launch
+    /// args are immutable per process, so a pure read is equivalent.)
+    static func isAdsEnabled(
+        isDebugBuild: Bool = AdManager.isDebugBuild,
+        defaults: UserDefaults = .standard
+    ) -> Bool {
+        !isDebugBuild || defaults.bool(forKey: adsEnabledKey)
+    }
+
+    // MARK: - Unit-ID resolution (§4.4, post_reveal_interstitial slot)
+
+    /// Override → else Google test unit in Debug / production unit in Release.
+    static func interstitialUnitId(
+        isDebugBuild: Bool = AdManager.isDebugBuild,
+        defaults: UserDefaults = .standard
+    ) -> String {
+        defaults.string(forKey: unitIdOverrideKey)
+            ?? (isDebugBuild ? testInterstitialUnitId : prodInterstitialUnitId)
+    }
+
+    // MARK: - SDK init (§4.5 — once, fire-and-forget)
+
+    private static var initStarted = false
+
+    /// Spins up the Mobile Ads SDK exactly once. Order is load-bearing:
+    /// maxAdContentRating .teen is set on the request configuration BEFORE
+    /// initialize. Never throws, never blocks — the app must never crash or
+    /// wait on ads (RN swallowed failures with "ads init failed"; the Swift
+    /// SDK surface has no failure path, start() reports per-adapter status
+    /// asynchronously and is itself fire-and-forget).
+    @MainActor
+    static func initAds() {
+        guard isAdsEnabled(), !initStarted else { return }
+        initStarted = true
+        MobileAds.shared.requestConfiguration.maxAdContentRating = .teen
+        MobileAds.shared.start(completionHandler: nil)
+    }
+
+    // MARK: - Interstitial load (§4.6)
+
+    /// Loads a single post-reveal interstitial. Resolves nil if ads are
+    /// disabled, nothing fills, or the 8 s timeout wins the race — callers
+    /// always proceed silently; an ad error is never surfaced to the user.
+    static func loadInterstitialOnce(
+        isDebugBuild: Bool = AdManager.isDebugBuild,
+        defaults: UserDefaults = .standard,
+        timeoutMs: Int = AdManager.loadTimeoutMs,
+        loader: @escaping @Sendable (String) async -> InterstitialController? = AdManager.loadGADInterstitial
+    ) async -> InterstitialController? {
+        guard isAdsEnabled(isDebugBuild: isDebugBuild, defaults: defaults) else { return nil }
+        let unitId = interstitialUnitId(isDebugBuild: isDebugBuild, defaults: defaults)
+        // Race of first-event-wins outcomes (RN's idempotent finish()):
+        // LOADED → controller, ERROR → nil (immediately), timeout → nil.
+        return await withTaskGroup(of: InterstitialController?.self) { group in
+            group.addTask { await loader(unitId) }
+            group.addTask {
+                try? await Task.sleep(nanoseconds: UInt64(timeoutMs) * 1_000_000)
+                return nil
+            }
+            let first = await group.next() ?? nil
+            group.cancelAll()
+            return first
+        }
+    }
+
+    /// Production loader: GADInterstitialAd with non-personalized extras.
+    private static func loadGADInterstitial(unitId: String) async -> InterstitialController? {
+        let request = Request()
+        let extras = Extras()
+        // §4.2: "npa": "1" on EVERY request — non-personalized, no ATT.
+        extras.additionalParameters = ["npa": "1"]
+        request.register(extras)
+        return await withCheckedContinuation { continuation in
+            InterstitialAd.load(with: unitId, request: request) { ad, error in
+                guard let ad else {
+                    logger.warning("interstitial load failed \(error?.localizedDescription ?? "", privacy: .public)")
+                    continuation.resume(returning: nil)
+                    return
+                }
+                continuation.resume(returning: LoadedInterstitial(ad))
+            }
+        }
+    }
+
+    // MARK: - Once-per-question post-reveal gate
+    // (RN app/(tabs)/index.tsx handleRevealComplete — exact order: gate-check
+    // → load → show → mark shown. Mark happens only AFTER a successful show,
+    // so a no-fill/timeout day retries on the next reveal of that question.)
+
+    static func showPostRevealInterstitialIfNeeded(
+        questionId: String,
+        gate: InterstitialGate = InterstitialGate(),
+        load: () async -> InterstitialController? = { await AdManager.loadInterstitialOnce() }
+    ) async {
+        guard !gate.hasShownInterstitialFor(questionId) else { return }
+        guard let controller = await load() else { return }
+        await controller.show()
+        gate.markInterstitialShownFor(questionId)
+    }
+}
+
+// MARK: - LoadedInterstitial (production InterstitialController)
+
+/// Wraps a filled GADInterstitialAd. show() presents from the key window's
+/// top view controller and resolves on fullScreenContentDidDismiss — or
+/// immediately if presentation fails (§4.6: never hang the post-reveal flow).
+/// All access happens on the main thread (present is MainActor; GAD delegate
+/// callbacks arrive on main), hence @unchecked Sendable.
+private final class LoadedInterstitial: NSObject, InterstitialController, FullScreenContentDelegate, @unchecked Sendable {
+
+    private let ad: InterstitialAd
+    private var continuation: CheckedContinuation<Void, Never>?
+
+    init(_ ad: InterstitialAd) {
+        self.ad = ad
+        super.init()
+    }
+
+    @MainActor
+    func show() async {
+        await withCheckedContinuation { (cont: CheckedContinuation<Void, Never>) in
+            continuation = cont
+            ad.fullScreenContentDelegate = self
+            ad.present(from: nil)
+        }
+    }
+
+    /// Idempotent settle — dismiss and present-failure both land here.
+    private func finish() {
+        continuation?.resume()
+        continuation = nil
+    }
+
+    func adDidDismissFullScreenContent(_ ad: FullScreenPresentingAd) {
+        finish()
+    }
+
+    func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
+        finish()
+    }
+}

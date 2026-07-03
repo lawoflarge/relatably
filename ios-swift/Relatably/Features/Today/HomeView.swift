@@ -18,13 +18,8 @@ struct HomeView: View {
             case .loading:
                 loadingView
 
-            case .reveal:
-                // Task 11 replaces this with RevealAnimation; tap-through so
-                // the flow is never dead-ended in the interim.
-                Text("REVEAL")
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .contentShape(Rectangle())
-                    .onTapGesture { vm.revealComplete() }
+            case .reveal(let yesterday):
+                RevealView(yesterday: yesterday, onComplete: { vm.revealComplete() })
 
             case .question(let question):
                 QuestionView(vm: vm, question: question)
@@ -54,7 +49,12 @@ struct HomeView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .task { vm.bootIfNeeded() }
+        .task {
+            // RN spins up the Mobile Ads SDK once on Home mount — fire-and-
+            // forget, never awaited on the boot path (no ATT, npa=1 only).
+            AdManager.initAds()
+            vm.bootIfNeeded()
+        }
     }
 
     // MARK: - Loading (§3: centered text, NO spinner)

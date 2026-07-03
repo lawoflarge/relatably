@@ -363,13 +363,25 @@ final class HomeViewModel: ObservableObject {
 
 extension HomeViewModel {
     /// Real dependencies: APIClient with the Firebase ID-token provider,
-    /// Keychain-backed device token + reveal gate, Firestore live clusters.
+    /// Keychain-backed device token + reveal gate, Firestore live clusters,
+    /// post-reveal interstitial (Task 11 — once per question, silent on any
+    /// failure; revealComplete keeps the markSeen → hook → loadQuestion order).
     nonisolated static func live() -> HomeViewModel {
-        HomeViewModel(
+        let vm = HomeViewModel(
             api: APIClient(tokenProvider: { await AuthService.shared.idToken() }),
             deviceTokenProvider: DeviceTokenProvider(),
             revealStore: RevealStore(),
             clusterSource: FirestoreClusterSource()
         )
+        // SwiftUI evaluates the StateObject factory on the main thread;
+        // assumeIsolated lets this nonisolated factory finish the wiring.
+        MainActor.assumeIsolated {
+            vm.postRevealHook = { [weak vm] in
+                guard let vm else { return }
+                guard let questionId = await MainActor.run(body: { vm.yesterday?.id }) else { return }
+                await AdManager.showPostRevealInterstitialIfNeeded(questionId: questionId)
+            }
+        }
+        return vm
     }
 }
