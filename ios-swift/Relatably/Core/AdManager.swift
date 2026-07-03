@@ -109,15 +109,19 @@ enum AdManager {
         let unitId = interstitialUnitId(isDebugBuild: isDebugBuild, defaults: defaults)
         // Race of first-event-wins outcomes (RN's idempotent finish()):
         // LOADED → controller, ERROR → nil (immediately), timeout → nil.
-        return await withTaskGroup(of: InterstitialController?.self) { group in
-            group.addTask { await loader(unitId) }
-            group.addTask {
+        // NOT a task group: a group awaits ALL its children at scope exit,
+        // and the production loader parks on a GAD load callback that ignores
+        // task cancellation — a group race would defer the return until GAD
+        // eventually calls back (30–60 s or never), hanging the post-reveal
+        // flow. A settle-once continuation returns the instant the first
+        // event lands; the loser's late result is silently dropped.
+        return await withCheckedContinuation { continuation in
+            let settle = FirstWinsSettle(continuation)
+            Task { settle.settle(returning: await loader(unitId)) }
+            Task {
                 try? await Task.sleep(nanoseconds: UInt64(timeoutMs) * 1_000_000)
-                return nil
+                settle.settle(returning: nil)
             }
-            let first = await group.next() ?? nil
-            group.cancelAll()
-            return first
         }
     }
 
@@ -154,6 +158,29 @@ enum AdManager {
         guard let controller = await load() else { return }
         await controller.show()
         gate.markInterstitialShownFor(questionId)
+    }
+}
+
+// MARK: - FirstWinsSettle (idempotent race settle, RN's finish())
+
+/// Resumes a load-race continuation exactly once: the first settle wins,
+/// every later settle is silently dropped. NSLock-guarded so the loader
+/// completion and the timeout can land concurrently from any thread.
+private final class FirstWinsSettle: @unchecked Sendable {
+
+    private let lock = NSLock()
+    private var continuation: CheckedContinuation<InterstitialController?, Never>?
+
+    init(_ continuation: CheckedContinuation<InterstitialController?, Never>) {
+        self.continuation = continuation
+    }
+
+    func settle(returning value: InterstitialController?) {
+        lock.lock()
+        let winner = continuation
+        continuation = nil
+        lock.unlock()
+        winner?.resume(returning: value)
     }
 }
 

@@ -138,6 +138,53 @@ final class AdManagerTests: XCTestCase {
         XCTAssertLessThan(Date().timeIntervalSince(start), 5, "timeout must win, not the 30 s loader")
     }
 
+    /// Regression: the timeout must bound the RETURN time even when the
+    /// loader IGNORES task cancellation — exactly what the production GAD
+    /// path does (it parks on a withCheckedContinuation around
+    /// InterstitialAd.load, which never observes cancellation). The old
+    /// task-group race awaited that parked child at scope exit, deferring
+    /// the return until GAD eventually called back.
+    func testLoadTimesOutToNilWhenLoaderIgnoresCancellation() async {
+        /// Cancellation-ignoring park: hands the continuation out so the
+        /// test can resume it AFTER the assertion (leak-safe teardown).
+        final class ManualGate: @unchecked Sendable {
+            private let lock = NSLock()
+            private var continuation: CheckedContinuation<Void, Never>?
+            private var released = false
+            func park() async {
+                await withCheckedContinuation { (cont: CheckedContinuation<Void, Never>) in
+                    lock.lock()
+                    if released { lock.unlock(); cont.resume(); return }
+                    continuation = cont
+                    lock.unlock()
+                }
+            }
+            func release() {
+                lock.lock()
+                released = true
+                let cont = continuation
+                continuation = nil
+                lock.unlock()
+                cont?.resume()
+            }
+        }
+        let gate = ManualGate()
+        let start = Date()
+        let result = await AdManager.loadInterstitialOnce(
+            isDebugBuild: false,
+            defaults: defaults,
+            timeoutMs: 100,
+            loader: { _ in
+                await gate.park() // ignores cancellation, like GAD's callback
+                return FakeInterstitial()
+            }
+        )
+        let elapsed = Date().timeIntervalSince(start)
+        XCTAssertNil(result)
+        XCTAssertLessThan(elapsed, 2, "100 ms timeout must bound the return even when the loader ignores cancellation")
+        gate.release() // parked loader finishes now; its late result is dropped
+    }
+
     func testProductionLoadTimeoutIs8000Milliseconds() {
         XCTAssertEqual(AdManager.loadTimeoutMs, 8000)
     }
