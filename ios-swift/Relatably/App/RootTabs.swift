@@ -42,7 +42,7 @@ struct RootTabs: View {
             ZStack(alignment: .bottom) {
                 ZStack {
                     tabView(.today) { HomeView() }
-                    tabView(.friends) { Text("FRIENDS") }
+                    tabView(.friends) { FriendsView() }
                     tabView(.board) { BoardView() }
                     tabView(.archive) { ArchiveView(popToRootTrigger: archiveTabSelects) }
                     tabView(.me) { Text("ME") }
