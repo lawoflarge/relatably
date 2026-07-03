@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		0A04179A00285B2C0335ADED /* Fonts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F00185DDC0E9B1D9373632B /* Fonts.swift */; };
 		0A7FAEFD57F74C7D70104647 /* EulaStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33FA05F1BF92386BF1DA103C /* EulaStore.swift */; };
+		0D6E5EED5B7F0924067696A5 /* WordcloudMathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB7806642A975257C6D0C72C /* WordcloudMathTests.swift */; };
 		153A074B0CE16A6E4D8DA53B /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = F4F93B360DE931037B71F83C /* GoogleMobileAds */; };
 		1AB128D7A5F23422F0E85515 /* HankenGrotesk-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 69C0B4CE433241382AEB9D34 /* HankenGrotesk-Bold.ttf */; };
 		2826336B4C2583FF4F5F3DA3 /* HardShadow.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC44687B1C48863A4D2B465C /* HardShadow.swift */; };
@@ -18,6 +19,7 @@
 		7A898DDF12ABFD8F4ED07528 /* BagelFatOne-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C455B4CB54D86AE237C9D255 /* BagelFatOne-Regular.ttf */; };
 		9396293C96933FC50C9AE2BB /* PaperTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6AB6665D603F59FC58544E5 /* PaperTexture.swift */; };
 		95289AA37B961F546D1C70EA /* Tokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FF4048C77E0FC0E018E8029 /* Tokens.swift */; };
+		9552DBF8C152BD75FF15D919 /* WordcloudMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCD4D10577B73CAC2615F857 /* WordcloudMath.swift */; };
 		9A42A6DA12C097BABBB62F18 /* OneShotGates.swift in Sources */ = {isa = PBXBuildFile; fileRef = B28B3A14BDD8286A1E4A89DB /* OneShotGates.swift */; };
 		9C4958AADB791DA94ADFDA3E /* HiddenContentStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0C47A838C0EC250B8C256C /* HiddenContentStore.swift */; };
 		A3A79C1A53A36B899FDC0A0F /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 163AB5FDF8CCC9199190AA92 /* Models.swift */; };
@@ -73,7 +75,9 @@
 		B6AB6665D603F59FC58544E5 /* PaperTexture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperTexture.swift; sourceTree = "<group>"; };
 		C455B4CB54D86AE237C9D255 /* BagelFatOne-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "BagelFatOne-Regular.ttf"; sourceTree = "<group>"; };
 		C735B610A0D73BF3756002F1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		CCD4D10577B73CAC2615F857 /* WordcloudMath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordcloudMath.swift; sourceTree = "<group>"; };
 		DB0C47A838C0EC250B8C256C /* HiddenContentStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HiddenContentStore.swift; sourceTree = "<group>"; };
+		DB7806642A975257C6D0C72C /* WordcloudMathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordcloudMathTests.swift; sourceTree = "<group>"; };
 		E32D899C2F1DD7CACA7FCED0 /* StoresTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoresTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -111,6 +115,7 @@
 				03AF4D846DB8C3275ED7F64F /* KeychainStore.swift */,
 				163AB5FDF8CCC9199190AA92 /* Models.swift */,
 				B28B3A14BDD8286A1E4A89DB /* OneShotGates.swift */,
+				CCD4D10577B73CAC2615F857 /* WordcloudMath.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -165,6 +170,7 @@
 				459077A1536C9BF5784AF681 /* DemoContentTests.swift */,
 				E32D899C2F1DD7CACA7FCED0 /* StoresTests.swift */,
 				7A15E047E0082BCA7521107D /* TokensTests.swift */,
+				DB7806642A975257C6D0C72C /* WordcloudMathTests.swift */,
 			);
 			path = RelatablyTests;
 			sourceTree = "<group>";
@@ -309,6 +315,7 @@
 				9396293C96933FC50C9AE2BB /* PaperTexture.swift in Sources */,
 				C3F9580112B6D4259E88D374 /* RelatablyApp.swift in Sources */,
 				95289AA37B961F546D1C70EA /* Tokens.swift in Sources */,
+				9552DBF8C152BD75FF15D919 /* WordcloudMath.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -320,6 +327,7 @@
 				4560E655D3A7C8992B6C9DD4 /* DemoContentTests.swift in Sources */,
 				EAF47E229FF6C54BDA5B8F81 /* StoresTests.swift in Sources */,
 				D0B62AD5CC14110BBD7205CB /* TokensTests.swift in Sources */,
+				0D6E5EED5B7F0924067696A5 /* WordcloudMathTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
