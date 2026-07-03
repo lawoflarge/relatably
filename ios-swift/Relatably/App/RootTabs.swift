@@ -28,6 +28,10 @@ extension EnvironmentValues {
 struct RootTabs: View {
 
     @State private var selection: AppTab = .today
+    /// RN parity: the ARCHIVE tab button always targets the list screen —
+    /// every switch INTO the archive tab pops its NavigationStack to root
+    /// (expo-router's archive/[id] is never the tab button's destination).
+    @State private var archiveTabSelects = 0
 
     var body: some View {
         GeometryReader { geo in
@@ -40,11 +44,11 @@ struct RootTabs: View {
                     tabView(.today) { HomeView() }
                     tabView(.friends) { Text("FRIENDS") }
                     tabView(.board) { BoardView() }
-                    tabView(.archive) { Text("ARCHIVE") }
+                    tabView(.archive) { ArchiveView(popToRootTrigger: archiveTabSelects) }
                     tabView(.me) { Text("ME") }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                StickerTabBar(selection: $selection)
+                StickerTabBar(selection: tabSelection)
                     .padding(.horizontal, Spacing.gutter) // 22
                     .padding(.bottom, bottomPad)
             }
@@ -53,6 +57,18 @@ struct RootTabs: View {
             // RN parity: the window never moves for the keyboard.
             .ignoresSafeArea(.keyboard, edges: .bottom)
         }
+    }
+
+    /// Wraps `selection` to count switches into the archive tab (StickerTabBar
+    /// only sets on non-active taps, so this fires exactly on tab ENTRY).
+    private var tabSelection: Binding<AppTab> {
+        Binding(
+            get: { selection },
+            set: { newValue in
+                if newValue == .archive { archiveTabSelects += 1 }
+                selection = newValue
+            }
+        )
     }
 
     /// Keeps the tab's view in the hierarchy permanently; only visibility and
