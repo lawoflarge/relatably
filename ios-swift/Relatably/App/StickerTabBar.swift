@@ -45,6 +45,11 @@ enum AppTab: CaseIterable, Hashable {
 struct StickerTabBar: View {
 
     @Binding var selection: AppTab
+    /// Called when the ALREADY-ACTIVE tab is tapped. RN parity nuance: on
+    /// archive/[id] the ARCHIVE pill still targets the list route, so a
+    /// re-tap must pop the archive stack to root (StickerTabBar.tsx:60-78);
+    /// every other tab's re-tap stays a no-op.
+    var onReselect: ((AppTab) -> Void)? = nil
 
     var body: some View {
         HStack(spacing: Spacing.sp1) { // 4pt gap between tabs
@@ -62,9 +67,13 @@ struct StickerTabBar: View {
     private func tabItem(_ tab: AppTab) -> some View {
         let isActive = selection == tab
         return Button {
-            // Active-tab tap is a no-op: no re-navigate, no scroll-to-top,
-            // no haptic (settings-tabbar.md §2 behavioral notes).
-            guard !isActive else { return }
+            // Active-tab tap: no re-navigate, no scroll-to-top, no haptic
+            // (settings-tabbar.md §2) — but the shell may pop nested stacks
+            // to root via onReselect (RN: navigate() to the tab's own route).
+            guard !isActive else {
+                onReselect?(tab)
+                return
+            }
             UISelectionFeedbackGenerator().selectionChanged()
             selection = tab
         } label: {

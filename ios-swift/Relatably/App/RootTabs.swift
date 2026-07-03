@@ -48,7 +48,11 @@ struct RootTabs: View {
                     tabView(.me) { Text("ME") }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                StickerTabBar(selection: tabSelection)
+                StickerTabBar(selection: tabSelection, onReselect: { tab in
+                    // RN parity: tapping ARCHIVE while on archive/[id] pops
+                    // back to the list (the pill always targets the list).
+                    if tab == .archive { archiveTabSelects += 1 }
+                })
                     .padding(.horizontal, Spacing.gutter) // 22
                     .padding(.bottom, bottomPad)
             }
@@ -59,8 +63,9 @@ struct RootTabs: View {
         }
     }
 
-    /// Wraps `selection` to count switches into the archive tab (StickerTabBar
-    /// only sets on non-active taps, so this fires exactly on tab ENTRY).
+    /// Wraps `selection` to count switches into the archive tab (fires on tab
+    /// ENTRY; re-taps of the active ARCHIVE pill bump the counter separately
+    /// via StickerTabBar.onReselect).
     private var tabSelection: Binding<AppTab> {
         Binding(
             get: { selection },
