@@ -119,7 +119,10 @@ Free, no subscription. Sign in with Apple to compete on the leaderboard, or play
   reviewContactLastName: "Schwab",
   reviewContactPhone: "+49 157 379 65607",
   reviewContactEmail: "levin.schwab@gmx.de",
-  reviewNotes: `Relatably is an anonymous daily-question app with user-generated free-text answers. Every Guideline 1.2 safeguard is a visible, one-tap control, and this build GUARANTEES there is always populated content to act on — a brand-new install immediately shows a full wordcloud of other answers and a full Board of users — so a reviewer can exercise every control in under a minute with NO sign-in and NO waiting.
+  reviewNotes: `GUIDELINE 2.1(a) — WHAT CHANGED IN THIS BUILD
+Build 34 could fail to get past its initial loading screen on iPadOS. We rebuilt the app natively in Swift/SwiftUI for this build (35). Startup now has hard 10-second network timeouts and a 12-second watchdog: the app ALWAYS reaches either today's question, an archive fallback, or an explicit retry screen — verified on iPad Air 11-inch simulators (iPhone-compatibility mode) with normal, slow, and unreachable network. All previously reviewed functionality and all Guideline 1.2 moderation controls below are unchanged.
+
+Relatably is an anonymous daily-question app with user-generated free-text answers. Every Guideline 1.2 safeguard is a visible, one-tap control, and this build GUARANTEES there is always populated content to act on — a brand-new install immediately shows a full wordcloud of other answers and a full Board of users — so a reviewer can exercise every control in under a minute with NO sign-in and NO waiting.
 
 HOW TO TEST (about 60 seconds, fully anonymous, no account)
 1. Launch. A full-screen Terms gate appears on first launch. It states our ZERO-TOLERANCE policy for objectionable content and abusive users and requires you to confirm you are 18 or older. Tap "I AGREE".

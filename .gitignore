@@ -75,4 +75,4 @@ ui-debug.log
 
 .vercel
 .asc-playwright-session/
-archive/
+/archive/
