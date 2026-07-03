@@ -73,12 +73,15 @@ struct WordcloudView: View {
             let cloudHeight = min(560, geo.size.height - insets.top - insets.bottom - 220)
             let visible = visibleClusters
             let maxCount = visible.map(\.count).max() ?? 0 // Math.max(0, ...)
+            // last-wins on duplicate ids — RN builds a `new Map(...)`, which
+            // silently keeps the last entry; uniqueKeysWithValues would trap.
             let placements = Dictionary(
-                uniqueKeysWithValues: wordcloudLayout(
+                wordcloudLayout(
                     clusters: visible,
                     width: cloudWidth,
                     height: cloudHeight
-                ).map { ($0.id, $0) }
+                ).map { ($0.id, $0) },
+                uniquingKeysWith: { _, new in new }
             )
 
             VStack(spacing: 0) {
