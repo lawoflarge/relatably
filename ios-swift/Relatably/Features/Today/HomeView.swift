@@ -2,7 +2,7 @@ import SwiftUI
 
 // TODAY tab — phase switch over HomeViewModel (home-flow.md §3).
 // The cream background + PaperTexture live in RootView, under every phase.
-// Reveal (Task 11) and wordcloud (Task 10) are placeholders for now.
+// Reveal (Task 11) is a placeholder for now.
 
 struct HomeView: View {
 
@@ -30,9 +30,7 @@ struct HomeView: View {
                 QuestionView(vm: vm, question: question)
 
             case .wordcloud:
-                // Task 10 replaces this with WordcloudView.
-                Text("WORDCLOUD")
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                WordcloudView(vm: vm)
 
             case .noDrop:
                 StatusCard(
