@@ -104,13 +104,25 @@ final class ArchiveViewModel: ObservableObject {
 
     // MARK: Long-press → share (§3)
 
-    /// RN long-press renders ShareCardVerdict offscreen and runs the
-    /// trackShare → capture → share-sheet pipeline. Task 16 (Core/ShareCard)
-    /// wires that here; until then this hook is a documented no-op so the
-    /// gesture (with its haptic in ArchiveView) is already in place.
+    /// RN long-press mounts ShareCardVerdict offscreen and runs the
+    /// trackShare → capture → share-sheet pipeline (Core/ShareCard here).
+    /// §3 verbatim: banner_type "verdict"; satellites = ALL tile top_clusters
+    /// with positional 1-based ranks (so #1 duplicates the verdict text);
+    /// always-anonymous rank line; date = device-locale date of created_at;
+    /// failures best-effort/silent.
     func tileLongPressed(_ tile: ArchiveTile) {
-        // Task 16: shareCardImage(banner_type: "verdict",
-        //          question_id: tile.questionId, share_target: "system")
+        let card = ShareCard.verdict(
+            verdictText: tile.verdictText,
+            satellites: tile.topClusters.enumerated().map {
+                VerdictSatellite(canonicalText: $0.element, finalRank: $0.offset + 1)
+            },
+            userRank: nil,
+            percentile: nil,
+            date: ArchiveDetailViewModel.formatDate(iso: tile.createdAt)
+        )
+        Task {
+            await ShareCardPresenter.shared.share(card: card, questionId: tile.questionId)
+        }
     }
 }
 

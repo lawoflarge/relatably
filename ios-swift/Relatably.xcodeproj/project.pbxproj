@@ -39,9 +39,11 @@
 		7832E3AEBEF961888FBC1176 /* StickerTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16ADEBD943DB0A59D0AE5624 /* StickerTabBar.swift */; };
 		7A898DDF12ABFD8F4ED07528 /* BagelFatOne-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C455B4CB54D86AE237C9D255 /* BagelFatOne-Regular.ttf */; };
 		84B412BAB4DB0A70227DB016 /* WordcloudView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E6C7541A581A53BD1C2E65 /* WordcloudView.swift */; };
+		84C412A1CE7C91BC9DFEF72A /* ShareCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03822D248BEC8F5639EEA639 /* ShareCard.swift */; };
 		86F4CEEBD898054CE712D9DF /* MeViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB9EDF1B939359CEB95101E9 /* MeViewModelTests.swift */; };
 		8FBB84258F62B522E867C617 /* TosGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3823E0AA4A90C8D94842DEC /* TosGate.swift */; };
 		9090A4E1450878BD02CFCA54 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 978880FEFF7A4210A5CA0526 /* AuthService.swift */; };
+		9257945FE5ED5465669EBB69 /* ShareCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFF4189A3348F499F0EF7F5E /* ShareCardTests.swift */; };
 		9396293C96933FC50C9AE2BB /* PaperTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6AB6665D603F59FC58544E5 /* PaperTexture.swift */; };
 		95289AA37B961F546D1C70EA /* Tokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FF4048C77E0FC0E018E8029 /* Tokens.swift */; };
 		9552DBF8C152BD75FF15D919 /* WordcloudMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCD4D10577B73CAC2615F857 /* WordcloudMath.swift */; };
@@ -86,6 +88,7 @@
 
 /* Begin PBXFileReference section */
 		00A05332DEDBF5090CF35421 /* HomeViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModelTests.swift; sourceTree = "<group>"; };
+		03822D248BEC8F5639EEA639 /* ShareCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCard.swift; sourceTree = "<group>"; };
 		03AF4D846DB8C3275ED7F64F /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
 		070931831D8B278B40061C62 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		0959BFC392D230F94C8C2A63 /* ArchiveViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArchiveViewModelTests.swift; sourceTree = "<group>"; };
@@ -147,6 +150,7 @@
 		EA3297C6ABD42964EEA06AC1 /* ClusterModeration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusterModeration.swift; sourceTree = "<group>"; };
 		EAD4A32CAD7C9E3FBF81F019 /* RevealView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RevealView.swift; sourceTree = "<group>"; };
 		ED4A35F42D34EEB9444C3CE8 /* SubmitButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubmitButton.swift; sourceTree = "<group>"; };
+		EFF4189A3348F499F0EF7F5E /* ShareCardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCardTests.swift; sourceTree = "<group>"; };
 		EFFC010F274E3BEF4B6C40F1 /* ClusterLiveSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusterLiveSource.swift; sourceTree = "<group>"; };
 		F34373632DCBE534FACC6F19 /* FriendsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsViewModel.swift; sourceTree = "<group>"; };
 		FA9B491E1C784DF3354F01FF /* LiveCounter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveCounter.swift; sourceTree = "<group>"; };
@@ -201,6 +205,7 @@
 				03AF4D846DB8C3275ED7F64F /* KeychainStore.swift */,
 				163AB5FDF8CCC9199190AA92 /* Models.swift */,
 				B28B3A14BDD8286A1E4A89DB /* OneShotGates.swift */,
+				03822D248BEC8F5639EEA639 /* ShareCard.swift */,
 				CCD4D10577B73CAC2615F857 /* WordcloudMath.swift */,
 			);
 			path = Core;
@@ -302,6 +307,7 @@
 				544D6333C557995A7F19A782 /* FriendsViewModelTests.swift */,
 				00A05332DEDBF5090CF35421 /* HomeViewModelTests.swift */,
 				BB9EDF1B939359CEB95101E9 /* MeViewModelTests.swift */,
+				EFF4189A3348F499F0EF7F5E /* ShareCardTests.swift */,
 				E32D899C2F1DD7CACA7FCED0 /* StoresTests.swift */,
 				7A15E047E0082BCA7521107D /* TokensTests.swift */,
 				DB7806642A975257C6D0C72C /* WordcloudMathTests.swift */,
@@ -494,6 +500,7 @@
 				32BF556F37233F69CD78898E /* RevealView.swift in Sources */,
 				BD3D23B3CCD3354FAA864626 /* RootTabs.swift in Sources */,
 				13AB21F84B320F2F2138F5AF /* RootView.swift in Sources */,
+				84C412A1CE7C91BC9DFEF72A /* ShareCard.swift in Sources */,
 				7832E3AEBEF961888FBC1176 /* StickerTabBar.swift in Sources */,
 				A1F0669EB883DB4BEEA8F0A2 /* SubmitButton.swift in Sources */,
 				95289AA37B961F546D1C70EA /* Tokens.swift in Sources */,
@@ -517,6 +524,7 @@
 				E7E9090DA4D78B12357135AD /* FriendsViewModelTests.swift in Sources */,
 				A1494B0CDA30BDB836997431 /* HomeViewModelTests.swift in Sources */,
 				86F4CEEBD898054CE712D9DF /* MeViewModelTests.swift in Sources */,
+				9257945FE5ED5465669EBB69 /* ShareCardTests.swift in Sources */,
 				EAF47E229FF6C54BDA5B8F81 /* StoresTests.swift in Sources */,
 				D0B62AD5CC14110BBD7205CB /* TokensTests.swift in Sources */,
 				0D6E5EED5B7F0924067696A5 /* WordcloudMathTests.swift in Sources */,

@@ -146,7 +146,7 @@ struct ArchiveDetailView: View {
                     .foregroundColor(Palette.inkSoft)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            shareButton
+            shareButton(detail)
         }
         .padding(.horizontal, Spacing.gutter) // 22
         .padding(.top, Spacing.sp3)           // 12
@@ -166,32 +166,26 @@ struct ArchiveDetailView: View {
             .background(RoundedRectangle(cornerRadius: 6).fill(Palette.ink))
     }
 
-    /// RN ShareButton visuals (§5.4). The share pipeline (trackShare →
-    /// capture → system sheet) lands in Task 16 (Core/ShareCard) — until
-    /// then the tap is a documented no-op. Icon: SF share glyph standing in
-    /// for RN's IconShare (16pt, ink).
-    private var shareButton: some View {
-        Button {
-            // Task 16: shareCardImage(banner_type: "verdict",
-            //          question_id: detail.id, share_target: "system")
-        } label: {
-            HStack(spacing: Spacing.sp2) { // gap 8
-                Image(systemName: "square.and.arrow.up")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(Palette.ink)
-                Text(Self.shareLabel)
-                    .font(Fonts.hankenBold(13))
-                    .kerning(0.5)
-                    .foregroundColor(Palette.ink)
+    /// RN ShareButton (§5.4): banner_type "verdict", share_target "system".
+    /// §7.8/§7.9 verbatim quirks — satellites are ALL visibleClusters (rank 1
+    /// included, so satellite #1 duplicates the verdict) and the rank line is
+    /// always the anonymous fallback (userRank/percentile hardcoded nil).
+    /// Failure silent ("share failed" console.warn in RN, no alert).
+    private func shareButton(_ detail: ArchiveDetail) -> some View {
+        ShareButtonView(label: Self.shareLabel) {
+            let card = ShareCard.verdict(
+                verdictText: vm.verdict,
+                satellites: vm.visibleClusters.map {
+                    VerdictSatellite(canonicalText: $0.canonicalText, finalRank: $0.finalRank)
+                },
+                userRank: nil,
+                percentile: nil,
+                date: ArchiveDetailViewModel.formatDate(iso: detail.createdAt)
+            )
+            Task {
+                await ShareCardPresenter.shared.share(card: card, questionId: detail.id)
             }
-            .padding(.horizontal, Spacing.sp4) // 16
-            .padding(.vertical, Spacing.sp2)   // 8
-            .frame(minHeight: 44)
-            .background(Capsule().fill(Palette.mint))
-            .overlay(Capsule().strokeBorder(Palette.ink, lineWidth: 2))
-            .hardShadow(Shadows.s, shape: Capsule())
         }
-        .buttonStyle(.plain)
     }
 
     // MARK: - Ranked cluster row (§5.4 item 3)

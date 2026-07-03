@@ -155,8 +155,8 @@ struct ArchiveView: View {
         .contentShape(RoundedRectangle(cornerRadius: Radii.m))
         .onTapGesture { path.append(tile.questionId) }
         .onLongPressGesture {
-            // Native long-press affordance; the share pipeline itself lands
-            // in Task 16 (vm.tileLongPressed is the documented no-op hook).
+            // Native long-press affordance; vm.tileLongPressed runs the
+            // verdict-card share pipeline (Core/ShareCard).
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
             vm.tileLongPressed(tile)
         }

@@ -14,8 +14,8 @@ import SwiftUI
 // - The cloud keeps its flex:1 slot when empty, so verdict + CTAs render in
 //   the lower part of the screen, exactly like RN.
 //
-// SHARE CTAs are rendered verbatim but deliberately no-op until Task 16
-// wires ShareCardVerdict/ShareCardCalledIt through shareCardImage.
+// SHARE CTAs run the Core/ShareCard pipeline (§1.7): trackShare → card PNG →
+// system share sheet; failures are silent (§7.4 — RN only console.warns).
 //
 // The cream background + PaperTexture live in RootView (same convention as
 // WordcloudView — RN sets its own flat cream here).
@@ -141,13 +141,24 @@ struct RevealView: View {
     private var cta: some View {
         VStack(spacing: Spacing.sp3) { // gap 12
             shareButton(label: "SHARE THE VERDICT", background: Palette.pink) {
-                // Task 16 wires ShareCardVerdict via shareCardImage
-                // (banner_type "verdict"); deliberate no-op until then.
+                // §1.7 onShareVerdict: banner_type "verdict", share_target
+                // "system"; failure silent (§7.4).
+                Task {
+                    await ShareCardPresenter.shared.share(
+                        card: .revealVerdict(yesterday: yesterday),
+                        questionId: yesterday.id
+                    )
+                }
             }
             if calledIt {
                 shareButton(label: "★ SHARE — YOU CALLED IT", background: Palette.lemon2) {
-                    // Task 16 wires ShareCardCalledIt via shareCardImage
-                    // (banner_type "called_it"); deliberate no-op until then.
+                    // §1.7 onShareCalledIt: banner_type "called_it".
+                    Task {
+                        await ShareCardPresenter.shared.share(
+                            card: .revealCalledIt(yesterday: yesterday),
+                            questionId: yesterday.id
+                        )
+                    }
                 }
             }
             Button(action: onComplete) {

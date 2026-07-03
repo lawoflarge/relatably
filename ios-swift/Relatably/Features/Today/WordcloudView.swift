@@ -12,7 +12,9 @@ import SwiftUI
 //
 // The cream background + PaperTexture live in RootView, under every phase
 // (RN renders its own PaperTexture here; RootView already provides it).
-// SHARE button + offscreen ShareCardTodaysTake land with Task 16.
+// SHARE button (header, §4.4 gate) runs the Core/ShareCard todays_take
+// pipeline — RN's offscreen ShareCardTodaysTake render target becomes an
+// ImageRenderer capture, so no hidden view is mounted here.
 
 struct WordcloudView: View {
 
@@ -161,8 +163,42 @@ struct WordcloudView: View {
                 .kerning(1.4)
                 .foregroundColor(Palette.inkSoft)
             Spacer(minLength: 0)
-            // SHARE button (shareEnabled gate) arrives with Task 16.
+            if shareEnabled, let question = vm.question {
+                // §3.5: banner_type "todays_take", share_target "system",
+                // label "SHARE"; failure silent ("share failed" warn in RN).
+                ShareButtonView {
+                    let userAnswer = vm.text
+                    Task {
+                        await ShareCardPresenter.shared.share(
+                            card: .todaysTake(
+                                questionText: question.text,
+                                userAnswer: userAnswer,
+                                date: Self.dateLabel()
+                            ),
+                            questionId: question.id
+                        )
+                    }
+                }
+            }
         }
+    }
+
+    /// RN share gate (wordcloud.md §4.4, verbatim): `!!(questionId &&
+    /// questionText && userAnswer && dateLabel)` — all four non-empty.
+    /// dateLabel (UTC calendar date) is always non-empty here.
+    private var shareEnabled: Bool {
+        guard let question = vm.question else { return false }
+        return !question.id.isEmpty && !question.text.isEmpty && !vm.text.isEmpty
+    }
+
+    /// RN dateLabel = `new Date().toISOString().slice(0, 10)` — the UTC
+    /// calendar date ("YYYY-MM-DD"), NOT the device-local date.
+    static func dateLabel(now: Date = Date()) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: now)
     }
 
     // MARK: - Delete row (§4.4 delete flow)
