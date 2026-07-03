@@ -34,13 +34,22 @@ struct ArchiveView: View {
     /// targets the list screen.
     let popToRootTrigger: Int
 
+    /// True while ARCHIVE is the selected tab. RN (expo-router) mounts tab
+    /// screens lazily on FIRST focus — the keep-alive shell constructs this
+    /// view at launch, so the first flip to true is the RN mount moment and
+    /// gates the initial fetch (later switches never refetch; bootIfNeeded
+    /// is once-per-VM-lifetime).
+    let isActive: Bool
+
     @Environment(\.appSafeAreaInsets) private var insets
 
     init(
         popToRootTrigger: Int = 0,
+        isActive: Bool = true,
         vm: @autoclosure @escaping () -> ArchiveViewModel = ArchiveViewModel.live()
     ) {
         self.popToRootTrigger = popToRootTrigger
+        self.isActive = isActive
         _vm = StateObject(wrappedValue: vm())
     }
 
@@ -52,7 +61,14 @@ struct ArchiveView: View {
                     ArchiveDetailView(questionId: questionId)
                 }
         }
-        .task { vm.bootIfNeeded() }
+        // RN lazy-mount parity: expo-router mounts the archive screen on
+        // first FOCUS, so the initial fetch fires when the tab is first
+        // selected — not at app launch (where its failure alert would pop
+        // over the TODAY tab). `initial: true` covers standalone use
+        // (previews/tests) where isActive is already true on appear.
+        .onChange(of: isActive, initial: true) { _, active in
+            if active { vm.bootIfNeeded() }
+        }
         .onChange(of: popToRootTrigger) { path.removeAll() }
         .alert(ArchiveViewModel.loadErrorTitle, isPresented: $vm.showLoadError) {
             Button("OK") {}

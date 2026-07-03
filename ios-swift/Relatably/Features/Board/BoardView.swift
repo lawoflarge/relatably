@@ -19,9 +19,20 @@ struct BoardView: View {
     /// Non-nil presents the "sign in failed" alert (§4.6).
     @State private var signInFailureMessage: String?
 
+    /// True while BOARD is the selected tab. RN (expo-router) mounts tab
+    /// screens lazily on FIRST focus — the keep-alive shell constructs this
+    /// view at launch, so the first flip to true is the RN mount moment and
+    /// gates the initial fetch (later switches never refetch; bootIfNeeded
+    /// is once-per-VM-lifetime).
+    let isActive: Bool
+
     @Environment(\.appSafeAreaInsets) private var insets
 
-    init(vm: @autoclosure @escaping () -> BoardViewModel = BoardViewModel.live()) {
+    init(
+        isActive: Bool = true,
+        vm: @autoclosure @escaping () -> BoardViewModel = BoardViewModel.live()
+    ) {
+        self.isActive = isActive
         _vm = StateObject(wrappedValue: vm())
     }
 
@@ -71,7 +82,13 @@ struct BoardView: View {
         .padding(.horizontal, Spacing.gutter)          // 22
         .padding(.top, insets.top + Spacing.sp6)       // safe-area top + 32
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .task { vm.bootIfNeeded() }
+        // RN lazy-mount parity: expo-router mounts the board screen on
+        // first FOCUS, so the initial fetch fires when the tab is first
+        // selected — not at app launch. `initial: true` covers standalone
+        // use (previews/tests) where isActive is already true on appear.
+        .onChange(of: isActive, initial: true) { _, active in
+            if active { vm.bootIfNeeded() }
+        }
         .onReceive(authState.$isSignedIn) { vm.isSignedIn = $0 }
         // RN ActionSheetIOS 1:1 — UIAlertController with the exact promised
         // options (sibling of ModerationSheetHost; see that type for why

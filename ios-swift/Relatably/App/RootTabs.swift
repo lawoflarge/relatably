@@ -40,13 +40,22 @@ struct RootTabs: View {
             let bottomPad: CGFloat = geo.safeAreaInsets.bottom > 0 ? 8 : 12
             ZStack(alignment: .bottom) {
                 ZStack {
+                    // TODAY boots at launch (it IS the initial tab — same
+                    // timing as RN). Every other tab gets isActive as its
+                    // focus signal: RN (expo-router) mounts tab screens
+                    // LAZILY on first focus, so their initial fetches fire
+                    // on first selection, not at app launch. MeView also
+                    // refreshes the undo lists on EVERY switch into ME (a
+                    // separately justified deviation).
                     tabView(.today) { HomeView() }
-                    tabView(.friends) { FriendsView() }
-                    tabView(.board) { BoardView() }
-                    tabView(.archive) { ArchiveView(popToRootTrigger: archiveTabSelects) }
-                    // isActive is the focus signal: the kept-alive MeView
-                    // re-reads the undo lists on every switch into ME (the
-                    // keep-alive equivalent of RN's lazy first-focus mount).
+                    tabView(.friends) { FriendsView(isActive: selection == .friends) }
+                    tabView(.board) { BoardView(isActive: selection == .board) }
+                    tabView(.archive) {
+                        ArchiveView(
+                            popToRootTrigger: archiveTabSelects,
+                            isActive: selection == .archive
+                        )
+                    }
                     tabView(.me) { MeView(isActive: selection == .me) }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)

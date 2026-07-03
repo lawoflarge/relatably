@@ -23,9 +23,22 @@ struct FriendsView: View {
     /// Non-nil presents the "sign in failed" alert (§4.1 SIWA onError).
     @State private var signInFailureMessage: String?
 
+    /// True while FRIENDS is the selected tab. RN (expo-router) mounts tab
+    /// screens lazily on FIRST focus — the keep-alive shell constructs this
+    /// view at launch, and without this gate a restored session would fire
+    /// the friends fetch at launch (auth flip → dep-changed effect). The
+    /// first flip to true is the RN mount moment; later switches never
+    /// refetch (bootIfNeeded is once-per-VM-lifetime). Anonymous flow is
+    /// unaffected (the signed-out effect run fetches nothing).
+    let isActive: Bool
+
     @Environment(\.appSafeAreaInsets) private var insets
 
-    init(vm: @autoclosure @escaping () -> FriendsViewModel = FriendsViewModel.live()) {
+    init(
+        isActive: Bool = true,
+        vm: @autoclosure @escaping () -> FriendsViewModel = FriendsViewModel.live()
+    ) {
+        self.isActive = isActive
         _vm = StateObject(wrappedValue: vm())
     }
 
@@ -43,7 +56,15 @@ struct FriendsView: View {
                 list
             }
         }
-        .task { vm.bootIfNeeded() }
+        // RN lazy-mount parity: expo-router mounts the friends screen on
+        // first FOCUS, so the auth effect (and any signed-in fetch) first
+        // runs when the tab is first selected — not at app launch. Pre-boot
+        // isSignedIn updates are absorbed (runAuthEffectIfDepChanged guards
+        // on hasBooted); boot reads the then-current auth state. `initial:
+        // true` covers standalone use (previews/tests).
+        .onChange(of: isActive, initial: true) { _, active in
+            if active { vm.bootIfNeeded() }
+        }
         .onReceive(authState.$isSignedIn) { vm.isSignedIn = $0 }
         // RN ActionSheetIOS 1:1 — UIAlertController with the exact promised
         // options (same host pattern as BoardModerationSheetHost).
