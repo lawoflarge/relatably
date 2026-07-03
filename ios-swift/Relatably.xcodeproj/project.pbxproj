@@ -10,6 +10,7 @@
 		0A04179A00285B2C0335ADED /* Fonts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F00185DDC0E9B1D9373632B /* Fonts.swift */; };
 		0A7FAEFD57F74C7D70104647 /* EulaStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33FA05F1BF92386BF1DA103C /* EulaStore.swift */; };
 		0D6E5EED5B7F0924067696A5 /* WordcloudMathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB7806642A975257C6D0C72C /* WordcloudMathTests.swift */; };
+		13AB21F84B320F2F2138F5AF /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77C4FA0D0016D1B661A11E66 /* RootView.swift */; };
 		153A074B0CE16A6E4D8DA53B /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = F4F93B360DE931037B71F83C /* GoogleMobileAds */; };
 		1AB128D7A5F23422F0E85515 /* HankenGrotesk-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 69C0B4CE433241382AEB9D34 /* HankenGrotesk-Bold.ttf */; };
 		2826336B4C2583FF4F5F3DA3 /* HardShadow.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC44687B1C48863A4D2B465C /* HardShadow.swift */; };
@@ -18,7 +19,9 @@
 		30BBB34E284199B888953F29 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 070931831D8B278B40061C62 /* APIClient.swift */; };
 		4560E655D3A7C8992B6C9DD4 /* DemoContentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459077A1536C9BF5784AF681 /* DemoContentTests.swift */; };
 		57984EC42EDBEBC45E932E90 /* ClusterLiveSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFFC010F274E3BEF4B6C40F1 /* ClusterLiveSource.swift */; };
+		7832E3AEBEF961888FBC1176 /* StickerTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16ADEBD943DB0A59D0AE5624 /* StickerTabBar.swift */; };
 		7A898DDF12ABFD8F4ED07528 /* BagelFatOne-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C455B4CB54D86AE237C9D255 /* BagelFatOne-Regular.ttf */; };
+		8FBB84258F62B522E867C617 /* TosGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3823E0AA4A90C8D94842DEC /* TosGate.swift */; };
 		9090A4E1450878BD02CFCA54 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 978880FEFF7A4210A5CA0526 /* AuthService.swift */; };
 		9396293C96933FC50C9AE2BB /* PaperTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6AB6665D603F59FC58544E5 /* PaperTexture.swift */; };
 		95289AA37B961F546D1C70EA /* Tokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FF4048C77E0FC0E018E8029 /* Tokens.swift */; };
@@ -29,6 +32,7 @@
 		B258164AA57E37375FA6BAC7 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 0B83A4F46882ED9A40DC6FE6 /* GoogleService-Info.plist */; };
 		B2AB317D78B1F2FACA5720FF /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 5319BF5E722D43A76EAC7783 /* FirebaseFirestore */; };
 		BB6DE8B186FFEE9973ED78CF /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03AF4D846DB8C3275ED7F64F /* KeychainStore.swift */; };
+		BD3D23B3CCD3354FAA864626 /* RootTabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9333DECA31919C620893EE50 /* RootTabs.swift */; };
 		C3F9580112B6D4259E88D374 /* RelatablyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17EEE842ADABF9C422042318 /* RelatablyApp.swift */; };
 		D0B62AD5CC14110BBD7205CB /* TokensTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A15E047E0082BCA7521107D /* TokensTests.swift */; };
 		D25CEDA2508C9A71A4FAEE94 /* DeviceToken.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3728079A5C880622326A3C2 /* DeviceToken.swift */; };
@@ -58,6 +62,7 @@
 		0B83A4F46882ED9A40DC6FE6 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		126F97A25B8965F95764851A /* SpaceGrotesk-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SpaceGrotesk-Bold.ttf"; sourceTree = "<group>"; };
 		163AB5FDF8CCC9199190AA92 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		16ADEBD943DB0A59D0AE5624 /* StickerTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickerTabBar.swift; sourceTree = "<group>"; };
 		17EEE842ADABF9C422042318 /* RelatablyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelatablyApp.swift; sourceTree = "<group>"; };
 		1903E203EA3EB801D3E7362B /* DemoContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoContent.swift; sourceTree = "<group>"; };
 		2FF4048C77E0FC0E018E8029 /* Tokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tokens.swift; sourceTree = "<group>"; };
@@ -70,10 +75,12 @@
 		69C0B4CE433241382AEB9D34 /* HankenGrotesk-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "HankenGrotesk-Bold.ttf"; sourceTree = "<group>"; };
 		6A6B19EEDEBFBD90F8510D80 /* HankenGrotesk-ExtraBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "HankenGrotesk-ExtraBold.ttf"; sourceTree = "<group>"; };
 		7542A0AD76EE2AD5ED973F4F /* SpaceGrotesk-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SpaceGrotesk-SemiBold.ttf"; sourceTree = "<group>"; };
+		77C4FA0D0016D1B661A11E66 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		78311EFF44BC1DF8165623CF /* RelatablyTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = RelatablyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7A15E047E0082BCA7521107D /* TokensTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokensTests.swift; sourceTree = "<group>"; };
 		850A4DB0556D79B66B6DB7B4 /* Relatably.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Relatably.entitlements; sourceTree = "<group>"; };
 		8F00185DDC0E9B1D9373632B /* Fonts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fonts.swift; sourceTree = "<group>"; };
+		9333DECA31919C620893EE50 /* RootTabs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootTabs.swift; sourceTree = "<group>"; };
 		978880FEFF7A4210A5CA0526 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		9F3F38242A2B69E3538501E8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		AC44687B1C48863A4D2B465C /* HardShadow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardShadow.swift; sourceTree = "<group>"; };
@@ -86,6 +93,7 @@
 		DB0C47A838C0EC250B8C256C /* HiddenContentStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HiddenContentStore.swift; sourceTree = "<group>"; };
 		DB7806642A975257C6D0C72C /* WordcloudMathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordcloudMathTests.swift; sourceTree = "<group>"; };
 		E32D899C2F1DD7CACA7FCED0 /* StoresTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoresTests.swift; sourceTree = "<group>"; };
+		E3823E0AA4A90C8D94842DEC /* TosGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TosGate.swift; sourceTree = "<group>"; };
 		EFFC010F274E3BEF4B6C40F1 /* ClusterLiveSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusterLiveSource.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -135,6 +143,10 @@
 			isa = PBXGroup;
 			children = (
 				17EEE842ADABF9C422042318 /* RelatablyApp.swift */,
+				9333DECA31919C620893EE50 /* RootTabs.swift */,
+				77C4FA0D0016D1B661A11E66 /* RootView.swift */,
+				16ADEBD943DB0A59D0AE5624 /* StickerTabBar.swift */,
+				E3823E0AA4A90C8D94842DEC /* TosGate.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -329,7 +341,11 @@
 				9A42A6DA12C097BABBB62F18 /* OneShotGates.swift in Sources */,
 				9396293C96933FC50C9AE2BB /* PaperTexture.swift in Sources */,
 				C3F9580112B6D4259E88D374 /* RelatablyApp.swift in Sources */,
+				BD3D23B3CCD3354FAA864626 /* RootTabs.swift in Sources */,
+				13AB21F84B320F2F2138F5AF /* RootView.swift in Sources */,
+				7832E3AEBEF961888FBC1176 /* StickerTabBar.swift in Sources */,
 				95289AA37B961F546D1C70EA /* Tokens.swift in Sources */,
+				8FBB84258F62B522E867C617 /* TosGate.swift in Sources */,
 				9552DBF8C152BD75FF15D919 /* WordcloudMath.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
