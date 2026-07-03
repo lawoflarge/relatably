@@ -89,22 +89,76 @@ enum Typography {
     static let micro = TypeStyle(family: Fonts.spaceGroteskBold, size: 9, lineHeight: 12, letterSpacing: 1.3)
 }
 
-/// Applies a `TypeStyle` with RN line-height semantics: the token's
-/// `lineHeight` is an absolute line-box height, so the delta over the font's
-/// natural line height is applied as explicit line spacing plus half-delta
-/// vertical padding (headroom so BagelFatOne ascenders don't clip).
+/// Applies a `TypeStyle` with RN line-height semantics. RN/TextKit treats
+/// `lineHeight` as a HARD clamp (NSParagraphStyle minimum==maximum): the line
+/// pitch is exactly `lineHeight` even when the font's natural line box is
+/// TALLER (BagelFatOne's is ~1.45x its point size, so hero 52/62 renders at
+/// a 62pt pitch in RN, not 75pt), and glyphs sit on a baseline `descent` up
+/// from the line-box bottom. SwiftUI equivalent (verified against RN
+/// screenshots in verification/PARITY.md): apply the SIGNED delta as
+/// lineSpacing between lines, plus the same delta as top padding — that
+/// bottom-aligns the first baseline exactly like TextKit and makes the text
+/// block exactly n*lineHeight tall. Glyphs never clip: SwiftUI draws them
+/// outside the shrunken frame.
 struct TypeStyleModifier: ViewModifier {
     let style: TypeStyle
 
+    /// Measured line count (raw text height / natural line height) — drives
+    /// the bottom compensation that shrinks the frame to n*lineHeight when
+    /// the natural line box is taller than the token (delta < 0).
+    @State private var lineCount = 1
+
+    @ViewBuilder
     func body(content: Content) -> some View {
         let uiFont = UIFont(name: style.family, size: style.size)
             ?? UIFont.systemFont(ofSize: style.size)
-        let delta = max(0, style.lineHeight - uiFont.lineHeight)
-        return content
+        let natural = uiFont.lineHeight
+        let delta = style.lineHeight - natural
+        let styled = content
             .font(style.font)
             .kerning(style.letterSpacing)
-            .lineSpacing(delta)
-            .padding(.vertical, delta / 2)
+        if delta >= 0 {
+            // Natural box fits inside the token box: extra space between
+            // lines + on top (TextKit bottom-aligns the first baseline).
+            styled
+                .lineSpacing(delta)
+                .padding(.top, delta)
+        } else if #available(iOS 18.0, *) {
+            // Natural box TALLER than the token (all BagelFatOne styles).
+            // SwiftUI clamps negative .lineSpacing to 0, so compress the
+            // pitch in drawing (TextRenderer shifts line i up by i*|delta|)
+            // and shrink the frame to exactly n*lineHeight via negative
+            // top/bottom padding.
+            styled
+                .textRenderer(LinePitchClamp(delta: delta))
+                .onGeometryChange(for: Int.self) { proxy in
+                    max(1, Int((proxy.size.height / natural).rounded()))
+                } action: { lineCount = $0 }
+                .padding(.top, delta)
+                .padding(.bottom, CGFloat(lineCount - 1) * delta)
+        } else {
+            // iOS 17 fallback: first line lands exactly like TextKit; the
+            // pitch of additional lines stays at the font's natural height
+            // (14% airier for BagelFatOne — best effort without UIKit text).
+            styled
+                .padding(.top, delta)
+        }
+    }
+}
+
+/// Draws each line of a `Text.Layout` at a compressed pitch: line i is
+/// shifted up by `i * |delta|`, so line pitch = natural + delta = the
+/// token's lineHeight. Glyphs are NOT clipped — SwiftUI draws whole lines.
+@available(iOS 18.0, *)
+private struct LinePitchClamp: TextRenderer {
+    let delta: CGFloat // negative
+
+    func draw(layout: Text.Layout, in ctx: inout GraphicsContext) {
+        for (index, line) in layout.enumerated() {
+            var lineCtx = ctx
+            lineCtx.translateBy(x: 0, y: CGFloat(index) * delta)
+            lineCtx.draw(line)
+        }
     }
 }
 
