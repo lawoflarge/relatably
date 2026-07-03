@@ -165,6 +165,26 @@ struct LeaderboardEntry: Codable, Equatable {
     let score: Int
     let dailyRank: Int?
     let locale: String
+    /// NOT part of the typed RN LeaderboardEntry — the Board reads it via a
+    /// cast (`(entry as … & { streak_days?: number }).streak_days ?? 0`,
+    /// board-demo.md §8.13). Optional extra; demo rows never carry it.
+    let streakDays: Int?
+
+    init(
+        userId: String,
+        handle: String?,
+        score: Int,
+        dailyRank: Int?,
+        locale: String,
+        streakDays: Int? = nil
+    ) {
+        self.userId = userId
+        self.handle = handle
+        self.score = score
+        self.dailyRank = dailyRank
+        self.locale = locale
+        self.streakDays = streakDays
+    }
 
     enum CodingKeys: String, CodingKey {
         case userId = "user_id"
@@ -172,6 +192,7 @@ struct LeaderboardEntry: Codable, Equatable {
         case score
         case dailyRank = "daily_rank"
         case locale
+        case streakDays = "streak_days"
     }
 }
 

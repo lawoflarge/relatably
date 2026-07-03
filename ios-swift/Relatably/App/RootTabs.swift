@@ -39,7 +39,7 @@ struct RootTabs: View {
                 ZStack {
                     tabView(.today) { HomeView() }
                     tabView(.friends) { Text("FRIENDS") }
-                    tabView(.board) { Text("BOARD") }
+                    tabView(.board) { BoardView() }
                     tabView(.archive) { Text("ARCHIVE") }
                     tabView(.me) { Text("ME") }
                 }
