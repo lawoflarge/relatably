@@ -1,0 +1,54 @@
+# Relatably
+
+> Relatably is a free iOS app that asks everyone on Earth the same question at one synchronized random moment each day. You type a single free-text answer, then watch every response cluster into a live wordcloud showing the world's collective opinion in real time.
+
+## About
+
+Relatably is a daily social ritual, not a feed. Once per day, at a synchronized random moment in UTC, every user receives the same question at the same time. You get one shot to type an honest free-text answer — there is no multiple choice. All answers cluster into a Mentimeter-style live wordcloud. To see yesterday's verdict, you have to answer today. No streaks, no XP, no infinite scroll — just thirty seconds a day.
+
+## Key facts
+
+- Name: Relatably
+- Platform: iOS 17.0 or later (iPhone)
+- Price: Free (USD 0.00) — no subscription, no paywall, no in-app purchases
+- Category: Social Networking
+- Publisher: Levin David Schwab
+- App Store: https://apps.apple.com/us/app/relatably/id6768082631
+- Website: https://relatably.vercel.app
+
+## Accounts and leaderboards
+
+Playing the daily ritual requires no account; you can stay anonymous. Signing in with Apple is optional and unlocks the global daily, weekly, and all-time leaderboards, friending other users, and the "called it" badge earned by submitting the eventual number-one answer first.
+
+## Privacy
+
+Relatably collects the bare minimum: an anonymous device ID, your free-text answer, and a hashed IP used only for rate-limiting. It does not collect location or contacts, and the iOS client runs no third-party analytics.
+
+## Pages
+
+- Privacy Policy: https://relatably.vercel.app/privacy
+- Support and FAQ: https://relatably.vercel.app/support
+- Terms of Service: https://relatably.vercel.app/tos
+- Pricing: https://relatably.vercel.app/pricing.md
+
+## FAQ
+
+### What is Relatably?
+Relatably is a free iOS app that asks everyone on Earth the same question at one synchronized random moment each day. Players type a single free-text answer, then watch every response cluster into a live wordcloud showing the world's collective opinion in real time. One question, one answer, once a day.
+
+### How much does Relatably cost?
+Relatably is completely free to play on iPhone. There is no subscription, no paywall, and no in-app purchase required to answer the daily question or view the global wordcloud. The app is available on the Apple App Store and requires iOS 17.0 or later.
+
+### How does the daily question work?
+Once per day, at a synchronized random moment in UTC, every Relatably user receives the same question at the same time. You get one shot to type an honest free-text answer, with no multiple choice. All answers then cluster into a Mentimeter-style live wordcloud of the world's opinion.
+
+### Do I need an account to play Relatably?
+No account is required to play the daily ritual, and you can stay anonymous and simply answer each question. Signing in with Apple is optional and unlocks the global daily, weekly, and all-time leaderboards, friending other users, and the "called it" badge for submitting the eventual number-one answer first.
+
+### Why can't I see yesterday's wordcloud?
+To see yesterday's verdict on Relatably, you first have to answer today's question. This gate is deliberate, and it keeps the app a single daily ritual instead of an endless feed. There are no streaks to grind, no XP, and no infinite scroll, just thirty seconds a day.
+
+### What data does Relatably collect?
+Relatably collects the bare minimum: an anonymous device ID, your free-text answer, and a hashed IP used only for rate-limiting. It does not collect location or contacts, and the iOS client runs no third-party analytics. The full privacy policy is available at relatably.vercel.app/privacy.
+
+Last updated: 2026-07-23
