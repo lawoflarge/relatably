@@ -1,21 +1,50 @@
 name: Cron — Trigger Drop
 
+# Why this is a self-looping job and not a `*/5` cron:
+#
+# GitHub silently drops most high-frequency scheduled runs. Measured on
+# 2026-07-29 — a day on which every run was green — a `*/5` schedule fired
+# 15 times instead of 288, with gaps of 48 / 79 / 196 min (min/median/max).
+# Drops were therefore going live up to ~3 h after `scheduled_drop_at`.
+#
+# Instead we ask for a *low-frequency* trigger (every 30 min), which GitHub
+# delivers far more reliably, and each run then drives the 5-minute cadence
+# itself for the next ~65 minutes. Runs deliberately overlap: at any moment
+# two or three are usually in flight, so a dropped trigger is covered by a
+# run that is already going. Overlap is free because the endpoint claims a
+# 5-minute bucket in a Firestore transaction (`runOnce`, api/src/lib/
+# idempotency.ts), so a duplicate POST returns {"skipped":
+# "already-ran-this-bucket"} and does no work.
+#
+# This costs a lot of runner minutes, which is only viable because this
+# repo is public — public repos get unlimited free minutes on standard
+# runners. Do NOT re-apply this pattern to a private repo; it would burn
+# the metered quota within days.
+
 on:
   schedule:
-    # Every 5 minutes (GitHub Actions cron minimum granularity)
-    - cron: "*/5 * * * *"
+    # Every 30 min. Each run then covers ~65 min, so consecutive runs overlap.
+    - cron: "0,30 * * * *"
   workflow_dispatch:
 
 jobs:
   trigger-drop:
     name: POST /api/cron/trigger-drop
     runs-on: ubuntu-latest
+    # Loop budget (65 min) plus headroom for a slow final request.
+    timeout-minutes: 75
     steps:
-      - name: Call Vercel endpoint
+      - name: Drive the 5-minute drop cadence
         env:
           API_BASE_URL: ${{ secrets.API_BASE_URL }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          # 14 posts, 5 min apart = 13 intervals = 65 min of coverage per
+          # run, against a 30-min schedule: 2-3 runs are always in flight.
+          ITERATIONS: "14"
+          INTERVAL_SECONDS: "300"
         run: |
+          set -uo pipefail
+
           if [ -z "$API_BASE_URL" ]; then
             echo "::error::API_BASE_URL secret is not set"
             exit 1
@@ -24,8 +53,42 @@ jobs:
             echo "::error::CRON_SECRET secret is not set"
             exit 1
           fi
-          curl -fSs \
-            -X POST \
-            -H "Authorization: Bearer $CRON_SECRET" \
-            -H "Content-Type: application/json" \
-            "$API_BASE_URL/api/cron/trigger-drop"
+
+          failures=0
+
+          for i in $(seq 1 "$ITERATIONS"); do
+            # Capture body and status separately so a non-2xx is reported
+            # with the API's own error payload rather than a bare exit code.
+            body="$(mktemp)"
+            code="$(curl -sS \
+              -o "$body" \
+              -w '%{http_code}' \
+              -X POST \
+              -H "Authorization: Bearer $CRON_SECRET" \
+              -H "Content-Type: application/json" \
+              --max-time 60 \
+              "$API_BASE_URL/api/cron/trigger-drop" || echo "000")"
+
+            if [ "$code" = "200" ]; then
+              echo "[$i/$ITERATIONS] $(date -u +%H:%M:%S)Z  ok  $(cat "$body")"
+            else
+              # Do NOT abort: one blip must not end this run's coverage for
+              # the remaining ~hour. Record it and fail the job at the end so
+              # the failure still surfaces red in the Actions UI and by email.
+              failures=$((failures + 1))
+              echo "::warning::[$i/$ITERATIONS] HTTP $code — $(cat "$body")"
+            fi
+            rm -f "$body"
+
+            # No trailing sleep after the final iteration; the next scheduled
+            # run is already overlapping by then.
+            if [ "$i" -lt "$ITERATIONS" ]; then
+              sleep "$INTERVAL_SECONDS"
+            fi
+          done
+
+          if [ "$failures" -gt 0 ]; then
+            echo "::error::$failures of $ITERATIONS trigger-drop calls failed"
+            exit 1
+          fi
+          echo "All $ITERATIONS calls succeeded."
