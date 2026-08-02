@@ -1,5 +1,24 @@
 name: Cron — Prepare Next Drop
 
+# This job used to be `curl -fSs` and nothing else, which meant it only ever
+# went red on a non-2xx response. But the endpoint answers **200** when the
+# question pool has run dry — `{"ok":true,"scheduled":null}`, with
+# runPrepareNextDrop logging "admin must seed more" server-side. So the one
+# failure that actually stops the app from having anything to drop was the
+# one failure this workflow reported as success. It stayed green through it
+# on 2026-08-02.
+#
+# The endpoint has three distinct 200 shapes and they must not be conflated:
+#
+#   {"ok":true,"scheduled":{"questionId":…,"dropAt":…}}  scheduled → green
+#   {"ok":true,"scheduled":null}                         pool dry  → RED
+#   {"skipped":"already-ran-today"}                      benign    → green
+#
+# Note the third: it carries no `scheduled` key at all, so a naive
+# `.scheduled == null` test would raise a false alarm on every re-run within
+# the same UTC day (the endpoint guards on a daily idempotency bucket, and
+# `workflow_dispatch` re-runs are routine). Check for `skipped` first.
+
 on:
   schedule:
     # Daily at 00:00 UTC
@@ -16,6 +35,8 @@ jobs:
           API_BASE_URL: ${{ secrets.API_BASE_URL }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
+          set -uo pipefail
+
           if [ -z "$API_BASE_URL" ]; then
             echo "::error::API_BASE_URL secret is not set"
             exit 1
@@ -24,8 +45,48 @@ jobs:
             echo "::error::CRON_SECRET secret is not set"
             exit 1
           fi
-          curl -fSs \
+
+          # Capture body and status separately: the body is the whole point
+          # here, so `curl -f` (which discards it on error) is not usable.
+          body="$(mktemp)"
+          code="$(curl -sS \
+            -o "$body" \
+            -w '%{http_code}' \
             -X POST \
             -H "Authorization: Bearer $CRON_SECRET" \
             -H "Content-Type: application/json" \
-            "$API_BASE_URL/api/cron/prepare-next-drop"
+            --max-time 60 \
+            "$API_BASE_URL/api/cron/prepare-next-drop" || echo "000")"
+
+          payload="$(cat "$body")"
+          rm -f "$body"
+          echo "HTTP $code — $payload"
+
+          if [ "$code" != "200" ]; then
+            echo "::error::prepare-next-drop returned HTTP $code: $payload"
+            exit 1
+          fi
+
+          if ! echo "$payload" | jq -e . >/dev/null 2>&1; then
+            echo "::error::prepare-next-drop returned non-JSON body: $payload"
+            exit 1
+          fi
+
+          # Benign: the daily idempotency bucket was already claimed. Carries
+          # no `scheduled` key, so this must be checked before the null test.
+          if echo "$payload" | jq -e 'has("skipped")' >/dev/null; then
+            echo "Already ran today ($(echo "$payload" | jq -r '.skipped')) — nothing to do."
+            exit 0
+          fi
+
+          # The silent failure this workflow exists to catch.
+          if echo "$payload" | jq -e '.scheduled == null' >/dev/null; then
+            echo "::error::Question pool is empty — prepare-next-drop found no \
+          scheduled question without a drop_at, so tomorrow has nothing to drop. \
+          Seed more questions (status=\"scheduled\", no scheduled_drop_at). \
+          See runPrepareNextDrop.ts and api/scripts/check-cron-state.mjs."
+            exit 1
+          fi
+
+          echo "Scheduled $(echo "$payload" | jq -r '.scheduled.questionId') \
+          for $(echo "$payload" | jq -r '.scheduled.dropAt')."
