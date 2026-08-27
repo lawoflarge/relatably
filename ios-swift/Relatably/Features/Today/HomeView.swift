@@ -50,10 +50,14 @@ struct HomeView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .task {
-            // RN spins up the Mobile Ads SDK once on Home mount — fire-and-
-            // forget, never awaited on the boot path (no ATT, npa=1 only).
-            AdManager.initAds()
             vm.bootIfNeeded()
+        }
+        .task {
+            // Consent BEFORE the SDK. Requesting an ad before the EEA/UK form is
+            // answered is the thing the form asks about; npa=1 alone does not
+            // cover it. Its own task, so the boot path is never awaited on ads.
+            await AdManager.gatherConsent()
+            AdManager.initAds()
         }
     }
 

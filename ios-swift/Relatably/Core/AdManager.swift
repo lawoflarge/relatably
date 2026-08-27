@@ -1,5 +1,6 @@
 import Foundation
 import GoogleMobileAds
+import UserMessagingPlatform
 import os
 
 // AdMob integration — 1:1 port of ios/src/lib/ads.ts per
@@ -82,6 +83,56 @@ enum AdManager {
         return defaults.string(forKey: unitIdOverrideKey) ?? testInterstitialUnitId
     }
 
+    // MARK: - EEA/UK consent (UMP)
+    //
+    // npa=1 is not consent. Relatably requests only non-personalized ads and
+    // never calls ATT (§4.2), so there is no IDFA and no ATT prompt, and the
+    // App Privacy answer "Data Not Used to Track You" stays true. None of that
+    // removes the EEA/UK duty: a non-personalized request still stores and
+    // reads information on the device, and AdMob requires a Google-certified
+    // CMP for EEA/UK traffic. UMP supplies exactly that consent, and nothing
+    // more; the ATT step of the usual chain is deliberately absent here.
+
+    @MainActor private static var consentRequested = false
+
+    /// Refreshes the consent info and presents the UMP form when the user's
+    /// region requires it. Runs once per launch. Never throws and never blocks
+    /// anything but the ad path: a failure leaves `canRequestAds` false, which
+    /// simply means no ad is requested.
+    @MainActor
+    static func gatherConsent() async {
+        guard isAdsEnabled(), !consentRequested else { return }
+        consentRequested = true
+        let parameters = RequestParameters()
+        await withCheckedContinuation { (cont: CheckedContinuation<Void, Never>) in
+            ConsentInformation.shared.requestConsentInfoUpdate(with: parameters) { _ in
+                cont.resume()
+            }
+        }
+        await withCheckedContinuation { (cont: CheckedContinuation<Void, Never>) in
+            ConsentForm.loadAndPresentIfRequired(from: nil) { _ in cont.resume() }
+        }
+    }
+
+    /// Whether UMP allows an ad request at all. False before the form is
+    /// answered in a region that requires one, and after a refusal.
+    @MainActor
+    static var canRequestAds: Bool { ConsentInformation.shared.canRequestAds }
+
+    /// Whether this user is entitled to reopen the consent choice. Outside the
+    /// EEA/UK there is no form, so the settings entry must stay hidden.
+    @MainActor
+    static var privacyOptionsRequired: Bool {
+        ConsentInformation.shared.privacyOptionsRequirementStatus == .required
+    }
+
+    /// Reopens the consent form so a granted consent can be withdrawn as
+    /// easily as it was given.
+    @MainActor
+    static func presentPrivacyOptions() {
+        ConsentForm.presentPrivacyOptionsForm(from: nil) { _ in }
+    }
+
     // MARK: - SDK init (§4.5 — once, fire-and-forget)
 
     private static var initStarted = false
@@ -94,7 +145,7 @@ enum AdManager {
     /// asynchronously and is itself fire-and-forget).
     @MainActor
     static func initAds() {
-        guard isAdsEnabled(), !initStarted else { return }
+        guard isAdsEnabled(), canRequestAds, !initStarted else { return }
         initStarted = true
         MobileAds.shared.requestConfiguration.maxAdContentRating = .teen
         MobileAds.shared.start(completionHandler: nil)
@@ -133,6 +184,7 @@ enum AdManager {
 
     /// Production loader: GADInterstitialAd with non-personalized extras.
     private static func loadGADInterstitial(unitId: String) async -> InterstitialController? {
+        guard await canRequestAds else { return nil }
         let request = Request()
         let extras = Extras()
         // §4.2: "npa": "1" on EVERY request — non-personalized, no ATT.

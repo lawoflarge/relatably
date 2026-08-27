@@ -170,6 +170,12 @@ struct MeView: View {
             SettingsRow(label: "Terms of Service") { openLink(MeViewModel.tosURL) }
             divider
             SettingsRow(label: "Privacy Policy") { openLink(MeViewModel.privacyURL) }
+            if AdManager.privacyOptionsRequired {
+                divider
+                SettingsRow(label: "Ad privacy options", hint: "Change your consent for ads") {
+                    AdManager.presentPrivacyOptions()
+                }
+            }
         }
     }
 
