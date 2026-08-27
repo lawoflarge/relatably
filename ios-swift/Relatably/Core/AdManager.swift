@@ -36,8 +36,9 @@ enum AdManager {
     /// First-event-wins load timeout (ms): LOADED → controller,
     /// error/timeout → nil.
     static let loadTimeoutMs = 8000
-    /// Launch arg / UserDefaults override `-admobInterstitialId <unit>` —
-    /// native replacement for EXPO_PUBLIC_ADMOB_INTERSTITIAL_ID.
+    /// Launch arg / UserDefaults override `-admobInterstitialId <unit>`,
+    /// native replacement for EXPO_PUBLIC_ADMOB_INTERSTITIAL_ID. Debug only,
+    /// see interstitialUnitId(isDebugBuild:defaults:).
     static let unitIdOverrideKey = "admobInterstitialId"
     /// Launch arg `-adsEnabled YES` — native replacement for
     /// EXPO_PUBLIC_ADMOB_ENABLED (RN required the exact string "true").
@@ -67,13 +68,18 @@ enum AdManager {
 
     // MARK: - Unit-ID resolution (§4.4, post_reveal_interstitial slot)
 
-    /// Override → else Google test unit in Debug / production unit in Release.
+    /// Release always serves the production unit. The UserDefaults override is a
+    /// development lever and stays closed in Release: `.standard` is writable from
+    /// outside the app (launch arguments, a managed app configuration), and traffic
+    /// billed to a unit this app did not choose is invalid traffic on the publisher
+    /// account. Google suspends the account, not the single app.
+    /// Debug: override → else Google's test unit.
     static func interstitialUnitId(
         isDebugBuild: Bool = AdManager.isDebugBuild,
         defaults: UserDefaults = .standard
     ) -> String {
-        defaults.string(forKey: unitIdOverrideKey)
-            ?? (isDebugBuild ? testInterstitialUnitId : prodInterstitialUnitId)
+        guard isDebugBuild else { return prodInterstitialUnitId }
+        return defaults.string(forKey: unitIdOverrideKey) ?? testInterstitialUnitId
     }
 
     // MARK: - SDK init (§4.5 — once, fire-and-forget)

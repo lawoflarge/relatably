@@ -64,11 +64,16 @@ final class AdManagerTests: XCTestCase {
     }
 
     /// `-admobInterstitialId <unit>` launch arg (native replacement for
-    /// EXPO_PUBLIC_ADMOB_INTERSTITIAL_ID) wins in BOTH build flavors.
-    func testOverrideKeyWinsInDebugAndRelease() {
+    /// EXPO_PUBLIC_ADMOB_INTERSTITIAL_ID) is a Debug-only lever. Release ignores it:
+    /// UserDefaults.standard is writable from outside the app, and a foreign unit id
+    /// puts invalid traffic on the publisher account.
+    func testOverrideKeyWinsInDebugOnly() {
         defaults.set("custom-unit-id", forKey: AdManager.unitIdOverrideKey)
         XCTAssertEqual(AdManager.interstitialUnitId(isDebugBuild: true, defaults: defaults), "custom-unit-id")
-        XCTAssertEqual(AdManager.interstitialUnitId(isDebugBuild: false, defaults: defaults), "custom-unit-id")
+        XCTAssertEqual(
+            AdManager.interstitialUnitId(isDebugBuild: false, defaults: defaults),
+            "ca-app-pub-6563643868702361/2000809540"
+        )
     }
 
     // MARK: Enable gate (§4.3 — Release always on, Debug opt-in)
