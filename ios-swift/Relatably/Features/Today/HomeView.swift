@@ -30,7 +30,7 @@ struct HomeView: View {
             case .noDrop:
                 StatusCard(
                     heading: "no drop yet",
-                    message: "today's question hasn't unlocked. one question, one global drop — once a day, at a random moment in UTC.",
+                    message: "today's question hasn't unlocked. one question, one global drop, once a day at a random moment in UTC.",
                     detail: nil,
                     buttonLabel: "CHECK AGAIN",
                     rotationDegrees: -1.5,
@@ -83,6 +83,12 @@ private struct StatusCard: View {
     let action: () -> Void
 
     var body: some View {
+        // The card carries the only action in the no-drop and error phases, and
+        // BagelFatOne/HankenGrotesk are custom faces that grow with the text
+        // size, so at the largest step the button left the screen. Scrollable
+        // now; the outer centring frame is unchanged.
+        GeometryReader { proxy in
+        ScrollView {
         VStack(spacing: Spacing.sp3) { // gap 12
             Text(heading)
                 .typeStyle(Typography.h2)
@@ -124,6 +130,10 @@ private struct StatusCard: View {
         .hardShadow(Shadows.m, shape: RoundedRectangle(cornerRadius: Radii.m))
         .rotationEffect(.degrees(rotationDegrees))
         .padding(.horizontal, Spacing.gutter) // 22
-        .frame(maxWidth: .infinity, maxHeight: .infinity) // centered
+        .padding(.vertical, Spacing.sp5)
+        .frame(maxWidth: .infinity, minHeight: proxy.size.height) // centred while it fits
+        }
+        .scrollBounceBehavior(.basedOnSize)
+        }
     }
 }

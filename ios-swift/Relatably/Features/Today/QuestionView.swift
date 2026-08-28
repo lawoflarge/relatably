@@ -1,9 +1,9 @@
 import SwiftUI
 
-// Question phase — 1:1 port of the RN layout (home-flow.md §3 "question").
+// Question phase, 1:1 port of the RN layout (home-flow.md §3 "question").
 //
 // IMPORTANT: the stack has ZERO spacing and children carry no vertical
-// margins (except the replay hint's marginBottom 12) — elements sit flush
+// margins (except the replay hint's marginBottom 12): elements sit flush
 // under each other, top-aligned. The visual breathing room comes from
 // BagelFatOne's 62pt line box, the input's internal padding, and the
 // button's padding. Do not add spacing.
@@ -16,9 +16,14 @@ struct QuestionView: View {
     @Environment(\.appSafeAreaInsets) private var insets
 
     var body: some View {
+        // BagelFatOne 52/62 is a custom face and grows with the text size, so at
+        // the largest step the hero alone filled an iPhone SE and pushed the
+        // submit button off screen. Scrolling keeps it reachable; spacing and
+        // order are untouched.
+        ScrollView {
         VStack(spacing: 0) {
             if vm.exploringPast {
-                Text("Today's drop hasn't unlocked yet. Here's the most recent one — answer it to explore the live wordcloud.")
+                Text("Today's drop hasn't unlocked yet. Here's the most recent one, answer it to explore the live wordcloud.")
                     .typeStyle(Typography.bodyS)
                     .foregroundColor(Palette.inkSoft)
                     .multilineTextAlignment(.center)
@@ -52,6 +57,9 @@ struct QuestionView: View {
         }
         .padding(.horizontal, Spacing.gutter)          // 22
         .padding(.top, insets.top + Spacing.sp5)       // safe-area top + 24
+        }
+        .scrollBounceBehavior(.basedOnSize)
+        .scrollDismissesKeyboard(.interactively)
     }
 }
 
