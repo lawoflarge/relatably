@@ -2,13 +2,18 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-  <key>method</key><string>app-store-connect</string>
-  <key>teamID</key><string>R95M36AU2X</string>
-  <key>signingStyle</key><string>manual</string>
-  <key>provisioningProfiles</key>
-  <dict>
-    <key>co.relatably.app</key><string>Relatably Local AppStore 2026-06-01</string>
-  </dict>
-  <key>uploadSymbols</key><true/>
+	<key>method</key>
+	<string>app-store-connect</string>
+	<key>provisioningProfiles</key>
+	<dict>
+		<key>co.relatably.app</key>
+		<string>Relatably Local AppStore 2026-06-01</string>
+	</dict>
+	<key>signingStyle</key>
+	<string>manual</string>
+	<key>teamID</key>
+	<string>R95M36AU2X</string>
+	<key>uploadSymbols</key>
+	<true/>
 </dict>
 </plist>

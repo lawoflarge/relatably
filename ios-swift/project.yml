@@ -8,8 +8,8 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "1.0.0"
-    CURRENT_PROJECT_VERSION: "35"
+    MARKETING_VERSION: "1.1.0"
+    CURRENT_PROJECT_VERSION: "1787939346"
     DEVELOPMENT_TEAM: "R95M36AU2X"
 packages:
   Firebase:
@@ -55,8 +55,8 @@ targets:
       path: Relatably/Resources/Info.plist
       properties:
         CFBundleDisplayName: Relatably
-        CFBundleShortVersionString: "1.0.0"
-        CFBundleVersion: "35"
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         LSRequiresIPhoneOS: true
         UILaunchScreen:
           UIColorName: Cream
