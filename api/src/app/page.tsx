@@ -1,7 +1,7 @@
 import Image from "next/image";
 import styles from "./page.module.css";
 
-const APP_STORE_URL = "https://apps.apple.com/us/app/relatably/id6768082631";
+const APP_STORE_URL = "https://apps.apple.com/us/app/relatably/id6768082631?pt=128877661&ct=site_relatably&mt=8";
 
 const DESCRIPTION =
   "Relatably asks the entire world one question at the same random moment each day. You type one free-text answer, then watch every answer on Earth cluster into a live wordcloud of the world's collective opinion in real time.";
@@ -225,6 +225,14 @@ export default function Home() {
               Terms
             </a>
             <div>Last updated: 2026-07-23</div>
+            <p style={{ padding: "1rem 1.5rem", margin: 0, fontSize: "0.875rem" }}>
+              <a
+                href="https://lawoflarge.app/en/apps/relatably"
+                style={{ color: "inherit", textDecoration: "underline", textUnderlineOffset: "3px" }}
+              >
+                Relatably in the Law of Large app collection
+              </a>
+            </p>
           </footer>
         </main>
       </div>
