@@ -2,19 +2,19 @@
 
 Daily synchronized opinion ritual for Gen Z. One question per day at a globally-random moment, free-text answers aggregate into a live wordcloud, and the first person to call the eventual #1 answer is crowned "most relatable on Earth."
 
-**Status:** Phases 1–6 live in production at <https://relatably.vercel.app>. iOS **v1.0 (build 32) is in App Review** as of 2026-06-03 — resubmitted after a Guideline 1.2 (User-Generated Content) rejection with visible report/block/hide controls everywhere, a no-drop Home fallback, an 18+ rating, and deterministic reviewer notes. See `docs/superpowers/plans/` for phase history.
+**Status:** Phases 1-6 live in production at <https://relatably.vercel.app>. iOS **v1.0 (build 32) is in App Review** as of 2026-06-03: resubmitted after a Guideline 1.2 (User-Generated Content) rejection with visible report/block/hide controls everywhere, a no-drop Home fallback, an 18+ rating, and deterministic reviewer notes. See `docs/superpowers/plans/` for phase history.
 
 ## Design + plans
 
-- Visual identity spec: [`mockups/01-sticker-pop/DESIGN.md`](mockups/01-sticker-pop/DESIGN.md) — Sticker Pop v1.0 (palette, typography, spacing, radii, shadow, motion, components, voice, a11y).
+- Visual identity spec: [`mockups/01-sticker-pop/DESIGN.md`](mockups/01-sticker-pop/DESIGN.md), Sticker Pop v1.0 (palette, typography, spacing, radii, shadow, motion, components, voice, a11y).
 - All 7 explored directions: [`mockups/index.html`](mockups/index.html) (open with `python -m http.server` from `mockups/`) + [`mockups/OVERVIEW.md`](mockups/OVERVIEW.md).
-- Sticker Pop implementation plan: [`docs/superpowers/plans/2026-05-11-relatably-sticker-pop-implementation.md`](docs/superpowers/plans/2026-05-11-relatably-sticker-pop-implementation.md) — 22 tasks, executed via subagent-driven development on `feat/sticker-pop-ui`, merged into `main` 2026-05-11.
+- Sticker Pop implementation plan: [`docs/superpowers/plans/2026-05-11-relatably-sticker-pop-implementation.md`](docs/superpowers/plans/2026-05-11-relatably-sticker-pop-implementation.md), 22 tasks, executed via subagent-driven development on `feat/sticker-pop-ui`, merged into `main` 2026-05-11.
 - Product spec: [`docs/superpowers/specs/2026-05-08-relatably-design.md`](docs/superpowers/specs/2026-05-08-relatably-design.md).
-- Phase 1 plan: [`docs/superpowers/plans/2026-05-08-relatably-phase1-core-loop.md`](docs/superpowers/plans/2026-05-08-relatably-phase1-core-loop.md) — complete.
-- Phase 2 plan: [`docs/superpowers/plans/2026-05-08-relatably-phase2-daily-ritual.md`](docs/superpowers/plans/2026-05-08-relatably-phase2-daily-ritual.md) — complete.
-- Phase 3 plan: [`docs/superpowers/plans/2026-05-08-relatably-phase3-leaderboard-anticheat.md`](docs/superpowers/plans/2026-05-08-relatably-phase3-leaderboard-anticheat.md) — complete.
-- Phase 4 plan: [`docs/superpowers/plans/2026-05-09-relatably-phase4-share-monetization.md`](docs/superpowers/plans/2026-05-09-relatably-phase4-share-monetization.md) — complete.
-- Phase 5 plan: [`docs/superpowers/plans/2026-05-09-relatably-phase5-archive-admin.md`](docs/superpowers/plans/2026-05-09-relatably-phase5-archive-admin.md) — complete.
+- Phase 1 plan: [`docs/superpowers/plans/2026-05-08-relatably-phase1-core-loop.md`](docs/superpowers/plans/2026-05-08-relatably-phase1-core-loop.md), complete.
+- Phase 2 plan: [`docs/superpowers/plans/2026-05-08-relatably-phase2-daily-ritual.md`](docs/superpowers/plans/2026-05-08-relatably-phase2-daily-ritual.md), complete.
+- Phase 3 plan: [`docs/superpowers/plans/2026-05-08-relatably-phase3-leaderboard-anticheat.md`](docs/superpowers/plans/2026-05-08-relatably-phase3-leaderboard-anticheat.md), complete.
+- Phase 4 plan: [`docs/superpowers/plans/2026-05-09-relatably-phase4-share-monetization.md`](docs/superpowers/plans/2026-05-09-relatably-phase4-share-monetization.md), complete.
+- Phase 5 plan: [`docs/superpowers/plans/2026-05-09-relatably-phase5-archive-admin.md`](docs/superpowers/plans/2026-05-09-relatably-phase5-archive-admin.md), complete.
 
 ## Repo layout
 
@@ -30,15 +30,15 @@ docs/superpowers/     Specs and implementation plans.
 
 ## Branches + tags
 
-- `main` — Sticker Pop UI shipped; Phases 1–6 live in prod
-- `phase-1-core-loop` (tag `phase-1-complete`) — Firebase rework + Phase 1
-- `phase-2-daily-ritual` (tag `phase-2-complete`) — Phase 2 daily ritual subsystem
-- `phase-3-leaderboard-anticheat` (tag `phase-3-complete`) — Phase 3 leaderboard + anti-cheat
-- `phase-4-share-monetization` (tag `phase-4-complete`) — Phase 4 share + monetization
-- `phase-5-archive-admin` (tag `phase-5-complete`) — Phase 5 archive + admin console
-- `phase-6-launch-hardening` (tag `phase-6-plan-seed`) — Phase 6 zero-cost launch hardening
-- `design/sticker-pop-mockups` — 7 design directions + chosen Sticker Pop visual identity (merged via PR #2 2026-05-11)
-- `feat/sticker-pop-ui` — Sticker Pop UI implementation, 22 commits (merged via PR #1 2026-05-11)
+- `main`: Sticker Pop UI shipped; Phases 1-6 live in prod
+- `phase-1-core-loop` (tag `phase-1-complete`): Firebase rework + Phase 1
+- `phase-2-daily-ritual` (tag `phase-2-complete`): Phase 2 daily ritual subsystem
+- `phase-3-leaderboard-anticheat` (tag `phase-3-complete`): Phase 3 leaderboard + anti-cheat
+- `phase-4-share-monetization` (tag `phase-4-complete`): Phase 4 share + monetization
+- `phase-5-archive-admin` (tag `phase-5-complete`): Phase 5 archive + admin console
+- `phase-6-launch-hardening` (tag `phase-6-plan-seed`): Phase 6 zero-cost launch hardening
+- `design/sticker-pop-mockups`: 7 design directions + chosen Sticker Pop visual identity (merged via PR #2 2026-05-11)
+- `feat/sticker-pop-ui`: Sticker Pop UI implementation, 22 commits (merged via PR #1 2026-05-11)
 
 ## Stack
 
@@ -59,9 +59,9 @@ docs/superpowers/     Specs and implementation plans.
 
 ## Tests
 
-- `cd api && pnpm test` — 98 vitest tests (18 files; mocked Admin SDK).
-- `cd firebase/functions && pnpm test` — 66 vitest tests (13 files; emulator-backed + pure-fn). Requires Java for Firestore emulator.
-- `cd ios && pnpm test` — 154 jest tests across 36 files (React Native Testing Library + Sticker Pop primitives + Phyllotaxis layout helpers).
+- `cd api && pnpm test`: 98 vitest tests (18 files; mocked Admin SDK).
+- `cd firebase/functions && pnpm test`: 66 vitest tests (13 files; emulator-backed + pure-fn). Requires Java for Firestore emulator.
+- `cd ios && pnpm test`: 154 jest tests across 36 files (React Native Testing Library + Sticker Pop primitives + Phyllotaxis layout helpers).
 
 Total: **318+ tests across all 3 codebases.**
 
@@ -103,7 +103,7 @@ All third-party SDKs default off. To enable in production:
 | `EXPO_PUBLIC_BRANCH_KEY` | EAS env | Branch.io SDK init. When unset, share fallback URL is `https://relatably.app/?r=<code>`. |
 | `EXPO_PUBLIC_ADMOB_ENABLED` | EAS env | Set to `"true"` to enable AdMob. When false (default), all 3 ad slots render the disabled placeholder. |
 | `EXPO_PUBLIC_ADMOB_LEADERBOARD_BANNER_ID` / `*_ARCHIVE_BANNER_ID` / `*_INTERSTITIAL_ID` | EAS env | Per-slot ad-unit ids. Default to AdMob's published iOS test ad units when unset. |
-| `EXPO_PUBLIC_API_URL` | **build-time env (xcodebuild / EAS)** | Backend base URL the iOS client calls. **MUST be exported as `https://relatably.vercel.app` at build time** — `ios/src/lib/api.ts` falls back to `http://localhost:3000`, so a release build without it cannot reach the backend (App Review sees "no signal" → instant reject). |
+| `EXPO_PUBLIC_API_URL` | **build-time env (xcodebuild / EAS)** | Backend base URL the iOS client calls. **MUST be exported as `https://relatably.vercel.app` at build time**: `ios/src/lib/api.ts` falls back to `http://localhost:3000`, so a release build without it cannot reach the backend (App Review sees "no signal" → instant reject). |
 
 ## Building & submitting to the App Store (local Mac)
 
@@ -129,9 +129,9 @@ xcrun altool --upload-app -f ../build/export/*.ipa -t ios \
 Then `node scripts/asc-fill-metadata.mjs` attaches the latest VALID build + sets review notes + the 18+ rating.
 
 **Gotchas (learned the hard way):**
-- **Export `EXPO_PUBLIC_API_URL` at build time** or the app points at localhost = instant App Review reject. Verify by running the build on a Simulator and confirming it reaches the backend — the Hermes bundle is bytecode, so `grep main.jsbundle` is unreliable; use `strings -n5 | grep`.
+- **Export `EXPO_PUBLIC_API_URL` at build time** or the app points at localhost = instant App Review reject. Verify by running the build on a Simulator and confirming it reaches the backend: the Hermes bundle is bytecode, so `grep main.jsbundle` is unreliable; use `strings -n5 | grep`.
 - **A REJECTED version cannot be resubmitted via REST** (it stays bound to the old reviewSubmission → `409 ITEM_PART_OF_ANOTHER_SUBMISSION`). Do the final step in the ASC web UI: version page → "Update Review" → submission page → "Resubmit to App Review".
 
 ## Owner
 
-Levin Schwab — built under existing Nebengewerbe.
+Levin Schwab: built under existing Nebengewerbe.

@@ -61,14 +61,14 @@ Set the same five env vars in the Vercel project (`relatably-api` or whatever th
 
 | Method | Path | Purpose |
 |---|---|---|
-| GET    | `/api/archive`                                  | Public — paginated revealed-question tiles |
-| GET    | `/api/archive/[id]`                             | Public — full archive detail (top-N clusters) |
-| GET    | `/api/admin/candidates`                         | Admin — list question candidates |
-| POST   | `/api/admin/candidates`                         | Admin — create candidate (status=pending) |
-| PATCH  | `/api/admin/candidates/[id]`                    | Admin — approve (atomically schedules question) or reject |
-| GET    | `/api/admin/questions`                          | Admin — list scheduled + live questions |
-| POST   | `/api/admin/questions/[id]/schedule`            | Admin — set scheduled_drop_at |
-| POST   | `/api/admin/trigger-drop`                       | Admin — soft-trigger next drop (≤60s) |
+| GET    | `/api/archive`                                  | Public: paginated revealed-question tiles |
+| GET    | `/api/archive/[id]`                             | Public: full archive detail (top-N clusters) |
+| GET    | `/api/admin/candidates`                         | Admin: list question candidates |
+| POST   | `/api/admin/candidates`                         | Admin: create candidate (status=pending) |
+| PATCH  | `/api/admin/candidates/[id]`                    | Admin: approve (atomically schedules question) or reject |
+| GET    | `/api/admin/questions`                          | Admin: list scheduled + live questions |
+| POST   | `/api/admin/questions/[id]/schedule`            | Admin: set scheduled_drop_at |
+| POST   | `/api/admin/trigger-drop`                       | Admin: soft-trigger next drop (≤60s) |
 
 ## Phase 6 - Cron + observability + kill-switches
 

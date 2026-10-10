@@ -1,4 +1,4 @@
-# Relatably — Design Language Mockups
+# Relatably: Design Language Mockups
 
 Seven distinct visual directions for Relatably 1.0. Each mockup renders the
 same four canonical screens (Question, Wordcloud, Leaderboard, Archive) with
