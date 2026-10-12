@@ -56,7 +56,7 @@ export default function PrivacyPage() {
   return (
     <div style={wrap}>
       <h1 style={h1}>Privacy Policy</h1>
-      <div style={sub}>Effective 2026-05-10. Operator: Levin Schwab (Germany). Contact: <a style={{ color: "#aaff00" }} href="mailto:levin.schwab@gmx.de">levin.schwab@gmx.de</a>.</div>
+      <div style={sub}>Effective 2026-10-11. Operator: Levin Schwab (Germany). Contact: <a style={{ color: "#aaff00" }} href="mailto:levin.schwab@gmx.de">levin.schwab@gmx.de</a>.</div>
 
       <p style={p}>
         Relatably is a daily one-question app. We try to collect as little as
@@ -64,6 +64,11 @@ export default function PrivacyPage() {
         leaderboard, and push notifications. This page explains exactly what
         data we touch and why.
       </p>
+
+<h2 style={h2}>Recommendations for our other apps</h2>
+<p style={p}>In Settings, the app can fetch up to three recommendations for our other apps. The choices depend on the app you are using, App Store availability and iOS compatibility, not on your personal data or activity inside the app. App icons load from Apple’s image servers. Opening a recommendation takes you to the App Store with a campaign label identifying the source app and placement, never a person.</p>
+<p style={p}>We count qualified views and successful opens in aggregate. Our service stores daily counts with the source app, recommended app, placement, configuration revision and optional presentation variant. It does not store an account, advertising identifier, device identifier, persistent visitor identifier or personal profile, and it does not receive the app’s private content. These counts cannot tell us who installed an app.</p>
+<p style={p}>The recommendation service is hosted by Supabase. Network requests necessarily expose an IP address to the hosting provider for delivery and security; our aggregate counter does not store it. See <a href="https://supabase.com/privacy" rel="noopener noreferrer" target="_blank">Supabase’s privacy policy</a>. Apple processes icon requests and App Store visits under <a href="https://www.apple.com/legal/privacy/" rel="noopener noreferrer" target="_blank">Apple’s privacy policy</a>.</p>
 
       <h2 style={h2}>1. What we collect</h2>
       <ul style={ul}>

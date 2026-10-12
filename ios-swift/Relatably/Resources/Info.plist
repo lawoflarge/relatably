@@ -20,6 +20,8 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>CrossPromotionBaseURL</key>
+	<string>$(CROSS_PROMOTION_BASE_URL)</string>
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-6563643868702361~4571132569</string>
 	<key>ITSAppUsesNonExemptEncryption</key>

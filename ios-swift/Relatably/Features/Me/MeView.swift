@@ -1,4 +1,5 @@
 import SwiftUI
+import CrossPromotionUI
 import UIKit
 
 // ME (settings) screen — 1:1 port of ios/app/(tabs)/settings.tsx per
@@ -13,6 +14,8 @@ import UIKit
 // hint → footer.
 
 struct MeView: View {
+    @State private var promotions = AppPromotions.makeStore()
+    let bottomObstruction: CGFloat
 
     @StateObject private var vm: MeViewModel
     /// RN parity: `onAuthStateChanged` drives the `uid` gate reactively.
@@ -30,13 +33,16 @@ struct MeView: View {
 
     init(
         isActive: Bool = true,
+        bottomObstruction: CGFloat = 120,
         vm: @autoclosure @escaping () -> MeViewModel = MeViewModel.live()
     ) {
         self.isActive = isActive
+        self.bottomObstruction = bottomObstruction
         _vm = StateObject(wrappedValue: vm())
     }
 
     var body: some View {
+        PromotionViewport { viewport in
         ScrollView {
             // RN contentContainer: gap 16 between children, paddingH 22,
             // paddingTop insets.top+24, paddingBottom 120 (floating pill).
@@ -47,6 +53,10 @@ struct MeView: View {
                     .padding(.bottom, Spacing.sp2) // marginBottom 8 (+ the 16 gap)
 
                 linksCard
+
+                if let promotions {
+                    AppPromotionSection(store: promotions, viewport: (!isActive || confirmSignOut || confirmDelete || vm.alert != nil) ? .zero : CGRect(x: viewport.minX, y: viewport.minY + insets.top, width: viewport.width, height: max(0, viewport.height - insets.top - bottomObstruction)))
+                }
 
                 if !vm.hidden.isEmpty {
                     sectionLabel("HIDDEN ANSWERS")
@@ -105,6 +115,8 @@ struct MeView: View {
             .padding(.top, insets.top + Spacing.sp5) // safe-area top + 24
             .padding(.bottom, 120)                   // clears the floating tab pill
         }
+        }
+        .promotionLifecycle(promotions, isActive: isActive)
         .task { vm.bootIfNeeded() }
         .onChange(of: isActive) { _, active in
             if active { vm.refresh() } // keep-alive focus refresh

@@ -1,5 +1,5 @@
 {
-  "originHash" : "2d3f06aab1ccdfff7b100ca10208a834bfb664b3c50890610f1e3c349eb3fbf3",
+  "originHash" : "502b794da8c2330b9edae7f6294a5964a4d849aae747eac69282c964944f8841",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -89,6 +89,14 @@
       "state" : {
         "revision" : "040d087ac2267d2ddd4cca36c757d1c6a05fdbfe",
         "version" : "101.0.0"
+      }
+    },
+    {
+      "identity" : "lawoflarge.app",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/lawoflarge/lawoflarge.app.git",
+      "state" : {
+        "revision" : "168dd73615cde4a62f92b0064aee3048c628c5a4"
       }
     },
     {

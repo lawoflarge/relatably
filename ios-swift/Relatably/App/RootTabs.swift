@@ -31,6 +31,7 @@ struct RootTabs: View {
     /// every switch INTO the archive tab pops its NavigationStack to root
     /// (expo-router's archive/[id] is never the tab button's destination).
     @State private var archiveTabSelects = 0
+    @State private var tabBarHeight: CGFloat = 120
 
     var body: some View {
         GeometryReader { geo in
@@ -56,7 +57,7 @@ struct RootTabs: View {
                             isActive: selection == .archive
                         )
                     }
-                    tabView(.me) { MeView(isActive: selection == .me) }
+                    tabView(.me) { MeView(isActive: selection == .me, bottomObstruction: tabBarHeight + bottomPad + 4) }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 StickerTabBar(selection: tabSelection, onReselect: { tab in
@@ -64,6 +65,13 @@ struct RootTabs: View {
                     // back to the list (the pill always targets the list).
                     if tab == .archive { archiveTabSelects += 1 }
                 })
+                    .background {
+                        GeometryReader { bar in
+                            Color.clear
+                                .onAppear { tabBarHeight = bar.size.height }
+                                .onChange(of: bar.size.height) { _, height in tabBarHeight = height }
+                        }
+                    }
                     .padding(.horizontal, Spacing.gutter) // 22
                     .padding(.bottom, bottomPad)
             }

@@ -15,12 +15,14 @@
 		0A7FAEFD57F74C7D70104647 /* EulaStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33FA05F1BF92386BF1DA103C /* EulaStore.swift */; };
 		0CBC7EE399E46633C570A975 /* ArchiveViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 834897807F6CE1D8E298BE19 /* ArchiveViewModel.swift */; };
 		0D6E5EED5B7F0924067696A5 /* WordcloudMathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB7806642A975257C6D0C72C /* WordcloudMathTests.swift */; };
+		0DB5F31C0872BB8B58962B75 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 5319BF5E722D43A76EAC7783 /* FirebaseFirestore */; };
 		13AB21F84B320F2F2138F5AF /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77C4FA0D0016D1B661A11E66 /* RootView.swift */; };
-		153A074B0CE16A6E4D8DA53B /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = F4F93B360DE931037B71F83C /* GoogleMobileAds */; };
+		153A074B0CE16A6E4D8DA53B /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = C39B8C507C81E08A457F4078 /* FirebaseAuth */; };
 		1AB128D7A5F23422F0E85515 /* HankenGrotesk-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 69C0B4CE433241382AEB9D34 /* HankenGrotesk-Bold.ttf */; };
 		273123A668CB84C783A2764F /* AnswerInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B0F872A1E0DA51E13290C73 /* AnswerInput.swift */; };
 		2826336B4C2583FF4F5F3DA3 /* HardShadow.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC44687B1C48863A4D2B465C /* HardShadow.swift */; };
 		298DFCCD748907326996930F /* FirebaseBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D7F375F9DE07F4140480A16 /* FirebaseBootstrap.swift */; };
+		2B04452ABD11F2725AAFA73D /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = F4F93B360DE931037B71F83C /* GoogleMobileAds */; };
 		2B5D2495C4E66E6C0C5772FB /* APIClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A187DC106F9FAB319D98FB /* APIClientTests.swift */; };
 		30BBB34E284199B888953F29 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 070931831D8B278B40061C62 /* APIClient.swift */; };
 		32388B85D76D7972B2C52CDF /* ArchiveViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0959BFC392D230F94C8C2A63 /* ArchiveViewModelTests.swift */; };
@@ -30,6 +32,7 @@
 		4F4E62EC0250CCD02255F981 /* QuestionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 284FF22D44D055EC81CCE71A /* QuestionView.swift */; };
 		530EFF25E078587DAFC4211F /* LiveCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA9B491E1C784DF3354F01FF /* LiveCounter.swift */; };
 		57984EC42EDBEBC45E932E90 /* ClusterLiveSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFFC010F274E3BEF4B6C40F1 /* ClusterLiveSource.swift */; };
+		5C45A4C2645A633FDCD09725 /* AppPromotions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9966605DE1C62D948E4697DD /* AppPromotions.swift */; };
 		648743A2DAC668F914CCEBDB /* LeaderboardRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDCD538EC7D1BE3F73431777 /* LeaderboardRow.swift */; };
 		64C682078A6A2A84E3FE50A3 /* AdManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54168C371D945D9F50FD4647 /* AdManagerTests.swift */; };
 		65910DE9BCAE040939DE61BC /* BoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 197C8E8E636A5CA410889343 /* BoardView.swift */; };
@@ -38,6 +41,7 @@
 		73ED92EB5849ED3853D75537 /* BoardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E95CC9F131ACE2B2931032 /* BoardViewModel.swift */; };
 		7832E3AEBEF961888FBC1176 /* StickerTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16ADEBD943DB0A59D0AE5624 /* StickerTabBar.swift */; };
 		7A898DDF12ABFD8F4ED07528 /* BagelFatOne-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C455B4CB54D86AE237C9D255 /* BagelFatOne-Regular.ttf */; };
+		7FB563396423564264BEE70B /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = ACF245F57B561664C5AD0D89 /* PrivacyInfo.xcprivacy */; };
 		84B412BAB4DB0A70227DB016 /* WordcloudView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E6C7541A581A53BD1C2E65 /* WordcloudView.swift */; };
 		84C412A1CE7C91BC9DFEF72A /* ShareCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03822D248BEC8F5639EEA639 /* ShareCard.swift */; };
 		86F4CEEBD898054CE712D9DF /* MeViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB9EDF1B939359CEB95101E9 /* MeViewModelTests.swift */; };
@@ -55,7 +59,7 @@
 		AD285003351104C48FCF6754 /* FriendsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F34373632DCBE534FACC6F19 /* FriendsViewModel.swift */; };
 		B1F652122C788B4F6106F237 /* ArchiveDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D63C46579B65897BF437B51 /* ArchiveDetailView.swift */; };
 		B258164AA57E37375FA6BAC7 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 0B83A4F46882ED9A40DC6FE6 /* GoogleService-Info.plist */; };
-		B2AB317D78B1F2FACA5720FF /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 5319BF5E722D43A76EAC7783 /* FirebaseFirestore */; };
+		B2AB317D78B1F2FACA5720FF /* CrossPromotionCore in Frameworks */ = {isa = PBXBuildFile; productRef = 138970929EAF13CAB058079C /* CrossPromotionCore */; };
 		BB6DE8B186FFEE9973ED78CF /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03AF4D846DB8C3275ED7F64F /* KeychainStore.swift */; };
 		BD3D23B3CCD3354FAA864626 /* RootTabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9333DECA31919C620893EE50 /* RootTabs.swift */; };
 		C3F9580112B6D4259E88D374 /* RelatablyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17EEE842ADABF9C422042318 /* RelatablyApp.swift */; };
@@ -73,7 +77,7 @@
 		EFD8B56CFC7AA82B1E63C1C2 /* SpaceGrotesk-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 126F97A25B8965F95764851A /* SpaceGrotesk-Bold.ttf */; };
 		F1D2540E04532AD2C03D6DB8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C735B610A0D73BF3756002F1 /* Assets.xcassets */; };
 		F4331927170357549598712B /* MeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A74974B678FB325C28368276 /* MeViewModel.swift */; };
-		F7ECA2EE56F66B0745B3C1DC /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = C39B8C507C81E08A457F4078 /* FirebaseAuth */; };
+		F7ECA2EE56F66B0745B3C1DC /* CrossPromotionUI in Frameworks */ = {isa = PBXBuildFile; productRef = F94FBE72BFA05AD525229A92 /* CrossPromotionUI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -131,9 +135,11 @@
 		9333DECA31919C620893EE50 /* RootTabs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootTabs.swift; sourceTree = "<group>"; };
 		96E95CC9F131ACE2B2931032 /* BoardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardViewModel.swift; sourceTree = "<group>"; };
 		978880FEFF7A4210A5CA0526 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
+		9966605DE1C62D948E4697DD /* AppPromotions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPromotions.swift; sourceTree = "<group>"; };
 		9F3F38242A2B69E3538501E8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		A74974B678FB325C28368276 /* MeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeViewModel.swift; sourceTree = "<group>"; };
 		AC44687B1C48863A4D2B465C /* HardShadow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardShadow.swift; sourceTree = "<group>"; };
+		ACF245F57B561664C5AD0D89 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		B28B3A14BDD8286A1E4A89DB /* OneShotGates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OneShotGates.swift; sourceTree = "<group>"; };
 		B3728079A5C880622326A3C2 /* DeviceToken.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceToken.swift; sourceTree = "<group>"; };
 		B6AB6665D603F59FC58544E5 /* PaperTexture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperTexture.swift; sourceTree = "<group>"; };
@@ -162,9 +168,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F7ECA2EE56F66B0745B3C1DC /* FirebaseAuth in Frameworks */,
-				B2AB317D78B1F2FACA5720FF /* FirebaseFirestore in Frameworks */,
-				153A074B0CE16A6E4D8DA53B /* GoogleMobileAds in Frameworks */,
+				F7ECA2EE56F66B0745B3C1DC /* CrossPromotionUI in Frameworks */,
+				B2AB317D78B1F2FACA5720FF /* CrossPromotionCore in Frameworks */,
+				153A074B0CE16A6E4D8DA53B /* FirebaseAuth in Frameworks */,
+				0DB5F31C0872BB8B58962B75 /* FirebaseFirestore in Frameworks */,
+				2B04452ABD11F2725AAFA73D /* GoogleMobileAds in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -269,6 +277,8 @@
 		88D1A567570CA71297FAE7D5 /* Relatably */ = {
 			isa = PBXGroup;
 			children = (
+				9966605DE1C62D948E4697DD /* AppPromotions.swift */,
+				ACF245F57B561664C5AD0D89 /* PrivacyInfo.xcprivacy */,
 				523806D25786A52156AFC0D4 /* App */,
 				3E3306A3548C7FC698BB1F9D /* Core */,
 				E8A03317605938FD087F0E58 /* DesignSystem */,
@@ -374,6 +384,8 @@
 			);
 			name = Relatably;
 			packageProductDependencies = (
+				F94FBE72BFA05AD525229A92 /* CrossPromotionUI */,
+				138970929EAF13CAB058079C /* CrossPromotionCore */,
 				C39B8C507C81E08A457F4078 /* FirebaseAuth */,
 				5319BF5E722D43A76EAC7783 /* FirebaseFirestore */,
 				F4F93B360DE931037B71F83C /* GoogleMobileAds */,
@@ -394,6 +406,8 @@
 				F765A554600002A556A45BA6 /* PBXTargetDependency */,
 			);
 			name = RelatablyTests;
+			packageProductDependencies = (
+			);
 			productName = RelatablyTests;
 			productReference = 78311EFF44BC1DF8165623CF /* RelatablyTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -409,7 +423,6 @@
 				TargetAttributes = {
 					EC036D4AF8CEBD793EA3AA66 = {
 						DevelopmentTeam = R95M36AU2X;
-						ProvisioningStyle = Manual;
 					};
 					F04CEE5D55FBB3CECD87D956 = {
 						DevelopmentTeam = R95M36AU2X;
@@ -427,6 +440,7 @@
 			mainGroup = E225BE61E88A0F9214D76DB8;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				8BBB0B0FF7372D3E68C63C1F /* XCRemoteSwiftPackageReference "lawoflarge.app" */,
 				DEC4BA608DEBD564F3566814 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				837FB5C5EAA83DAADB6581BA /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
 			);
@@ -451,6 +465,7 @@
 				B258164AA57E37375FA6BAC7 /* GoogleService-Info.plist in Resources */,
 				1AB128D7A5F23422F0E85515 /* HankenGrotesk-Bold.ttf in Resources */,
 				DF3F09DDBB7E7A221AFAC5CC /* HankenGrotesk-ExtraBold.ttf in Resources */,
+				7FB563396423564264BEE70B /* PrivacyInfo.xcprivacy in Resources */,
 				EFD8B56CFC7AA82B1E63C1C2 /* SpaceGrotesk-Bold.ttf in Resources */,
 				ECA2883923F35F7644C10ABD /* SpaceGrotesk-SemiBold.ttf in Resources */,
 			);
@@ -466,6 +481,7 @@
 				30BBB34E284199B888953F29 /* APIClient.swift in Sources */,
 				EAEC8113ECA2A87C9F2FEEB9 /* AdManager.swift in Sources */,
 				273123A668CB84C783A2764F /* AnswerInput.swift in Sources */,
+				5C45A4C2645A633FDCD09725 /* AppPromotions.swift in Sources */,
 				B1F652122C788B4F6106F237 /* ArchiveDetailView.swift in Sources */,
 				0290A7BD7AC82BB8E9FD6BD6 /* ArchiveView.swift in Sources */,
 				0CBC7EE399E46633C570A975 /* ArchiveViewModel.swift in Sources */,
@@ -548,7 +564,6 @@
 				CODE_SIGN_ENTITLEMENTS = Relatably/Resources/Relatably.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Distribution";
 				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = R95M36AU2X;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Relatably/Resources/Info.plist;
@@ -641,7 +656,8 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1787939346;
+				CROSS_PROMOTION_BASE_URL = "https://zovzimsewjkjmazckhua.supabase.co/functions/v1/cross-promotion";
+				CURRENT_PROJECT_VERSION = 1787939347;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = R95M36AU2X;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -655,7 +671,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.1.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -700,7 +716,8 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1787939346;
+				CROSS_PROMOTION_BASE_URL = "https://zovzimsewjkjmazckhua.supabase.co/functions/v1/cross-promotion";
+				CURRENT_PROJECT_VERSION = 1787939347;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = R95M36AU2X;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -720,7 +737,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.1.1;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -792,6 +809,14 @@
 				minimumVersion = 12.0.0;
 			};
 		};
+		8BBB0B0FF7372D3E68C63C1F /* XCRemoteSwiftPackageReference "lawoflarge.app" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/lawoflarge/lawoflarge.app.git";
+			requirement = {
+				kind = revision;
+				revision = 168dd73615cde4a62f92b0064aee3048c628c5a4;
+			};
+		};
 		DEC4BA608DEBD564F3566814 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
@@ -803,6 +828,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		138970929EAF13CAB058079C /* CrossPromotionCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8BBB0B0FF7372D3E68C63C1F /* XCRemoteSwiftPackageReference "lawoflarge.app" */;
+			productName = CrossPromotionCore;
+		};
 		5319BF5E722D43A76EAC7783 /* FirebaseFirestore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = DEC4BA608DEBD564F3566814 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
@@ -817,6 +847,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 837FB5C5EAA83DAADB6581BA /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
 			productName = GoogleMobileAds;
+		};
+		F94FBE72BFA05AD525229A92 /* CrossPromotionUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8BBB0B0FF7372D3E68C63C1F /* XCRemoteSwiftPackageReference "lawoflarge.app" */;
+			productName = CrossPromotionUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
