@@ -16,6 +16,7 @@ export const metadata: Metadata = {
   title: "Relatably — one global question, once a day",
   description:
     "Relatably is a free iOS app that asks everyone on Earth the same question at one synchronized random moment each day. Type one free-text answer and watch the world's opinion form a live wordcloud.",
+  itunes: { appId: "6768082631" },
 };
 
 export default function RootLayout({
